@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useMemo } from 'react';
@@ -8,6 +7,11 @@ import { calcSensitivity } from '../engine/sensitivity';
 import { getHardErrors, getSoftWarnings } from '../engine/validators';
 import HeadlineSIP from '../components/results/HeadlineSIP';
 import ScenarioCards from '../components/results/ScenarioCards';
+import NLGoalInput from '../components/ai/NLGoalInput';
+import InsightParagraph from '../components/ai/InsightParagraph';
+import GoalValidator from '../components/ai/GoalValidator';
+import AreaChart from '../components/charts/AreaChart';
+import SensitivityHeatTable from '../components/charts/SensitivityHeatTable';
 
 const DEFAULTS = {
   goalType: 'house',
@@ -25,8 +29,6 @@ const DEFAULTS = {
   activeAccordion: null,
   locks: { inflation: false, annualRet: false },
 };
-
-// remove these once its build
 
 function getInflationDefault(goalType) {
   const map = { house:9, education:11, healthcare:9, wedding:8, travel:6.5, car:6, general:6 };
@@ -66,8 +68,10 @@ export default function FinCalApp() {
   }));
 
   const inputs = {
-    cost: s.cost, inflation: s.inflation,
-    yrs: s.yrs, annualRet: s.annualRet,
+    cost: s.cost,
+    inflation: s.inflation,
+    yrs: s.yrs,
+    annualRet: s.annualRet,
     lumpsum: s.lumpsumOn ? s.lumpsum : 0,
   };
 
@@ -75,29 +79,149 @@ export default function FinCalApp() {
   const softWarnings = getSoftWarnings({ ...inputs, goalType: s.goalType, riskProfile: s.riskProfile });
   const hasErrors = hardErrors.length > 0;
 
-  const results = useMemo(() => hasErrors ? null : calcAll(inputs), [
-    s.cost, s.inflation, s.yrs, s.annualRet, s.lumpsum, s.lumpsumOn,
-  ]);
+  const results = useMemo(
+    () => hasErrors ? null : calcAll(inputs),
+    [s.cost, s.inflation, s.yrs, s.annualRet, s.lumpsum, s.lumpsumOn]
+  );
 
-  const scenarios = useMemo(() => hasErrors ? [] : calcScenarios({
-    cost: s.cost, inflation: s.inflation, yrs: s.yrs,
-    lumpsum: s.lumpsumOn ? s.lumpsum : 0,
-  }), [s.cost, s.inflation, s.yrs, s.lumpsum, s.lumpsumOn]);
+  const scenarios = useMemo(
+    () => hasErrors ? [] : calcScenarios({
+      cost: s.cost, inflation: s.inflation, yrs: s.yrs,
+      lumpsum: s.lumpsumOn ? s.lumpsum : 0,
+    }),
+    [s.cost, s.inflation, s.yrs, s.lumpsum, s.lumpsumOn]
+  );
 
-  const sensitivity = useMemo(() => hasErrors ? [] : calcSensitivity({
-    cost: s.cost, yrs: s.yrs,
-  }), [s.cost, s.yrs]);
+  const sensitivity = useMemo(
+    () => hasErrors ? [] : calcSensitivity({ cost: s.cost, yrs: s.yrs }),
+    [s.cost, s.yrs]
+  );
 
   return (
-    <div>
-      {/* We both will add compenents here , so chnage it for your use */}
+    <div style={{ background: '#f8f9fb', minHeight: '100vh', paddingBottom: 80 }}>
+
+      {/* HIMANSHU — Header component here */}
+      {/* <Header /> */}
+
+      {/* HIMANSHU — TaxationBanner component here */}
+      {/* <TaxationBanner /> */}
+
+      {/* Arpit — NL Goal Input (top of input panel) */}
+      <NLGoalInput
+        onApply={({ goalType, cost, yrs }) => {
+          if (goalType) onGoalChange(goalType);
+          if (cost) set('cost', cost);
+          if (yrs) set('yrs', yrs);
+        }}
+      />
+
+      {/* HIMANSHU — GoalSelector component here */}
+      {/* <GoalSelector value={s.goalType} onChange={onGoalChange} /> */}
+
+      {/* HIMANSHU — GoalInputForm component here */}
+      {/* <GoalInputForm
+            cost={s.cost} yrs={s.yrs} inflation={s.inflation}
+            onCostChange={v => set('cost', v)}
+            onYrsChange={v => set('yrs', v)}
+            onInflationChange={v => { set('inflation', v); set('inflationSrc', 'custom'); }}
+            locks={s.locks} onLockToggle={setLock}
+            hardErrors={hardErrors} softWarnings={softWarnings}
+          /> */}
+
+      {/* HIMANSHU — RiskProfileSelector component here */}
+      {/* <RiskProfileSelector
+            profile={s.riskProfile}
+            onChange={onProfileChange}
+            locked={s.locks.annualRet}
+          /> */}
+
+      {/* HIMANSHU — SliderInput for annualRet here */}
+      {/* <SliderInput
+            label="Expected Return" value={s.annualRet}
+            min={1} max={20} step={0.5} unit="%"
+            onChange={onRetSlider}
+            locked={s.locks.annualRet}
+            onLockToggle={() => setLock('annualRet')}
+          /> */}
+
+      {/* HIMANSHU — QuickPresets component here */}
+      {/* <QuickPresets value={s.cost} onChange={v => set('cost', v)} /> */}
+
+      {/* HIMANSHU — StepUpToggle component here */}
+      {/* <StepUpToggle
+            enabled={s.stepUpOn} pct={s.stepUpPct}
+            onToggle={() => set('stepUpOn', !s.stepUpOn)}
+            onPctChange={v => set('stepUpPct', v)}
+          /> */}
+
+      {/* HIMANSHU — LumpsumToggle component here */}
+      {/* <LumpsumToggle
+            enabled={s.lumpsumOn} amount={s.lumpsum}
+            onToggle={() => set('lumpsumOn', !s.lumpsumOn)}
+            onAmountChange={v => set('lumpsum', v)}
+          /> */}
+
+      {/* Arpit — Headline SIP result */}
       <HeadlineSIP
-  results={results}
-  fv={results?.fv}
-  yrs={s.yrs}
-  inflation={s.inflation}
-/>
-<ScenarioCards scenarios={scenarios} activeProfile={s.riskProfile} />
+        results={results}
+        fv={results?.fv}
+        yrs={s.yrs}
+        inflation={s.inflation}
+      />
+
+      {/* Arpit — 3 Scenario Cards */}
+      <ScenarioCards scenarios={scenarios} activeProfile={s.riskProfile} />
+
+      {/* Arpit — Corpus Growth Area Chart */}
+      <AreaChart
+        scenarios={scenarios}
+        yrs={s.yrs}
+        activeProfile={s.riskProfile}
+      />
+
+      {/* Arpit — Sensitivity Heat Table */}
+      <SensitivityHeatTable
+        data={sensitivity}
+        userInflation={s.inflation}
+        userReturn={s.annualRet}
+      />
+
+      {/* Arpit — AI Insight Paragraph */}
+      <InsightParagraph
+        results={results}
+        goalType={s.goalType}
+        yrs={s.yrs}
+        inflation={s.inflation}
+        annualRet={s.annualRet}
+      />
+
+      {/* Arpit — AI Goal Validator Flags */}
+      <GoalValidator
+        results={results}
+        goalType={s.goalType}
+        cost={s.cost}
+        inflation={s.inflation}
+        annualRet={s.annualRet}
+        yrs={s.yrs}
+      />
+
+      {/* HIMANSHU — CostOfDelayCard component here */}
+      {/* <CostOfDelayCard cost={s.cost} inflation={s.inflation} annualRet={s.annualRet} yrs={s.yrs} /> */}
+
+      {/* HIMANSHU — GoalRealityIndicator component here */}
+      {/* <GoalRealityIndicator results={results} goalType={s.goalType} /> */}
+
+      {/* HIMANSHU — EducationTips component here */}
+      {/* <EducationTips goalType={s.goalType} /> */}
+
+      {/* HIMANSHU — DonutChart component here */}
+      {/* <DonutChart invested={results?.invested} returns={results?.returns} corpus={results?.corpus} /> */}
+
+      {/* HIMANSHU — StackedBarChart component here */}
+      {/* <StackedBarChart yearByYearData={yearByYear} /> */}
+
+      {/* HIMANSHU — StickyDisclaimer — always last, always visible */}
+      {/* <StickyDisclaimer /> */}
 
     </div>
   );
