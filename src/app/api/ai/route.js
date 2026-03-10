@@ -5,6 +5,7 @@ import { parseGoalResponse, parseValidatorResponse } from '../../../lib/ai/parse
 export async function POST(req) {
   const body = await req.json();
   const { type, data } = body;
+  console.log('AI request:', type, data);
 
   if (type === 'insight') {
     const raw = await callAI(INSIGHT_PROMPT(data), 'text');
@@ -18,6 +19,7 @@ export async function POST(req) {
 
   if (type === 'parser') {
     const raw = await callAI(PARSER_PROMPT(data.text), 'json');
+    console.log('AI raw response:', raw);
     return Response.json({ result: parseGoalResponse(raw) });
   }
 
