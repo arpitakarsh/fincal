@@ -1,7 +1,3 @@
-//temprory function to remove alter once himanshu builds this
-
-
-
 
 'use client';
 
@@ -10,6 +6,8 @@ import { calcAll } from '../engine/formulas';
 import { calcScenarios } from '../engine/scenarios';
 import { calcSensitivity } from '../engine/sensitivity';
 import { getHardErrors, getSoftWarnings } from '../engine/validators';
+import HeadlineSIP from '../components/results/HeadlineSIP';
+import ScenarioCards from '../components/results/ScenarioCards';
 
 const DEFAULTS = {
   goalType: 'house',
@@ -93,6 +91,13 @@ export default function FinCalApp() {
   return (
     <div>
       {/* We both will add compenents here , so chnage it for your use */}
+      <HeadlineSIP
+  results={results}
+  fv={results?.fv}
+  yrs={s.yrs}
+  inflation={s.inflation}
+/>
+<ScenarioCards scenarios={scenarios} activeProfile={s.riskProfile} />
 
     </div>
   );
