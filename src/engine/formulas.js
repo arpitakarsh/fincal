@@ -9,7 +9,7 @@ export function calcSIP(fv, annualRet, yrs) {
 
   if (r === 0) return parseFloat((fv / n).toFixed(2));
 
-  const sip = (fv * r) / ((Math.pow(1 + r, n) - 1) * (1 + r));
+  const sip = (fv * r) / ((Math.pow(1 + r, n) - 1) * (1 + r));  
   return parseFloat(sip.toFixed(2));
 }
 

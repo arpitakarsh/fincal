@@ -1,17 +1,17 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { calcAll } from '../engine/formulas';
-import { calcScenarios } from '../engine/scenarios';
-import { calcSensitivity } from '../engine/sensitivity';
-import { getHardErrors, getSoftWarnings } from '../engine/validators';
-import HeadlineSIP from '../components/results/HeadlineSIP';
-import ScenarioCards from '../components/results/ScenarioCards';
-import NLGoalInput from '../components/ai/NLGoalInput';
-import InsightParagraph from '../components/ai/InsightParagraph';
-import GoalValidator from '../components/ai/GoalValidator';
-import AreaChart from '../components/charts/AreaChart';
-import SensitivityHeatTable from '../components/charts/SensitivityHeatTable';
+import { calcAll } from '../src/engine/formulas';
+import { calcScenarios } from '../src/engine/scenarios';
+import { calcSensitivity } from '../src/engine/sensitivity';
+import { getHardErrors, getSoftWarnings } from '../src/engine/validators';
+import HeadlineSIP from '../src/components/results/HeadlineSIP';
+import ScenarioCards from '../src/components/results/ScenarioCards';
+import NLGoalInput from '../src/components/ai/NLGoalInput';
+import InsightParagraph from '../src/components/ai/InsightParagraph';
+import GoalValidator from '../src/components/ai/GoalValidator';
+import AreaChart from '../src/components/charts/AreaChart';
+import SensitivityHeatTable from '../src/components/charts/SensitivityHeatTable';
 
 const DEFAULTS = {
   goalType: 'house',
