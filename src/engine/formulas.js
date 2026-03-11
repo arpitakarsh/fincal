@@ -39,3 +39,16 @@ export function calcAll({ cost, inflation, yrs, annualRet, lumpsum = 0 }) {
     effFV: parseFloat(effFV.toFixed(2)),
   };
 }
+
+// For backward compatibility with existing code
+export function calculateSIP({ presentCost, inflation, annualReturn, years }) {
+  const FV = parseFloat(
+    (presentCost * Math.pow(1 + inflation / 100, years)).toFixed(10)
+  );
+  const r = parseFloat((annualReturn / 100 / 12).toFixed(10));
+  const n = years * 12;
+  const SIP = parseFloat(
+    (FV * r / ((Math.pow(1 + r, n) - 1) * (1 + r))).toFixed(10)
+  );
+  return parseFloat(SIP.toFixed(2));
+}
