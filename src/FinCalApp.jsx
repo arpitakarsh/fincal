@@ -12,6 +12,8 @@ import InsightParagraph from '../src/components/ai/InsightParagraph';
 import GoalValidator from '../src/components/ai/GoalValidator';
 import AreaChart from '../src/components/charts/AreaChart';
 import SensitivityHeatTable from '../src/components/charts/SensitivityHeatTable';
+// import GoalInputForm from './components/inputs/GoalInputForm';
+import HeroSection from '../src/components/layout/HeroSection';
 
 const DEFAULTS = {
   goalType: 'house',
@@ -43,6 +45,8 @@ function getReturnDefault(yrs) {
 
 export default function FinCalApp() {
   const [s, setS] = useState(DEFAULTS);
+  const [showHero, setShowHero] = useState(true);
+  
 
   const set = (key, val) => setS(prev => ({ ...prev, [key]: val }));
   const setLock = (key) => setS(prev => ({
@@ -90,7 +94,7 @@ export default function FinCalApp() {
     cost: s.cost, inflation: s.inflation, yrs: s.yrs,
     lumpsum: s.lumpsumOn ? s.lumpsum : 0,
   });
-  console.log('SCENARIOS DEBUG:', raw); 
+  
   return raw;
 }, [s.cost, s.inflation, s.yrs, s.lumpsum, s.lumpsumOn]);
 
@@ -99,8 +103,13 @@ export default function FinCalApp() {
     [s.cost, s.yrs]
   );
 
+  if (showHero) {
+  return <HeroSection onGetStarted={() => setShowHero(false)} />;
+}
+
   return (
     <div style={{ background: '#f8f9fb', minHeight: '100vh', paddingBottom: 80 }}>
+      
 
       {/* HIMANSHU — Header component here */}
       {/* <Header /> */}
@@ -121,14 +130,17 @@ export default function FinCalApp() {
       {/* <GoalSelector value={s.goalType} onChange={onGoalChange} /> */}
 
       {/* HIMANSHU — GoalInputForm component here */}
-      {/* <GoalInputForm
+     {/*
+     <GoalInputForm
             cost={s.cost} yrs={s.yrs} inflation={s.inflation}
             onCostChange={v => set('cost', v)}
             onYrsChange={v => set('yrs', v)}
             onInflationChange={v => { set('inflation', v); set('inflationSrc', 'custom'); }}
             locks={s.locks} onLockToggle={setLock}
             hardErrors={hardErrors} softWarnings={softWarnings}
-          /> */}
+          /> 
+     
+     */}  
 
       {/* HIMANSHU — RiskProfileSelector component here */}
       {/* <RiskProfileSelector

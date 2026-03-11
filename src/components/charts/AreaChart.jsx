@@ -21,8 +21,9 @@ function buildData(scenarios, yrs) {
     const yr = i + 1;
     const row = { year: `Yr ${yr}` };
     scenarios.forEach(s => {
-     const r = (s.annualRet ?? s.ret) / 12 / 100;
+      const r = (s.annualRet ?? s.ret) / 12 / 100;
       const n = yr * 12;
+     
       const corpus = r === 0 ? s.sip * n : s.sip * ((Math.pow(1 + r, n) - 1) * (1 + r)) / r;
       row[s.id] = Math.round(corpus);
     });
