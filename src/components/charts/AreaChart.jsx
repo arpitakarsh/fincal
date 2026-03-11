@@ -10,20 +10,20 @@ import {
   Legend,
 } from 'recharts';
 
-const SCENARIOS = [
-  { id: 'conservative', label: 'Conservative', color: '#64748b' },
-  { id: 'moderate',     label: 'Moderate',     color: '#224c87' },
-  { id: 'aggressive',  label: 'Aggressive',   color: '#059669' },
-];
+const COLORS = {
+  conservative: '#64748b',
+  moderate: '#224c87',
+  aggressive: '#059669',
+};
 
 function buildData(scenarios, yrs) {
   return Array.from({ length: yrs }, (_, i) => {
     const yr = i + 1;
     const row = { year: `Yr ${yr}` };
     scenarios.forEach(s => {
-      const r = s.annualRet / 12 / 100;
+     const r = (s.annualRet ?? s.ret) / 12 / 100;
       const n = yr * 12;
-      const corpus = s.sip * ((Math.pow(1 + r, n) - 1) * (1 + r)) / r;
+      const corpus = r === 0 ? s.sip * n : s.sip * ((Math.pow(1 + r, n) - 1) * (1 + r)) / r;
       row[s.id] = Math.round(corpus);
     });
     return row;
@@ -49,12 +49,15 @@ export default function AreaChart({ scenarios, yrs, activeProfile }) {
       <ResponsiveContainer width="100%" height={240}>
         <ReAreaChart data={data}>
           <defs>
-            {SCENARIOS.map(s => (
-              <linearGradient key={s.id} id={`grad-${s.id}`} x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%"  stopColor={s.color} stopOpacity={0.2} />
-                <stop offset="95%" stopColor={s.color} stopOpacity={0} />
-              </linearGradient>
-            ))}
+            {scenarios.map(s => {
+              const color = COLORS[s.id] || '#224c87';
+              return (
+                <linearGradient key={s.id} id={`grad-${s.id}`} x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%"  stopColor={color} stopOpacity={0.2} />
+                  <stop offset="95%" stopColor={color} stopOpacity={0} />
+                </linearGradient>
+              );
+            })}
           </defs>
 
           <XAxis dataKey="year" tick={{ fontSize: 11, fill: '#919090' }} />
@@ -62,20 +65,25 @@ export default function AreaChart({ scenarios, yrs, activeProfile }) {
           <Tooltip formatter={(val) => formatY(val)} />
           <Legend />
 
-          {SCENARIOS.map(s => (
-            <Area
-              key={s.id}
-              type="monotone"
-              dataKey={s.id}
-              name={s.label}
-              stroke={s.color}
-              strokeWidth={activeProfile === s.id || s.id === 'moderate' ? 3 : 1.5}
-              fill={`url(#grad-${s.id})`}
-            />
-          ))}
+          {scenarios.map(s => {
+            const color = COLORS[s.id] || '#224c87';
+            return (
+              <Area
+                key={s.id}
+                type="monotone"
+                dataKey={s.id}
+                name={s.label}
+                stroke={color}
+                strokeWidth={activeProfile === s.id ? 3 : 1.5}
+                fill={`url(#grad-${s.id})`}
+              />
+            );
+          })}
         </ReAreaChart>
       </ResponsiveContainer>
-      <p style={{ fontSize: 11, color: '#919090', marginTop: 8 }}>* Illustrative only. Assumes constant monthly SIP.</p>
+      <p style={{ fontSize: 11, color: '#919090', marginTop: 8 }}>
+        * Illustrative only. Assumes constant monthly SIP.
+      </p>
     </div>
   );
 }

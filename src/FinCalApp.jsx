@@ -84,13 +84,15 @@ export default function FinCalApp() {
     [s.cost, s.inflation, s.yrs, s.annualRet, s.lumpsum, s.lumpsumOn]
   );
 
-  const scenarios = useMemo(
-    () => hasErrors ? [] : calcScenarios({
-      cost: s.cost, inflation: s.inflation, yrs: s.yrs,
-      lumpsum: s.lumpsumOn ? s.lumpsum : 0,
-    }),
-    [s.cost, s.inflation, s.yrs, s.lumpsum, s.lumpsumOn]
-  );
+  const scenarios = useMemo(() => {
+  if (hasErrors) return [];
+  const raw = calcScenarios({
+    cost: s.cost, inflation: s.inflation, yrs: s.yrs,
+    lumpsum: s.lumpsumOn ? s.lumpsum : 0,
+  });
+  console.log('SCENARIOS DEBUG:', raw); 
+  return raw;
+}, [s.cost, s.inflation, s.yrs, s.lumpsum, s.lumpsumOn]);
 
   const sensitivity = useMemo(
     () => hasErrors ? [] : calcSensitivity({ cost: s.cost, yrs: s.yrs }),
