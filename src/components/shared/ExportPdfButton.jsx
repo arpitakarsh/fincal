@@ -8,24 +8,23 @@ export default function ExportPdfButton({ isFloating }) {
   const handleExport = async () => {
     setExporting(true);
     try {
-      
       const html2canvas = (await import('html2canvas')).default;
       const { jsPDF } = await import('jspdf');
 
       const element = document.getElementById('export-report');
       if (!element) return;
-      
-      const canvas = await html2canvas(element, { 
+
+      const canvas = await html2canvas(element, {
         scale: 2,
         useCORS: true,
         backgroundColor: '#ffffff'
       });
-      
+
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF('p', 'mm', 'a4');
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-      
+
       pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
       pdf.save(`FinCal-Report-${new Date().toLocaleDateString('en-IN')}.pdf`);
     } catch (err) {
@@ -35,8 +34,8 @@ export default function ExportPdfButton({ isFloating }) {
     }
   };
 
-  const floatingClass = isFloating 
-    ? 'fixed bottom-[80px] right-[20px] shadow-lg z-40' 
+  const floatingClass = isFloating
+    ? 'fixed bottom-[80px] right-[20px] shadow-lg z-40'
     : 'mt-4 sm:absolute sm:top-5 sm:right-6 sm:mt-0';
 
   return (
@@ -44,9 +43,9 @@ export default function ExportPdfButton({ isFloating }) {
       onClick={handleExport}
       disabled={exporting}
       className={`
-        flex items-center gap-2 bg-white border border-[#e2e6ed] rounded-[10px] 
-        px-[16px] py-[8px] text-[13px] font-[600] text-[#224c87] 
-        hover:bg-[#f0f4ff] transition-colors
+        flex items-center gap-2 bg-white border border-[#e2e6ed] rounded-[10px]
+        px-[16px] py-[8px] text-[13px] font-[600] text-[#224c87]
+        transition-all duration-150 hover:bg-[#f0f4ff] hover:border-[#224c87]
         ${exporting ? 'opacity-70 cursor-not-allowed' : ''}
         ${floatingClass}
       `}

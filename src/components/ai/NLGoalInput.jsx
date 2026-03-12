@@ -48,7 +48,18 @@ export default function NLGoalInput({ onApply }) {
 
   return (
     <div style={{ marginBottom: 16 }}>
-      <div style={{ position: 'relative', width: '100%' }}>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          background: '#ffffff',
+          border: '2px solid #e2e6ed',
+          borderRadius: 12,
+          padding: '4px 4px 4px 16px',
+          transition: 'border-color 0.15s ease, box-shadow 0.15s ease',
+        }}
+        className="focus-within:!border-[#224c87] focus-within:shadow-[0_0_0_3px_rgba(34,76,135,0.1)]"
+      >
         <input
           ref={inputRef}
           value={text}
@@ -58,36 +69,32 @@ export default function NLGoalInput({ onApply }) {
           inputMode="text"
           aria-label="Describe your goal in plain English"
           style={{
-            width: '100%',
-            padding: '14px 16px',
-            paddingRight: '64px',
-            borderRadius: 12,
-            border: '1px solid #e2e6ed',
+            flex: 1,
+            border: 'none',
+            outline: 'none',
             fontSize: 14,
             color: '#1a1a2e',
-            outline: 'none',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+            background: 'transparent',
           }}
+          className="placeholder:text-[#9ca3af]"
         />
         <button
           onClick={handleParse}
           disabled={loading || !text.trim()}
           aria-label="Parse goal"
           style={{
-            position: 'absolute',
-            right: 6,
-            top: 6,
-            bottom: 6,
-            padding: '0 18px',
+            padding: '10px 20px',
             borderRadius: 8,
             background: '#224c87',
             color: '#fff',
             border: 'none',
+            fontSize: 14,
             fontWeight: 600,
             cursor: loading ? 'not-allowed' : 'pointer',
             opacity: loading || !text.trim() ? 0.7 : 1,
-            transition: 'opacity 0.2s',
+            transition: 'background 0.15s ease, opacity 0.15s ease',
           }}
+          className="hover:!bg-[#1a3d6e] active:scale-[0.97]"
         >
           {loading ? '...' : 'Go'}
         </button>

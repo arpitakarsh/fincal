@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 const SCENARIOS = [
   { id: 'conservative', label: 'Conservative', color: '#64748b' },
   { id: 'moderate',     label: 'Moderate',     color: '#224c87' },
-  { id: 'aggressive',  label: 'Aggressive',   color: '#059669' },
+  { id: 'aggressive',   label: 'Aggressive',   color: '#059669' },
 ];
 
 export default function ScenarioCards({ scenarios, activeProfile }) {
@@ -22,20 +22,16 @@ export default function ScenarioCards({ scenarios, activeProfile }) {
           <motion.div
             key={s.id}
             initial={{ opacity: 0, y: 16 }}
-            animate={{ 
-              opacity: 1, 
-              y: 0,
-              scale: isActive ? [1, 1.02, 1] : 1, // Pulse effect on load/active
-            }}
-            transition={{ 
-              delay: i * 0.1,
-              scale: { duration: 0.4, ease: "easeInOut" }
-            }}
+            animate={{ opacity: 1, y: 0, scale: isActive ? [1, 1.02, 1] : 1 }}
+            transition={{ delay: i * 0.1, scale: { duration: 0.4, ease: "easeInOut" } }}
+            whileHover={{ y: -2, boxShadow: '0 4px 12px rgba(34,76,135,0.12)' }}
             style={{
               background: '#fff',
               border: `2px solid ${isActive ? meta.color : '#e2e6ed'}`,
               borderRadius: 16,
-              padding: '16px',
+              padding: 16,
+              transition: 'all 0.15s ease',
+              cursor: 'default',
             }}
           >
             <div className="flex flex-row justify-between items-center sm:flex-col sm:justify-center text-left sm:text-center w-full">
@@ -50,21 +46,11 @@ export default function ScenarioCards({ scenarios, activeProfile }) {
               <div className="flex flex-col items-end sm:items-center mt-0 sm:mt-2">
                 <p style={{
                   fontFamily: 'var(--font-montserrat), Montserrat, sans-serif',
-                  fontWeight: 700,
-                  fontSize: 20,
-                  color: '#1a1a2e',
+                  fontWeight: 700, fontSize: 20, color: '#1a1a2e',
                 }}>
                   {s.sip > 0 ? (
-                    <CountUp
-                      end={s.sip}
-                      duration={1}
-                      separator=","
-                      decimals={0}
-                      prefix="₹"
-                    />
-                  ) : (
-                    '—'
-                  )}
+                    <CountUp end={s.sip} duration={1} separator="," decimals={0} prefix="₹" />
+                  ) : '—'}
                 </p>
                 <p style={{ fontSize: 11, color: '#919090', marginTop: 2 }}>
                   /month

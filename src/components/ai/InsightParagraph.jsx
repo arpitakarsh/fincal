@@ -10,9 +10,7 @@ export default function InsightParagraph({ results, goalType, yrs, inflation, an
 
   useEffect(() => {
     if (!results) return;
-
     if (debounceRef.current) clearTimeout(debounceRef.current);
-
     debounceRef.current = setTimeout(async () => {
       setLoading(true);
       try {
@@ -21,14 +19,7 @@ export default function InsightParagraph({ results, goalType, yrs, inflation, an
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             type: 'insight',
-            data: {
-              goalType,
-              cost: results.fv,
-              sip: results.sip,
-              yrs,
-              inflation,
-              annualRet,
-            },
+            data: { goalType, cost: results.fv, sip: results.sip, yrs, inflation, annualRet },
           }),
         });
         const { result } = await res.json();
@@ -39,17 +30,14 @@ export default function InsightParagraph({ results, goalType, yrs, inflation, an
         setLoading(false);
       }
     }, 1500);
-
     return () => clearTimeout(debounceRef.current);
   }, [results?.sip, goalType, yrs, inflation, annualRet]);
 
-  // Typewriter effect
   useEffect(() => {
     if (!text || loading) {
       setDisplayedText('');
       return;
     }
-    
     let currentIndex = 0;
     const intervalId = setInterval(() => {
       if (currentIndex < text.length) {
@@ -58,20 +46,14 @@ export default function InsightParagraph({ results, goalType, yrs, inflation, an
       } else {
         clearInterval(intervalId);
       }
-    }, 20); // 20ms per character
-
+    }, 20);
     return () => clearInterval(intervalId);
   }, [text, loading]);
 
   if (!results) return null;
 
   return (
-    <div style={{
-      background: '#fff',
-      border: '1px solid #e2e6ed',
-      borderRadius: 16,
-      padding: '20px',
-    }}>
+    <div style={{ background: '#fff', border: '1px solid #e2e6ed', borderRadius: 16, boxShadow: '0 1px 4px rgba(0,0,0,0.04)', padding: 20 }}>
       <p style={{ fontSize: 11, color: '#224c87', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 8 }}>
         Your Goal Summary
       </p>
@@ -80,16 +62,18 @@ export default function InsightParagraph({ results, goalType, yrs, inflation, an
         <div>
           {[100, 80, 60].map((w, i) => (
             <div key={i} style={{
-              height: 12, borderRadius: 6,
-              background: '#e2e6ed',
+              height: 12,
+              borderRadius: 6,
               width: `${w}%`,
               marginBottom: 8,
-              animation: 'pulse 1.5s ease-in-out infinite',
+              background: 'linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%)',
+              backgroundSize: '200% 100%',
+              animation: 'shimmer 1.5s infinite',
             }} />
           ))}
         </div>
       ) : (
-        <p style={{ fontSize: 14, color: '#1a1a2e', lineHeight: 1.7, minHeight: '60px' }}>
+        <p style={{ fontSize: 14, color: '#1a1a2e', lineHeight: 1.7, minHeight: 60 }}>
           {displayedText || text || '—'}
         </p>
       )}

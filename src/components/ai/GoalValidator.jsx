@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function GoalValidator({ results, goalType, cost, inflation, annualRet, yrs }) {
   const [flags, setFlags] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [dismissed, setDismissed] = useState([]);
   const prevInputs = useRef({});
 
@@ -26,6 +26,7 @@ export default function GoalValidator({ results, goalType, cost, inflation, annu
     }
 
     const run = async () => {
+      setLoading(true);
       try {
         const res = await fetch('/api/ai', {
           method: 'POST',
@@ -39,6 +40,8 @@ export default function GoalValidator({ results, goalType, cost, inflation, annu
         setFlags(result ?? []);
       } catch {
         setFlags([]);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -46,6 +49,22 @@ export default function GoalValidator({ results, goalType, cost, inflation, annu
   }, [results?.sip]);
 
   const visible = flags.filter(f => !dismissed.includes(f.field));
+
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {[1, 2].map(i => (
+          <div key={i} style={{
+            height: 48,
+            borderRadius: 16,
+            background: 'linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%)',
+            backgroundSize: '200% 100%',
+            animation: 'shimmer 1.5s infinite',
+          }} />
+        ))}
+      </div>
+    );
+  }
 
   if (!visible.length) return null;
 
