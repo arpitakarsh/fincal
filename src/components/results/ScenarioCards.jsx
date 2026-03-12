@@ -1,6 +1,6 @@
 'use client';
 
-import CountUp from 'react-countup';
+import NumberCounter from '../ui/NumberCounter';
 import { motion } from 'framer-motion';
 
 const SCENARIOS = [
@@ -73,7 +73,17 @@ export default function ScenarioCards({ scenarios, activeProfile, onSelect }) {
                   fontWeight: 700, fontSize: 28, color: '#1a1a2e',
                 }}>
                   {s.sip > 0 ? (
-                    <CountUp end={s.sip} duration={1} separator="," decimals={0} prefix="₹" />
+                    <NumberCounter
+                      value={Math.round(s.sip)}
+                      prefix="₹"
+                      duration={1000}
+                      style={{
+                        fontFamily: 'Montserrat, sans-serif',
+                        fontWeight: 700,
+                        fontSize: 28,
+                        color: '#1a1a2e',
+                      }}
+                    />
                   ) : '—'}
                 </p>
                 <p style={{ fontSize: 11, color: '#919090', marginTop: 2 }}>

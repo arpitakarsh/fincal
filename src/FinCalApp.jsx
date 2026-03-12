@@ -33,6 +33,61 @@ import SliderInput from '../src/components/inputs/SliderInput';
 import QuickPresets from '../src/components/inputs/QuickPresets';
 import StepUpToggle from '../src/components/inputs/StepUpToggle';
 import LumpsumToggle from '../src/components/inputs/LumpsumToggle';
+import GlowMenu from '../src/components/ui/GlowMenu';
+
+const CalculatorIcon = ({ size = 16 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect width="16" height="20" x="4" y="2" rx="2" />
+    <line x1="8" x2="16" y1="6" y2="6" />
+    <line x1="16" x2="16" y1="14" y2="18" />
+    <path d="M16 10h.01" />
+    <path d="M12 10h.01" />
+    <path d="M8 10h.01" />
+    <path d="M12 14h.01" />
+    <path d="M8 14h.01" />
+    <path d="M12 18h.01" />
+    <path d="M8 18h.01" />
+  </svg>
+);
+
+const RefreshCwIcon = ({ size = 16 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+    <path d="M21 3v5h-5" />
+    <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
+    <path d="M8 16H3v5" />
+  </svg>
+);
+
+const GitCompareIcon = ({ size = 16 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="18" cy="18" r="3" />
+    <circle cx="6" cy="6" r="3" />
+    <path d="M13 6h3a2 2 0 0 1 2 2v7" />
+    <path d="M11 18H8a2 2 0 0 1-2-2V9" />
+  </svg>
+);
+
+const TAB_ITEMS = [
+  {
+    icon: CalculatorIcon,
+    label: "Goal Calculator",
+    gradient: "radial-gradient(circle, rgba(34,76,135,0.15) 0%, rgba(34,76,135,0.05) 50%, transparent 100%)",
+    iconColor: "#224c87",
+  },
+  {
+    icon: RefreshCwIcon,
+    label: "Reverse Calculator",
+    gradient: "radial-gradient(circle, rgba(5,150,105,0.15) 0%, rgba(5,150,105,0.05) 50%, transparent 100%)",
+    iconColor: "#059669",
+  },
+  {
+    icon: GitCompareIcon,
+    label: "Compare Goals",
+    gradient: "radial-gradient(circle, rgba(218,56,50,0.15) 0%, rgba(218,56,50,0.05) 50%, transparent 100%)",
+    iconColor: "#da3832",
+  },
+];
 
 const DEFAULTS = {
   goalType: 'house',
@@ -197,112 +252,33 @@ export default function FinCalApp() {
   };
 
 
-  const tabButtonStyle = (active) => ({
-    padding: '6px 16px',
-    borderRadius: 999,
-    fontSize: 13,
-    fontFamily: 'Montserrat, sans-serif',
-    fontWeight: active ? 600 : 500,
-    color: active ? '#ffffff' : 'rgba(26,26,46,0.6)',
-    background: active ? '#224c87' : 'transparent',
-    border: 'none',
-    cursor: 'pointer',
-    transition: 'all 0.15s ease',
-  });
+  const activeLabel =
+    activeTab === 'calculator' ? 'Goal Calculator' :
+    activeTab === 'reverse' ? 'Reverse Calculator' :
+    'Compare Goals';
 
-  const renderTabButtons = (variant) => (
-    <>
-      <button
-        onClick={() => { setActiveTab('calculator'); if (variant === 'mobile') setMobileMenuOpen(false); }}
-        className="transition-all whitespace-nowrap"
-        style={variant === 'mobile'
-          ? { ...tabButtonStyle(activeTab === 'calculator'), borderRadius: 10, width: '100%', textAlign: 'left', background: activeTab === 'calculator' ? '#224c87' : '#ffffff', color: activeTab === 'calculator' ? '#ffffff' : '#1a1a2e' }
-          : tabButtonStyle(activeTab === 'calculator')}
-        onMouseEnter={(e) => {
-          if (variant !== 'mobile' && activeTab !== 'calculator') e.currentTarget.style.background = '#e8eef7';
-        }}
-        onMouseLeave={(e) => {
-          if (variant !== 'mobile' && activeTab !== 'calculator') e.currentTarget.style.background = 'transparent';
-        }}
-      >
-        Goal Calculator
-      </button>
-      <button
-        onClick={() => { setActiveTab('reverse'); if (variant === 'mobile') setMobileMenuOpen(false); }}
-        className="transition-all whitespace-nowrap"
-        style={variant === 'mobile'
-          ? { ...tabButtonStyle(activeTab === 'reverse'), borderRadius: 10, width: '100%', textAlign: 'left', background: activeTab === 'reverse' ? '#224c87' : '#ffffff', color: activeTab === 'reverse' ? '#ffffff' : '#1a1a2e' }
-          : tabButtonStyle(activeTab === 'reverse')}
-        onMouseEnter={(e) => {
-          if (variant !== 'mobile' && activeTab !== 'reverse') e.currentTarget.style.background = '#e8eef7';
-        }}
-        onMouseLeave={(e) => {
-          if (variant !== 'mobile' && activeTab !== 'reverse') e.currentTarget.style.background = 'transparent';
-        }}
-      >
-        Reverse Calculator
-      </button>
-      <button
-        onClick={() => { setActiveTab('compare'); if (variant === 'mobile') setMobileMenuOpen(false); }}
-        className="transition-all whitespace-nowrap"
-        style={variant === 'mobile'
-          ? { ...tabButtonStyle(activeTab === 'compare'), borderRadius: 10, width: '100%', textAlign: 'left', background: activeTab === 'compare' ? '#224c87' : '#ffffff', color: activeTab === 'compare' ? '#ffffff' : '#1a1a2e' }
-          : tabButtonStyle(activeTab === 'compare')}
-        onMouseEnter={(e) => {
-          if (variant !== 'mobile' && activeTab !== 'compare') e.currentTarget.style.background = '#e8eef7';
-        }}
-        onMouseLeave={(e) => {
-          if (variant !== 'mobile' && activeTab !== 'compare') e.currentTarget.style.background = 'transparent';
-        }}
-      >
-        Compare Goals
-      </button>
-    </>
-  );
+  const handleGlowMenuClick = (label) => {
+    if (label === 'Goal Calculator') setActiveTab('calculator');
+    if (label === 'Reverse Calculator') setActiveTab('reverse');
+    if (label === 'Compare Goals') setActiveTab('compare');
+  };
 
-  const tabBarDesktop = (
-    <div
-      className="flex gap-1 header-tabs-desktop"
-      style={{
-        background: '#f0f4fb',
-        borderRadius: 999,
-        padding: 4,
-      }}
-    >
-      {renderTabButtons('desktop')}
+  const glowMenuDesktop = (
+    <div className="header-tabs-desktop">
+      <GlowMenu
+        items={TAB_ITEMS}
+        activeItem={activeLabel}
+        onItemClick={handleGlowMenuClick}
+      />
     </div>
   );
 
-  const tabBarMobilePills = (
-    <div className="flex gap-2 overflow-x-auto">
-      {[
-        { id: 'calculator', label: 'Goal Calculator' },
-        { id: 'reverse', label: 'Reverse' },
-        { id: 'compare', label: 'Compare' },
-      ].map((tab) => {
-        const active = activeTab === tab.id;
-        return (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className="whitespace-nowrap"
-            style={{
-              padding: '8px 14px',
-              borderRadius: 999,
-              fontSize: 13,
-              fontFamily: 'Montserrat, sans-serif',
-              fontWeight: 600,
-              background: active ? '#224c87' : '#ffffff',
-              color: active ? '#ffffff' : 'rgba(26,26,46,0.6)',
-              border: active ? '1px solid #224c87' : '1px solid #e2e6ed',
-              minHeight: 44,
-            }}
-          >
-            {tab.label}
-          </button>
-        );
-      })}
-    </div>
+  const glowMenuMobile = (
+    <GlowMenu
+      items={TAB_ITEMS}
+      activeItem={activeLabel}
+      onItemClick={handleGlowMenuClick}
+    />
   );
 
   return (
@@ -456,9 +432,9 @@ export default function FinCalApp() {
 
             <div className="w-full pb-0 pt-0 relative z-10">
               <div className="app-shell">
-                <Header tabBar={tabBarDesktop} />
-                <div className="mobile-only" style={{ padding: '8px 16px 4px', background: '#f8f9fb' }}>
-                  {tabBarMobilePills}
+                <Header tabBar={glowMenuDesktop} />
+                <div className="mobile-only" style={{ padding: '8px 16px 4px', background: '#f8f9fb', overflowX: 'auto' }}>
+                  {glowMenuMobile}
                 </div>
                 {showTaxBanner && <TaxationBanner onClose={handleTaxBannerClose} />}
               </div>
@@ -770,7 +746,7 @@ export default function FinCalApp() {
 
 
             {activeTab === 'reverse' && (
-              <div key="tab-reverse" className="animate-fadeIn w-full pb-12 pt-6">
+              <div key="tab-reverse" className="animate-fadeIn w-full" style={{ overflowY: 'auto', height: 'calc(100vh - 56px)', paddingBottom: 48, paddingTop: 24 }}>
                 <div className="max-w-[860px] mx-auto px-6">
                   <ReverseCalculator initialAnnualRet={s.annualRet} initialInflation={s.inflation} />
                 </div>
@@ -778,7 +754,7 @@ export default function FinCalApp() {
             )}
 
             {activeTab === 'compare' && (
-              <div key="tab-compare" className="animate-fadeIn w-full pb-12 pt-6">
+              <div key="tab-compare" className="animate-fadeIn w-full" style={{ overflowY: 'auto', height: 'calc(100vh - 56px)', paddingBottom: 48, paddingTop: 24 }}>
                 <div className="max-w-[960px] mx-auto px-6">
                   <GoalComparison />
                 </div>

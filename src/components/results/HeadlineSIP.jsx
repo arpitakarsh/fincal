@@ -1,9 +1,15 @@
 'use client';
 
-import CountUp from 'react-countup';
+import NumberCounter from '../ui/NumberCounter';
 import Confetti from 'react-confetti';
 import { useState, useEffect } from 'react';
 import AssumptionTransparency from '../shared/AssumptionTransparency';
+import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent
+} from '../ui/Accordion';
 
 function useWindowSize() {
   const [size, setSize] = useState([0, 0]);
@@ -77,7 +83,15 @@ export default function HeadlineSIP({ results, fv, yrs, inflation, annualRet }) 
           marginBottom: 4,
           lineHeight: 1,
         }}>
-          ₹<CountUp end={sip} duration={1} separator="," decimals={0} />
+          <NumberCounter
+            value={Math.round(sip)}
+            prefix="₹"
+            duration={1000}
+            style={{
+              fontFamily: 'Montserrat, sans-serif',
+              fontWeight: 700,
+            }}
+          />
         </h1>
         <div style={{
           background: '#fff5f5',
@@ -151,7 +165,15 @@ export default function HeadlineSIP({ results, fv, yrs, inflation, annualRet }) 
             lineHeight: 1,
             letterSpacing: '-1px',
           }}>
-            ₹<CountUp end={sip} duration={1} separator="," decimals={0} />
+            <NumberCounter
+              value={Math.round(sip)}
+              prefix="₹"
+              duration={1000}
+              style={{
+                fontFamily: 'Montserrat, sans-serif',
+                fontWeight: 700,
+              }}
+            />
           </h1>
           <span style={{ color: '#93c5fd', fontSize: isSmall ? 16 : 18, fontWeight: 500 }}>per month</span>
         </div>
@@ -159,7 +181,7 @@ export default function HeadlineSIP({ results, fv, yrs, inflation, annualRet }) 
       <div className="rounded-lg p-3 sm:p-4 flex flex-col sm:flex-row flex-wrap gap-4 sm:gap-6 mb-5" style={{ background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.2)', backdropFilter: 'blur(10px)' }}>
         <div className="flex-1 pl-3">
           <p style={{ fontSize: 11, color: '#93c5fd', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 2 }}>Goal after inflation</p>
-          <p style={{ fontSize: 15, fontWeight: 600 }}>₹<CountUp end={fv} duration={1} separator="," decimals={0} /></p>
+          <p style={{ fontSize: 15, fontWeight: 600 }}><NumberCounter value={Math.round(fv)} prefix="₹" duration={1000} /></p>
         </div>
         <div className="flex-1 pl-3">
           <p style={{ fontSize: 11, color: '#93c5fd', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 2 }}>Time Horizon</p>
@@ -171,7 +193,54 @@ export default function HeadlineSIP({ results, fv, yrs, inflation, annualRet }) 
         </div>
       </div>
 
-      <AssumptionTransparency />
+      <Accordion type="single" collapsible style={{ marginTop: 16 }}>
+        <AccordionItem value="formulas">
+          <AccordionTrigger>
+            How we calculated this (Formulas)
+          </AccordionTrigger>
+          <AccordionContent>
+            <div style={{
+              color: 'rgba(255,255,255,0.85)',
+              fontSize: 13,
+              lineHeight: 1.8,
+              fontFamily: 'monospace'
+            }}>
+              <p style={{ marginBottom: 12, color: 'rgba(255,255,255,0.5)', fontSize: 11, fontFamily: 'Arial', letterSpacing: 1 }}>
+                STEP 1 — INFLATION ADJUSTMENT
+              </p>
+              <p style={{ marginBottom: 16 }}>
+                Future Value = Present Cost × (1 + Inflation)^Years
+              </p>
+              <p style={{ marginBottom: 12, color: 'rgba(255,255,255,0.5)', fontSize: 11, fontFamily: 'Arial', letterSpacing: 1 }}>
+                STEP 2 — REQUIRED SIP
+              </p>
+              <p style={{ marginBottom: 16 }}>
+                SIP = FV × r ÷ [((1+r)^n − 1) × (1+r)]
+              </p>
+              <p style={{
+                color: 'rgba(255,255,255,0.4)',
+                fontSize: 11,
+                fontFamily: 'Arial',
+                fontStyle: 'italic'
+              }}>
+                where r = annualReturn ÷ 12 ÷ 100, n = years × 12
+              </p>
+              <p style={{
+                marginTop: 16,
+                color: 'rgba(255,255,255,0.3)',
+                fontSize: 11,
+                fontFamily: 'Arial',
+                borderTop: '1px solid rgba(255,255,255,0.1)',
+                paddingTop: 12
+              }}>
+                * All figures are estimated and illustrative only.
+                Assumes constant monthly SIP and fixed annual return.
+                Does not account for taxes or fund expenses.
+              </p>
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
       </div>
     </div>
   );

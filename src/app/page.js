@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import FeatureSteps from "@/components/blocks/feature-section";
+import AnimatedShinyText from "@/components/magicui/animated-shiny-text";
 import { motion, AnimatePresence, useReducedMotion, useInView } from "framer-motion";
 import CountUp from "react-countup";
 
@@ -89,9 +90,12 @@ export default function Page() {
           className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] items-center"
         >
           <motion.div variants={heroMotion} className="flex flex-col gap-6">
-            <div className="inline-flex items-center gap-2 rounded-full border border-[#d7def0] px-4 py-2 text-[11px] uppercase tracking-[0.18em] text-[#224c87]">
-              ● HDFC Mutual Fund × FinCal
-            </div>
+            <Link href="/calculator" className="group rounded-full border border-[#224c87]/20 bg-[#e8eef7] text-base transition-all ease-in hover:cursor-pointer hover:bg-[#dce6f5] inline-block">
+              <AnimatedShinyText className="inline-flex items-center justify-center px-4 py-1 text-[#224c87] transition ease-out hover:text-[#1a3d6e] hover:duration-300 text-[11px] uppercase tracking-[0.18em] font-[600]">
+                <span>● HDFC Mutual Fund × FinCal</span>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-1 transition-transform duration-300 ease-in-out group-hover:translate-x-0.5"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
+              </AnimatedShinyText>
+            </Link>
             <h1 className="text-4xl md:text-5xl font-[700]" style={{ fontFamily: "Montserrat, sans-serif" }}>
               Goal-Based Investment{" "}
               <span className="text-[#224c87]">Calculator</span>
