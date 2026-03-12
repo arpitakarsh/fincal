@@ -22,7 +22,7 @@ export default function CostOfDelayCard({ cost, inflation, annualRet, yrs }) {
   const topDelay = delays[0];
 
   return (
-    <div className="mb-4 rounded-[16px] border border-red-100 bg-red-50 p-6 shadow-[0_1px_4px_rgba(0,0,0,0.04)] hover:-translate-y-[2px] transition-all duration-200">
+    <div className="mb-4 rounded-[16px] border border-[#fde68a] bg-white p-6 shadow-[0_8px_32px_rgba(34,76,135,0.12)] hover:-translate-y-[2px] transition-all duration-200" style={{ borderLeft: '4px solid #f59e0b' }}>
       <div className="flex flex-col gap-3">
         <div className="flex items-center gap-2">
           <span className="text-lg">⏰</span>
@@ -33,7 +33,7 @@ export default function CostOfDelayCard({ cost, inflation, annualRet, yrs }) {
         
         <p className="text-lg font-montserrat text-gray-800 leading-snug">
           If you delay by <span className="font-extrabold">1 year</span>, you must invest <br className="hidden sm:block" />
-          <span className="font-black text-[#da3832] text-2xl sm:text-[32px] mt-2 inline-block">₹{formatLakh(topDelay.extraSIP)} more</span> <span className="text-base font-semibold text-red-500">/ month.</span>
+          <span className="font-black text-[#da3832] text-2xl sm:text-[32px] mt-2 inline-block">{formatLakh(topDelay.extraSIP)} more</span> <span className="text-base font-semibold text-red-500">/ month.</span>
         </p>
       </div>
 

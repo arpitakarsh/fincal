@@ -1,8 +1,7 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { COLORS } from '../src/lib/constants';
 import { calcAll } from '../src/engine/formulas';
 import { calcScenarios } from '../src/engine/scenarios';
 import { calcSensitivity } from '../src/engine/sensitivity';
@@ -14,12 +13,14 @@ import NLGoalInput from '../src/components/ai/NLGoalInput';
 import InsightParagraph from '../src/components/ai/InsightParagraph';
 import GoalValidator from '../src/components/ai/GoalValidator';
 import SensitivityHeatTable from '../src/components/charts/SensitivityHeatTable';
+import AreaChart from '../src/components/charts/AreaChart';
+import GlidePath from '../src/components/charts/GlidePath';
+import StackedBarChart from '../src/components/charts/StackedBarChart';
+import DonutChart from '../src/components/charts/DonutChart';
 import HeroSection from '../src/components/layout/HeroSection';
-import EducationTips from '../src/components/layout/EducationTips';
 import CostOfDelayCard from '../src/components/results/CostOfDelayCard';
 import GoalRealityIndicator from '../src/components/results/GoalRealityIndicator';
 import TaxationBanner from '../src/components/layout/TaxationBanner';
-import AnalyticsSection from '../src/components/results/AnalyticsSection';
 import ReverseCalculator from '../src/components/results/ReverseCalculator';
 import GoalComparison from '../src/components/results/GoalComparison';
 import ExportPdfButton from '../src/components/shared/ExportPdfButton';
@@ -66,6 +67,13 @@ export default function FinCalApp() {
   const [s, setS] = useState(DEFAULTS);
   const [showHero, setShowHero] = useState(true);
   const [isFocusMode, setIsFocusMode] = useState(false);
+  const [showTaxBanner, setShowTaxBanner] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
+  const [step1Open, setStep1Open] = useState(true);
+  const [step2Open, setStep2Open] = useState(true);
+  const centerPanelRef = useRef(null);
+  const heroCardRef = useRef(null);
+  const [showFloatingPill, setShowFloatingPill] = useState(false);
 
   const set = (key, val) => setS(prev => ({ ...prev, [key]: val }));
   const setLock = (key) => setS(prev => ({
@@ -84,6 +92,14 @@ export default function FinCalApp() {
     if (s.locks.annualRet) return;
     const retMap = { safe: 8, balanced: 10, growth: 12 };
     setS(prev => ({ ...prev, riskProfile: profile, annualRet: retMap[profile] }));
+  };
+
+  const onScenarioSelect = (scenarioId) => {
+    setS(prev => {
+      if (prev.locks.annualRet) return { ...prev, riskProfile: scenarioId };
+      const retMap = { conservative: 8, moderate: 10, aggressive: 12 };
+      return { ...prev, riskProfile: scenarioId, annualRet: retMap[scenarioId] };
+    });
   };
 
   const onRetSlider = (val) => setS(prev => ({
@@ -133,224 +149,618 @@ export default function FinCalApp() {
     });
   }, [s.cost, s.inflation, s.annualRet, s.yrs, s.stepUpOn, s.stepUpPct, s.lumpsum, s.lumpsumOn, hasErrors]);
 
+  useEffect(() => {
+    centerPanelRef.current?.scrollTo(0, 0);
+  }, [results]);
+
+  useEffect(() => {
+    const media = window.matchMedia('(max-width: 768px)');
+    const apply = () => {
+      setIsMobile(media.matches);
+      if (!media.matches) {
+        setStep1Open(true);
+        setStep2Open(true);
+      }
+    };
+    apply();
+    media.addEventListener?.('change', apply);
+    return () => media.removeEventListener?.('change', apply);
+  }, []);
+
+  useEffect(() => {
+    if (!isMobile) {
+      setShowFloatingPill(false);
+      return;
+    }
+    if (!heroCardRef.current) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setShowFloatingPill(!entry.isIntersecting);
+      },
+      { threshold: 0.3 }
+    );
+    observer.observe(heroCardRef.current);
+    return () => observer.disconnect();
+  }, [isMobile, results]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const dismissed = window.localStorage.getItem('fincal_tax_banner_dismissed');
+    if (dismissed === '1') setShowTaxBanner(false);
+  }, []);
+
+  const handleTaxBannerClose = () => {
+    setShowTaxBanner(false);
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem('fincal_tax_banner_dismissed', '1');
+    }
+  };
+
+
+  const tabButtonStyle = (active) => ({
+    padding: '6px 16px',
+    borderRadius: 999,
+    fontSize: 13,
+    fontFamily: 'Montserrat, sans-serif',
+    fontWeight: active ? 600 : 500,
+    color: active ? '#ffffff' : 'rgba(26,26,46,0.6)',
+    background: active ? '#224c87' : 'transparent',
+    border: 'none',
+    cursor: 'pointer',
+    transition: 'all 0.15s ease',
+  });
+
+  const renderTabButtons = (variant) => (
+    <>
+      <button
+        onClick={() => { setActiveTab('calculator'); if (variant === 'mobile') setMobileMenuOpen(false); }}
+        className="transition-all whitespace-nowrap"
+        style={variant === 'mobile'
+          ? { ...tabButtonStyle(activeTab === 'calculator'), borderRadius: 10, width: '100%', textAlign: 'left', background: activeTab === 'calculator' ? '#224c87' : '#ffffff', color: activeTab === 'calculator' ? '#ffffff' : '#1a1a2e' }
+          : tabButtonStyle(activeTab === 'calculator')}
+        onMouseEnter={(e) => {
+          if (variant !== 'mobile' && activeTab !== 'calculator') e.currentTarget.style.background = '#e8eef7';
+        }}
+        onMouseLeave={(e) => {
+          if (variant !== 'mobile' && activeTab !== 'calculator') e.currentTarget.style.background = 'transparent';
+        }}
+      >
+        Goal Calculator
+      </button>
+      <button
+        onClick={() => { setActiveTab('reverse'); if (variant === 'mobile') setMobileMenuOpen(false); }}
+        className="transition-all whitespace-nowrap"
+        style={variant === 'mobile'
+          ? { ...tabButtonStyle(activeTab === 'reverse'), borderRadius: 10, width: '100%', textAlign: 'left', background: activeTab === 'reverse' ? '#224c87' : '#ffffff', color: activeTab === 'reverse' ? '#ffffff' : '#1a1a2e' }
+          : tabButtonStyle(activeTab === 'reverse')}
+        onMouseEnter={(e) => {
+          if (variant !== 'mobile' && activeTab !== 'reverse') e.currentTarget.style.background = '#e8eef7';
+        }}
+        onMouseLeave={(e) => {
+          if (variant !== 'mobile' && activeTab !== 'reverse') e.currentTarget.style.background = 'transparent';
+        }}
+      >
+        Reverse Calculator
+      </button>
+      <button
+        onClick={() => { setActiveTab('compare'); if (variant === 'mobile') setMobileMenuOpen(false); }}
+        className="transition-all whitespace-nowrap"
+        style={variant === 'mobile'
+          ? { ...tabButtonStyle(activeTab === 'compare'), borderRadius: 10, width: '100%', textAlign: 'left', background: activeTab === 'compare' ? '#224c87' : '#ffffff', color: activeTab === 'compare' ? '#ffffff' : '#1a1a2e' }
+          : tabButtonStyle(activeTab === 'compare')}
+        onMouseEnter={(e) => {
+          if (variant !== 'mobile' && activeTab !== 'compare') e.currentTarget.style.background = '#e8eef7';
+        }}
+        onMouseLeave={(e) => {
+          if (variant !== 'mobile' && activeTab !== 'compare') e.currentTarget.style.background = 'transparent';
+        }}
+      >
+        Compare Goals
+      </button>
+    </>
+  );
+
+  const tabBarDesktop = (
+    <div
+      className="flex gap-1 header-tabs-desktop"
+      style={{
+        background: '#f0f4fb',
+        borderRadius: 999,
+        padding: 4,
+      }}
+    >
+      {renderTabButtons('desktop')}
+    </div>
+  );
+
+  const tabBarMobilePills = (
+    <div className="flex gap-2 overflow-x-auto">
+      {[
+        { id: 'calculator', label: 'Goal Calculator' },
+        { id: 'reverse', label: 'Reverse' },
+        { id: 'compare', label: 'Compare' },
+      ].map((tab) => {
+        const active = activeTab === tab.id;
+        return (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className="whitespace-nowrap"
+            style={{
+              padding: '8px 14px',
+              borderRadius: 999,
+              fontSize: 13,
+              fontFamily: 'Montserrat, sans-serif',
+              fontWeight: 600,
+              background: active ? '#224c87' : '#ffffff',
+              color: active ? '#ffffff' : 'rgba(26,26,46,0.6)',
+              border: active ? '1px solid #224c87' : '1px solid #e2e6ed',
+              minHeight: 44,
+            }}
+          >
+            {tab.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+
   return (
-    <div style={{ background: '#f8f9fb', minHeight: '100vh', paddingBottom: 80 }}>
+    <div
+      className="app-root"
+      style={{
+        background: '#f8f9fb',
+        display: 'flex',
+        flexDirection: 'column',
+        backgroundImage: "radial-gradient(rgba(34,76,135,0.03) 1px, transparent 1px)",
+        backgroundSize: '20px 20px',
+      }}
+    >
+      <style jsx global>{`
+        html, body {
+          scroll-behavior: smooth;
+          overflow-x: hidden;
+        }
+        .app-root {
+          height: 100vh;
+          overflow: hidden;
+        }
+        .panel-height {
+          min-height: calc(100vh - 56px - 40px);
+          height: calc(100vh - 56px - 40px);
+        }
+        @media (max-width: 767px) {
+          .panel-height {
+            height: auto;
+          }
+        }
+        .panel-wrapper {
+          overflow: hidden;
+          gap: 12px;
+        }
+        .app-shell {
+          width: 100%;
+          margin: 0 auto;
+          padding: 0 24px;
+        }
+        @media (min-width: 1280px) {
+          .app-shell {
+            max-width: 1400px;
+          }
+        }
+        .content-wrapper {
+          padding-top: 24px;
+        }
+        @media (max-width: 768px) {
+          .app-root {
+            height: auto !important;
+            overflow: auto !important;
+          }
+          .panel-wrapper {
+            flex-direction: column !important;
+            overflow: visible !important;
+          }
+          .panel-scroll {
+            overflow: visible !important;
+          }
+          .panel-left,
+          .panel-right {
+            width: 100% !important;
+            max-width: none !important;
+            min-width: 0 !important;
+            flex-basis: 100% !important;
+            overflow: visible !important;
+            height: auto !important;
+          }
+          .content-wrapper {
+            padding-top: 56px !important;
+          }
+          .mobile-only {
+            display: flex !important;
+          }
+          .desktop-only {
+            display: none !important;
+          }
+        }
+        .mobile-only {
+          display: none;
+        }
+        .desktop-only {
+          display: block;
+        }
+        .header-tabs-desktop {
+          display: flex;
+        }
+        @media (max-width: 768px) {
+          .header-tabs-desktop {
+            display: none;
+          }
+        }
+        @keyframes menuSlide {
+          from {
+            opacity: 0;
+            transform: translateY(-6px) scaleY(0.98);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0) scaleY(1);
+          }
+        }
+        .panel-left {
+          flex: 0 1 38%;
+          min-width: 340px;
+          max-width: 440px;
+        }
+        .panel-right {
+          flex: 1 1 62%;
+          min-width: 0;
+          max-width: 900px;
+          margin-left: auto;
+          margin-right: auto;
+        }
+        @media (min-width: 768px) and (max-width: 1024px) {
+          .panel-left {
+            flex-basis: 38%;
+          }
+          .panel-right {
+            flex-basis: 62%;
+          }
+        }
+        .panel-scroll {
+          scrollbar-width: thin;
+          scrollbar-color: #e2e6ed transparent;
+        }
+        .panel-scroll::-webkit-scrollbar {
+          width: 4px;
+        }
+        .panel-scroll::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .panel-scroll::-webkit-scrollbar-thumb {
+          background: #e2e6ed;
+          border-radius: 999px;
+        }
+        @media (max-width: 768px) {
+          .mobile-nl {
+            margin: 0 16px 16px;
+          }
+        }
+      `}</style>
       <AnimatePresence>
         {showHero ? (
           <motion.div key="hero" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, scale: 0.98 }} transition={{ duration: 0.2, ease: "easeInOut" }} className="absolute inset-0 z-50 bg-[#f8f9fb]">
             <HeroSection onGetStarted={() => setShowHero(false)} />
           </motion.div>
         ) : (
-          <motion.div key="app" className="bg-gray-50 min-h-screen font-sans w-full relative z-10" initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.1, ease: "easeOut" }}>
+          <motion.div key="app" className="bg-gray-50 font-sans w-full relative z-10" initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.1, ease: "easeOut" }}>
 
-            <div className="w-full pb-4 pt-4 relative z-10">
-              <div className="max-w-[1120px] mx-auto w-full px-6">
-                <Header />
-                <TaxationBanner />
-
-                <div className="flex justify-center mt-6 mb-4 relative z-20">
-                  <div className="bg-white border border-[#e2e6ed] p-1.5 rounded-xl flex gap-2 shadow-sm font-semibold text-[12px] md:text-[14px] overflow-x-auto max-w-full">
-                    <button
-                      onClick={() => setActiveTab('calculator')}
-                      className={`px-4 md:px-6 py-2.5 rounded-lg transition-all whitespace-nowrap ${activeTab === 'calculator' ? 'bg-[#224c87] text-white shadow-md' : 'text-gray-500 hover:text-[#1a1a2e] hover:bg-slate-50'}`}
-                    >
-                      Goal Calculator
-                    </button>
-                    <button
-                      onClick={() => setActiveTab('reverse')}
-                      className={`px-4 md:px-6 py-2.5 rounded-lg transition-all whitespace-nowrap ${activeTab === 'reverse' ? 'bg-[#224c87] text-white shadow-md' : 'text-gray-500 hover:text-[#1a1a2e] hover:bg-slate-50'}`}
-                    >
-                      Reverse Calculator
-                    </button>
-                    <button
-                      onClick={() => setActiveTab('compare')}
-                      className={`px-4 md:px-6 py-2.5 rounded-lg transition-all whitespace-nowrap ${activeTab === 'compare' ? 'bg-[#224c87] text-white shadow-md' : 'text-gray-500 hover:text-[#1a1a2e] hover:bg-slate-50'}`}
-                    >
-                      Compare Goals
-                    </button>
-                  </div>
+            <div className="w-full pb-0 pt-0 relative z-10">
+              <div className="app-shell">
+                <Header tabBar={tabBarDesktop} />
+                <div className="mobile-only" style={{ padding: '8px 16px 4px', background: '#f8f9fb' }}>
+                  {tabBarMobilePills}
                 </div>
+                {showTaxBanner && <TaxationBanner onClose={handleTaxBannerClose} />}
               </div>
             </div>
 
-            {activeTab === 'calculator' && (
+                        {activeTab === 'calculator' && (
               <div key="tab-calculator" className="animate-fadeIn">
-                <div className="w-full pb-8 relative z-10">
-                  <div className="max-w-[1120px] mx-auto w-full px-6">
-                    <div className="relative pl-0 md:pl-8 mt-4">
-                      <div className="hidden md:block absolute left-[15px] top-[40px] bottom-[150px] w-[2px] bg-[#e2e6ed] z-0"></div>
-
-                      <div className="mb-10 flex flex-col items-start gap-1 relative z-10">
-                        <h2 style={{ fontSize: 18, fontWeight: 700, color: '#1a1a2e', marginBottom: 4 }}>Describe your goal in plain English</h2>
-                        <p style={{ fontSize: 13, color: '#919090', marginBottom: 16 }}>Our AI will set up the calculator for you</p>
-                        <div className="w-full relative">
-                          <NLGoalInput onApply={(p) => setS(prev => ({ ...prev, ...p, inflationSrc: 'custom' }))} />
-                        </div>
-                      </div>
-
-                      <div className="mb-6 flex flex-col items-start gap-2 relative z-10">
-                        <span className="bg-[#eef2ff] text-[#224c87] text-[11px] font-bold px-2.5 py-1 rounded-md tracking-widest uppercase mb-1">Step 1</span>
-                        <h2 style={{ fontSize: 18, fontWeight: 700, color: '#1a1a2e', marginBottom: 4 }}>Your Financial Goal</h2>
-                        <p style={{ fontSize: 13, color: '#919090', marginBottom: 16 }}>What are you saving for and how much do you need?</p>
-                      </div>
-
+                <div className="w-full pb-0 relative z-10 content-wrapper">
+                  <div className="app-shell">
+                    <div className="panel-height panel-wrapper flex flex-col md:flex-row bg-[#f8f9fb]">
                       <div
+                        className="panel-scroll panel-left w-full"
                         style={{
-                          background: '#fff', border: '1px solid #e2e6ed', borderRadius: 16,
-                          boxShadow: '0 1px 4px rgba(0,0,0,0.04)', padding: 20, marginBottom: 16,
-                          opacity: isFocusMode ? 0.3 : 1, transition: 'opacity 0.3s ease',
+                          height: '100%',
+                          minHeight: 0,
+                          overflowY: 'scroll',
+                          borderRight: '1px solid #e2e6ed',
+                          background: '#ffffff',
+                          paddingLeft: 24,
+                          paddingRight: 24,
+                          paddingTop: 16,
+                          paddingBottom: 48,
+                          scrollbarWidth: 'thin',
+                          scrollbarColor: '#e2e6ed transparent',
+                          opacity: isFocusMode ? 0.3 : 1,
+                          transition: 'opacity 0.3s ease',
                           pointerEvents: isFocusMode ? 'none' : 'auto',
                         }}
                       >
-                        <div style={{ marginBottom: 16 }}>
-                          <GoalSelector selectedGoal={s.goalType} onGoalChange={onGoalChange} />
+                        <div className="w-full mobile-nl" style={{ marginBottom: 16 }}>
+                          <NLGoalInput onApply={(p) => setS(prev => ({ ...prev, ...p, inflationSrc: 'custom' }))} />
                         </div>
-                        <GoalInputForm
-                          presentCost={s.cost} years={s.yrs} inflation={s.inflation}
-                          onPresentCostChange={v => set('cost', v)}
-                          onYearsChange={v => set('yrs', v)}
-                          onInflationChange={v => { set('inflation', v); set('inflationSrc', 'custom'); }}
-                          assumptionLocks={s.locks} onLockToggle={setLock}
-                          hardErrors={hardErrors} softWarnings={softWarnings}
-                        />
-                      </div>
 
-                      <div className="mt-8 mb-4 flex flex-col items-start gap-2 relative z-10">
-                        <span className="bg-[#eef2ff] text-[#224c87] text-[11px] font-bold px-2.5 py-1 rounded-md tracking-widest uppercase mb-1">Step 2</span>
-                        <h2 style={{ fontSize: 18, fontWeight: 700, color: '#1a1a2e', marginBottom: 4 }}>Return Assumptions</h2>
-                        <p style={{ fontSize: 13, color: '#919090', marginBottom: 16 }}>How do you expect your investments to grow?</p>
-                      </div>
-
-                      <div
-                        style={{
-                          background: '#fff', border: '1px solid #e2e6ed', borderRadius: 16,
-                          boxShadow: '0 1px 4px rgba(0,0,0,0.04)', padding: 20, marginBottom: 16,
-                          position: 'relative', zIndex: isFocusMode ? 10 : 1,
-                        }}
-                      >
-                        <div style={{ marginBottom: 16 }}>
-                          <RiskProfileSelector profile={s.riskProfile} onChange={onProfileChange} locked={s.locks.annualRet} />
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '16px 0' }}>
+                          <div style={{ flex: 1, height: 1, background: '#e2e6ed' }} />
+                          <span style={{ fontSize: 11, fontWeight: 700, color: '#224c87', letterSpacing: 1, textTransform: 'uppercase', background: '#e8eef7', padding: '4px 10px', borderRadius: 999 }}>
+                            STEP 1
+                          </span>
+                          <div style={{ flex: 1, height: 1, background: '#e2e6ed' }} />
                         </div>
-                        <div className="flex flex-col gap-1">
-                          <SliderInput
-                            label="Expected Growth" value={s.annualRet}
-                            min={1} max={20} step={0.5} unit="%"
-                            onChange={onRetSlider}
-                            locked={s.locks.annualRet}
-                            onLockToggle={() => setLock('annualRet')}
-                            onDragStart={() => setIsFocusMode(true)}
-                            onDragEnd={() => setIsFocusMode(false)}
-                          />
-                          {s.annualRet > 12 && (
-                            <div className="mt-1 flex items-start gap-2 rounded bg-amber-50 px-3 py-2 text-xs text-amber-800">
-                              <span>💡</span>
-                              <span>Historical markets often average 10-12%. High returns come with higher risk.</span>
+                        <div className="desktop-only" style={{ fontSize: 16, fontWeight: 700, color: '#1a1a2e', marginBottom: 12 }}>
+                          Your Financial Goal
+                        </div>
+                        <button
+                          type="button"
+                          className="mobile-only transition-colors hover:bg-[#e8eef7]"
+                          onClick={() => setStep1Open(v => !v)}
+                          aria-expanded={step1Open}
+                          style={{
+                            width: '100%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            background: '#f0f4fb',
+                            border: 'none',
+                            borderRadius: 10,
+                            padding: '10px 12px',
+                            fontWeight: 600,
+                            color: '#1a1a2e',
+                            fontFamily: 'Montserrat, sans-serif',
+                            marginBottom: 12,
+                            minHeight: 44,
+                          }}
+                        >
+                          <span>Goal Details</span>
+                          <span
+                            aria-hidden="true"
+                            style={{
+                              fontSize: 16,
+                              color: '#1a1a2e',
+                              lineHeight: 1,
+                              transform: step1Open ? 'rotate(-90deg)' : 'rotate(90deg)',
+                              transition: 'transform 200ms ease',
+                              display: 'inline-block',
+                            }}
+                          >
+                            ›
+                          </span>
+                        </button>
+
+                        <div style={{ marginBottom: 16, display: !step1Open ? 'none' : 'block' }}>
+                          <div style={{ marginBottom: 16 }}>
+                            <GoalSelector selectedGoal={s.goalType} onGoalChange={onGoalChange} columns={2} />
+                          </div>
+                          <div>
+                            <GoalInputForm
+                              presentCost={s.cost} years={s.yrs} inflation={s.inflation}
+                              onPresentCostChange={v => set('cost', v)}
+                              onYearsChange={v => set('yrs', v)}
+                              onInflationChange={v => { set('inflation', v); set('inflationSrc', 'custom'); }}
+                              assumptionLocks={s.locks} onLockToggle={setLock}
+                              hardErrors={hardErrors} softWarnings={softWarnings}
+                            />
+                          </div>
+                        </div>
+
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '16px 0' }}>
+                          <div style={{ flex: 1, height: 1, background: '#e2e6ed' }} />
+                          <span style={{ fontSize: 11, fontWeight: 700, color: '#224c87', letterSpacing: 1, textTransform: 'uppercase', background: '#e8eef7', padding: '4px 10px', borderRadius: 999 }}>
+                            STEP 2
+                          </span>
+                          <div style={{ flex: 1, height: 1, background: '#e2e6ed' }} />
+                        </div>
+                        <div className="desktop-only" style={{ fontSize: 16, fontWeight: 700, color: '#1a1a2e', marginBottom: 12 }}>
+                          Return Assumptions
+                        </div>
+                        <button
+                          type="button"
+                          className="mobile-only transition-colors hover:bg-[#e8eef7]"
+                          onClick={() => setStep2Open(v => !v)}
+                          aria-expanded={step2Open}
+                          style={{
+                            width: '100%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            background: '#f0f4fb',
+                            border: 'none',
+                            borderRadius: 10,
+                            padding: '10px 12px',
+                            fontWeight: 600,
+                            color: '#1a1a2e',
+                            fontFamily: 'Montserrat, sans-serif',
+                            marginBottom: 12,
+                            minHeight: 44,
+                          }}
+                        >
+                          <span>Strategy</span>
+                          <span
+                            aria-hidden="true"
+                            style={{
+                              fontSize: 16,
+                              color: '#1a1a2e',
+                              lineHeight: 1,
+                              transform: step2Open ? 'rotate(-90deg)' : 'rotate(90deg)',
+                              transition: 'transform 200ms ease',
+                              display: 'inline-block',
+                            }}
+                          >
+                            ›
+                          </span>
+                        </button>
+
+                        <div style={{ marginBottom: 16, display: !step2Open ? 'none' : 'block' }}>
+                          <div style={{ marginBottom: 16 }}>
+                            <RiskProfileSelector profile={s.riskProfile} onChange={onProfileChange} locked={s.locks.annualRet} />
+                          </div>
+                          <div className="flex flex-col gap-1" style={{ marginBottom: 12 }}>
+                            <SliderInput
+                              label="Expected Growth" value={s.annualRet}
+                              min={1} max={20} step={0.5} unit="%"
+                              onChange={onRetSlider}
+                              locked={s.locks.annualRet}
+                              onLockToggle={() => setLock('annualRet')}
+                              onDragStart={() => setIsFocusMode(true)}
+                              onDragEnd={() => setIsFocusMode(false)}
+                            />
+                            {s.annualRet > 12 && (
+                              <div className="mt-1 flex items-start gap-2 rounded bg-amber-50 px-3 py-2 text-xs text-amber-800">
+                                <span>*</span>
+                                <span>Historical markets often average 10-12%. High returns come with higher risk.</span>
+                              </div>
+                            )}
+                          </div>
+                          <div>
+                            <QuickPresets value={s.cost} onChange={v => set('cost', v)} />
+                            <div style={{ marginTop: 12 }}>
+                              <StepUpToggle stepUpEnabled={s.stepUpOn} stepUpPercent={s.stepUpPct} onToggle={() => set('stepUpOn', !s.stepUpOn)} onPercentChange={v => set('stepUpPct', v)} />
                             </div>
-                          )}
-                        </div>
-                      </div>
-
-                      <div style={{ opacity: isFocusMode ? 0.3 : 1, transition: 'opacity 0.3s ease' }}>
-                        <QuickPresets value={s.cost} onChange={v => set('cost', v)} />
-                        <StepUpToggle stepUpEnabled={s.stepUpOn} stepUpPercent={s.stepUpPct} onToggle={() => set('stepUpOn', !s.stepUpOn)} onPercentChange={v => set('stepUpPct', v)} />
-                        <LumpsumToggle lumpsumEnabled={s.lumpsumOn} lumpsumAmount={s.lumpsum} onToggle={() => set('lumpsumOn', !s.lumpsumOn)} onAmountChange={v => set('lumpsum', v)} />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-center mb-6 mt-2 max-w-[1120px] mx-auto px-6">
-                  <div className="h-px bg-[#e2e6ed] flex-1"></div>
-                  <span className="px-6 text-[11px] font-bold text-slate-400 tracking-widest uppercase">Your Investment Plan</span>
-                  <div className="h-px bg-[#e2e6ed] flex-1"></div>
-                </div>
-
-                <div
-                  style={{ opacity: isFocusMode ? 0.2 : 1, transition: 'opacity 0.4s ease', pointerEvents: isFocusMode ? 'none' : 'auto' }}
-                  className="w-full relative"
-                >
-                  {isFocusMode && (
-                    <div className="absolute inset-0 flex items-start pt-32 justify-center z-50 pointer-events-none">
-                      <motion.div
-                        animate={{ opacity: [0.4, 1, 0.4] }}
-                        transition={{ repeat: Infinity, duration: 1.5 }}
-                        className="px-6 py-3 rounded-full text-white font-semibold text-lg"
-                        style={{ backgroundColor: '#224c87', boxShadow: '0 4px 12px rgba(34,76,135,0.3)' }}
-                      >
-                        Recalculating...
-                      </motion.div>
-                    </div>
-                  )}
-
-                  <div className="w-full pb-4">
-                    <div className="max-w-[1120px] mx-auto w-full px-6">
-
-                      <div className="w-full flex justify-end mb-4 pr-1">
-                        <ExportPdfButton isFloating={false} />
-                      </div>
-
-                      <div style={{ marginBottom: 16 }}>
-                        <HeadlineSIP results={results} fv={results?.fv} yrs={s.yrs} inflation={s.inflation} annualRet={s.annualRet} />
-                      </div>
-
-                      <div style={{ marginBottom: 16 }}>
-                        <InsightParagraph results={results} goalType={s.goalType} yrs={s.yrs} inflation={s.inflation} annualRet={s.annualRet} />
-                      </div>
-
-                      <div style={{ marginBottom: 16 }}>
-                        <GoalValidator results={results} goalType={s.goalType} cost={s.cost} inflation={s.inflation} annualRet={s.annualRet} yrs={s.yrs} />
-                      </div>
-
-                      <div style={{ marginBottom: 16 }}>
-                        <ScenarioCards scenarios={scenarios} activeProfile={s.riskProfile} />
-                      </div>
-
-                      <div style={{ background: '#fff', border: '1px solid #e2e6ed', borderRadius: 16, boxShadow: '0 1px 4px rgba(0,0,0,0.04)', padding: 20, marginBottom: 16 }}>
-                        <p style={{ fontSize: 13, fontWeight: 600, color: '#1a1a2e', marginBottom: 4 }}>Sensitivity Analysis — SIP vs Inflation &amp; Return</p>
-                        <p style={{ fontSize: 12, color: '#919090', marginBottom: 16 }}>How your SIP changes with different return and inflation assumptions.</p>
-                        <div className="overflow-auto w-full">
-                          <div style={{ minWidth: 600 }}>
-                            <SensitivityHeatTable data={sensitivity} userInflation={s.inflation} userReturn={s.annualRet} />
+                            <div style={{ marginTop: 12 }}>
+                              <LumpsumToggle lumpsumEnabled={s.lumpsumOn} lumpsumAmount={s.lumpsum} onToggle={() => set('lumpsumOn', !s.lumpsumOn)} onAmountChange={v => set('lumpsum', v)} />
+                            </div>
                           </div>
                         </div>
                       </div>
 
-                      <div style={{ marginBottom: 16 }}>
-                        <GoalRealityIndicator results={results} goalType={s.goalType} />
-                      </div>
-
-                      <div style={{ marginBottom: 16 }}>
-                        <CostOfDelayCard cost={s.cost} inflation={s.inflation} annualRet={s.annualRet} yrs={s.yrs} />
-                      </div>
-
-                      <div className="mb-4 flex flex-wrap gap-3 items-center">
-                        <span className="text-sm font-medium text-gray-500 w-full md:w-auto mb-1 md:mb-0 mr-2">What If?</span>
-                        <button
-                          onClick={() => set('cost', Math.round(s.cost * 1.1))}
-                          className="px-[14px] py-[6px] border border-[#224c87] bg-white text-[#224c87] text-[12px] font-[600] rounded-[8px] transition-all duration-150 hover:bg-[#224c87] hover:text-white active:scale-[0.97]"
+                      <div
+                        className="panel-scroll panel-right w-full"
+                        style={{
+                          height: '100%',
+                          minHeight: 0,
+                          background: '#f8f9fb',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          overflow: 'hidden',
+                          scrollbarWidth: 'thin',
+                          scrollbarColor: '#e2e6ed transparent',
+                        }}
+                      >
+                        <div
+                          style={{
+                            padding: '10px 20px',
+                            background: '#f8f9fb',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 12,
+                            flexShrink: 0,
+                          }}
                         >
-                          Increase target by 10%
-                        </button>
-                        <button
-                          onClick={() => set('yrs', s.yrs + 2)}
-                          className="px-[14px] py-[6px] border border-[#224c87] bg-white text-[#224c87] text-[12px] font-[600] rounded-[8px] transition-all duration-150 hover:bg-[#224c87] hover:text-white active:scale-[0.97]"
+                          <div style={{ width: 2, height: 16, background: '#224c87', borderRadius: 2 }} />
+                          <span style={{ fontSize: 11, fontWeight: 600, color: 'rgba(34,76,135,0.7)', textAlign: 'center', letterSpacing: 1.5 }}>
+                            YOUR INVESTMENT PLAN
+                          </span>
+                          <div style={{ flex: 1, height: 1, background: '#e2e6ed' }} />
+                        </div>
+
+                        <div
+                          ref={centerPanelRef}
+                          className="panel-scroll"
+                          style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: '0 20px 48px', position: 'relative', opacity: isFocusMode ? 0.2 : 1, transition: 'opacity 0.4s ease', pointerEvents: isFocusMode ? 'none' : 'auto' }}
                         >
-                          Delay by 2 years
-                        </button>
-                      </div>
+                          {isFocusMode && (
+                            <div className="absolute inset-0 flex items-start pt-32 justify-center z-50 pointer-events-none">
+                              <motion.div
+                                animate={{ opacity: [0.4, 1, 0.4] }}
+                                transition={{ repeat: Infinity, duration: 1.5 }}
+                                className="px-6 py-3 rounded-full text-white font-semibold text-lg"
+                                style={{ backgroundColor: '#224c87', boxShadow: '0 4px 12px rgba(34,76,135,0.3)' }}
+                              >
+                                Recalculating...
+                              </motion.div>
+                            </div>
+                          )}
 
-                    </div>
-                  </div>
+                          <div ref={heroCardRef} style={{ marginTop: 12, marginBottom: 16 }}>
+                            <HeadlineSIP results={results} fv={results?.fv} yrs={s.yrs} inflation={s.inflation} annualRet={s.annualRet} />
+                          </div>
 
-                  <div className="w-full pb-8">
-                    <div className="max-w-[1120px] mx-auto w-full px-6">
-                      <AnalyticsSection
-                        scenarios={scenarios} yrs={s.yrs} riskProfile={s.riskProfile}
-                        sensitivity={sensitivity} inflation={s.inflation} annualRet={s.annualRet}
-                        yearByYear={yearByYear} results={results}
-                      />
-                      <div style={{ marginTop: 16 }}>
-                        <EducationTips goalType={s.goalType} />
+                          <div style={{ marginBottom: 16 }}>
+                            <InsightParagraph results={results} goalType={s.goalType} yrs={s.yrs} inflation={s.inflation} annualRet={s.annualRet} />
+                          </div>
+
+                          <div style={{ marginBottom: 16 }}>
+                            <GoalValidator results={results} goalType={s.goalType} cost={s.cost} inflation={s.inflation} annualRet={s.annualRet} yrs={s.yrs} />
+                          </div>
+
+                          <div style={{ marginBottom: 16 }}>
+                            <ScenarioCards scenarios={scenarios} activeProfile={s.riskProfile} onSelect={onScenarioSelect} />
+                          </div>
+
+                          <div style={{ background: '#fff', border: '1px solid #e2e6ed', borderRadius: 16, padding: 20, marginBottom: 16, boxShadow: '0 8px 32px rgba(34,76,135,0.12)' }}>
+                            <p style={{ fontSize: 13, fontWeight: 600, color: '#1a1a2e', marginBottom: 4 }}>Sensitivity Analysis - SIP vs Inflation & Return</p>
+                            <p style={{ fontSize: 12, color: '#919090', marginBottom: 16 }}>How your SIP changes with different return and inflation assumptions.</p>
+                            <div className="overflow-auto w-full">
+                              <SensitivityHeatTable data={sensitivity} userInflation={s.inflation} userReturn={s.annualRet} />
+                            </div>
+                          </div>
+
+                          <div style={{ marginBottom: 16 }}>
+                            <GoalRealityIndicator results={results} goalType={s.goalType} />
+                          </div>
+
+                          <div style={{ marginBottom: 16 }}>
+                            <CostOfDelayCard cost={s.cost} inflation={s.inflation} annualRet={s.annualRet} yrs={s.yrs} />
+                          </div>
+
+                          <div className="mb-4 flex flex-wrap gap-3 items-center">
+                            <span className="text-sm font-medium text-gray-500 w-full md:w-auto mb-1 md:mb-0 mr-2">What If?</span>
+                            <button
+                              onClick={() => set('cost', Math.round(s.cost * 1.1))}
+                              className="px-[14px] py-[6px] border border-[#224c87] bg-white text-[#224c87] text-[12px] font-[600] rounded-[8px] transition-all duration-150 hover:bg-[#224c87] hover:text-white active:scale-[0.97]"
+                            >
+                              Increase target by 10%
+                            </button>
+                            <button
+                              onClick={() => set('yrs', s.yrs + 2)}
+                              className="px-[14px] py-[6px] border border-[#224c87] bg-white text-[#224c87] text-[12px] font-[600] rounded-[8px] transition-all duration-150 hover:bg-[#224c87] hover:text-white active:scale-[0.97]"
+                            >
+                              Delay by 2 years
+                            </button>
+                          </div>
+
+                          <div style={{ background: '#fff', border: '1px solid #e2e6ed', borderRadius: 16, padding: 20, marginBottom: 16, boxShadow: '0 8px 32px rgba(34,76,135,0.12)' }}>
+                            <div style={{ height: 240 }}>
+                              <AreaChart scenarios={scenarios} yrs={s.yrs} activeProfile={s.riskProfile} />
+                            </div>
+                          </div>
+
+                          <div style={{ background: '#fff', border: '1px solid #e2e6ed', borderRadius: 16, padding: 20, marginBottom: 16, boxShadow: '0 8px 32px rgba(34,76,135,0.12)' }}>
+                            <div style={{ height: 220 }} className="w-full relative">
+                              <div className="absolute inset-0">
+                                <StackedBarChart yearByYearData={yearByYear} />
+                              </div>
+                            </div>
+                          </div>
+
+                          <div style={{ background: '#fff', border: '1px solid #e2e6ed', borderRadius: 16, padding: 20, marginBottom: 16, boxShadow: '0 8px 32px rgba(34,76,135,0.12)' }}>
+                            <div style={{ height: 200 }} className="w-full relative">
+                              <div className="absolute inset-0">
+                                <GlidePath years={s.yrs} />
+                              </div>
+                            </div>
+                          </div>
+
+                          <div style={{ marginBottom: 8 }}>
+                            <div style={{ height: 280 }} className="w-full">
+                              <DonutChart totalInvested={results?.invested || 0} totalReturns={results?.returns || 0} />
+                            </div>
+                          </div>
+
+                          <ExportPdfButton variant="panel" className="mt-2 w-full" />
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -358,15 +768,20 @@ export default function FinCalApp() {
               </div>
             )}
 
+
             {activeTab === 'reverse' && (
               <div key="tab-reverse" className="animate-fadeIn w-full pb-12 pt-6">
-                <ReverseCalculator initialAnnualRet={s.annualRet} initialInflation={s.inflation} />
+                <div className="max-w-[860px] mx-auto px-6">
+                  <ReverseCalculator initialAnnualRet={s.annualRet} initialInflation={s.inflation} />
+                </div>
               </div>
             )}
 
             {activeTab === 'compare' && (
               <div key="tab-compare" className="animate-fadeIn w-full pb-12 pt-6">
-                <GoalComparison />
+                <div className="max-w-[960px] mx-auto px-6">
+                  <GoalComparison />
+                </div>
               </div>
             )}
 
@@ -475,31 +890,22 @@ export default function FinCalApp() {
               </div>
             </div>
 
-            <div className="max-w-[1120px] mx-auto w-full px-6 pt-8 pb-24 relative">
+            <div className="w-full relative">
               <StickyDisclaimer />
-              {activeTab === 'calculator' && <ExportPdfButton isFloating={true} />}
             </div>
 
-            {activeTab === 'calculator' && (
-              <div className="fixed bottom-[20px] left-[50%] -translate-x-1/2 z-40 flex justify-center w-[calc(100%-48px)] max-w-sm md:hidden pointer-events-none">
-                <motion.div
+            {activeTab === 'calculator' && isMobile && showFloatingPill && results?.sip > 0 && (
+              <div className="fixed bottom-[44px] left-0 right-0 z-40 px-4">
+                <motion.button
+                  type="button"
+                  onClick={() => heroCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
                   initial={{ y: 50, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
-                  className="pointer-events-auto flex w-full items-center justify-between gap-4 rounded-full bg-white/70 backdrop-blur-[10px] px-6 py-3 shadow-[0_8px_24px_rgba(0,0,0,0.12)] border border-white/80"
+                  className="w-full rounded-full bg-[#224c87] text-white px-5 py-3 shadow-[0_-4px_16px_rgba(34,76,135,0.2)] text-[14px] font-[600] h-[56px]"
+                  style={{ fontFamily: 'Montserrat, sans-serif' }}
                 >
-                  <div className="flex flex-col">
-                    <span className="text-[10px] font-semibold tracking-wider text-gray-500 uppercase">Monthly SIP</span>
-                    <span className="font-montserrat text-lg font-bold text-[#224c87] leading-none mt-0.5">
-                      {results?.sip > 0 ? `₹${results.sip.toLocaleString('en-IN')}` : 'Goal Met 🎉'}
-                    </span>
-                  </div>
-                  <button
-                    onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                    className="ml-2 flex h-8 w-8 items-center justify-center rounded-full bg-[#224c87] text-white shadow-sm"
-                  >
-                    ↑
-                  </button>
-                </motion.div>
+                  {`\u20B9${results.sip.toLocaleString('en-IN')} / month \u00B7 ${s.riskProfile === 'balanced' ? 'Moderate' : s.riskProfile === 'safe' ? 'Conservative' : s.riskProfile === 'growth' ? 'Aggressive' : 'Custom'}`}
+                </motion.button>
               </div>
             )}
 

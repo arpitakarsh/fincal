@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 
-export default function ExportPdfButton({ isFloating }) {
+export default function ExportPdfButton({ isFloating, variant = 'default', className = '' }) {
   const [exporting, setExporting] = useState(false);
 
   const handleExport = async () => {
@@ -38,16 +38,27 @@ export default function ExportPdfButton({ isFloating }) {
     ? 'fixed bottom-[80px] right-[20px] shadow-lg z-40'
     : 'mt-4 sm:absolute sm:top-5 sm:right-6 sm:mt-0';
 
+  const baseClass = variant === 'panel'
+    ? `
+        w-full flex items-center gap-2 justify-center bg-[#224c87] border border-[#224c87] rounded-[10px]
+        px-[16px] py-[10px] text-[13px] font-[600] text-white
+        shadow-[0_8px_32px_rgba(34,76,135,0.12)] transition-all duration-150 hover:bg-[#1a3d6e]
+      `
+    : `
+        flex items-center gap-2 bg-white border border-[#e2e6ed] rounded-[10px]
+        px-[16px] py-[8px] text-[13px] font-[600] text-[#224c87]
+        transition-all duration-150 hover:bg-[#f0f4ff] hover:border-[#224c87]
+      `;
+
   return (
     <button
       onClick={handleExport}
       disabled={exporting}
       className={`
-        flex items-center gap-2 bg-white border border-[#e2e6ed] rounded-[10px]
-        px-[16px] py-[8px] text-[13px] font-[600] text-[#224c87]
-        transition-all duration-150 hover:bg-[#f0f4ff] hover:border-[#224c87]
+        ${baseClass}
         ${exporting ? 'opacity-70 cursor-not-allowed' : ''}
-        ${floatingClass}
+        ${variant === 'panel' ? '' : floatingClass}
+        ${className}
       `}
     >
       {exporting ? (

@@ -26,8 +26,8 @@ export default function GlidePath({ years }) {
         <AreaChart data={data} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
           <defs>
             <linearGradient id="equityGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor={COLORS.blue} stopOpacity={0.3} />
-              <stop offset="95%" stopColor={COLORS.blue} stopOpacity={0.05} />
+              <stop offset="0%" stopColor="rgba(34,76,135,0.12)" />
+              <stop offset="100%" stopColor="rgba(34,76,135,0)" />
             </linearGradient>
             <linearGradient id="debtGrad" x1="0" y1="0" x2="0" y2="1">
               <stop offset="5%" stopColor={COLORS.grey} stopOpacity={0.3} />

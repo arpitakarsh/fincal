@@ -4,10 +4,15 @@ import { COLORS } from '@/lib/constants';
 export default function LumpsumToggle({ lumpsumEnabled, lumpsumAmount, onToggle, onAmountChange }) {
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex items-center justify-between">
-        <span className="text-sm font-medium" style={{ color: COLORS.text }}>
-          One-time investment today
-        </span>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <span className="text-sm font-medium" style={{ color: COLORS.text }}>
+            One-time investment today
+          </span>
+          <div style={{ fontSize: 12, color: '#919090', marginTop: 2 }}>
+            Reduce monthly SIP by adding a lumpsum now.
+          </div>
+        </div>
         <button
           role="switch"
           aria-checked={lumpsumEnabled}

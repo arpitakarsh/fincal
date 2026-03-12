@@ -6,6 +6,7 @@ export default function RiskProfileSelector({
   profile: currentProfile,
   locked,
   onChange,
+  stacked = false,
 }) {
   const [conflictField, setConflictField] = useState(null);
 
@@ -19,10 +20,10 @@ export default function RiskProfileSelector({
   };
 
   const getProfileDetails = (id) => {
-    if (id === 'safe') return { icon: '🟢', returns: '6-8% p.a.', desc1: 'Lower return', desc2: 'Lower volatility' };
-    if (id === 'balanced') return { icon: '🟡', returns: '9-11% p.a.', desc1: 'Balanced growth', desc2: 'Moderate risk' };
-    if (id === 'growth') return { icon: '🔴', returns: '11-13% p.a.', desc1: 'Higher return assumption', desc2: 'Higher volatility' };
-    return { icon: '', returns: '', desc1: '', desc2: '' };
+    if (id == 'safe') return { dot: '#22c55e', returns: '6 - 8% p.a.' };
+    if (id == 'balanced') return { dot: '#f59e0b', returns: '9 - 11% p.a.' };
+    if (id == 'growth') return { dot: '#ef4444', returns: '11 - 13% p.a.' };
+    return { dot: '#e2e6ed', returns: '' };
   };
 
   return (
@@ -30,7 +31,7 @@ export default function RiskProfileSelector({
       <span className="text-sm font-medium" style={{ color: COLORS.text }}>
         Risk Profile
       </span>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+      <div className={`${stacked ? 'flex flex-col' : 'flex flex-row'} gap-2`}>
         {RISK_PROFILES.map((profile) => {
           const isSelected = currentProfile === profile.id;
           const isConflict = conflictField === profile.id;
@@ -49,32 +50,46 @@ export default function RiskProfileSelector({
                 onClick={() => handleClick(profile)}
                 aria-label={`Select ${profile.label} risk profile`}
                 aria-pressed={isSelected}
-                className={`flex flex-col items-start p-5 rounded-[16px] border transition-all duration-200 focus:outline-none w-full text-left hover:-translate-y-[2px] ${isSelected ? 'bg-blue-50/50' : 'bg-slate-50 hover:bg-white'}`}
+                className="flex flex-col items-center justify-center text-center p-4 rounded-[16px] border transition-all duration-200 focus:outline-none w-full flex-1 min-w-0 hover:-translate-y-[2px] hover:shadow-[0_4px_12px_rgba(34,76,135,0.1)]"
                 style={{
-                  border: `1px solid ${isConflict ? COLORS.amber : isSelected ? COLORS.blue : '#e2e6ed'}`,
-                  boxShadow: isSelected
-                    ? '0 4px 20px rgba(34,76,135,0.1)'
-                    : isConflict
-                    ? `0 0 0 2px ${COLORS.amber}`
-                    : '0 1px 2px rgba(0,0,0,0.02)',
+                  border: `${isSelected ? 2 : 1}px solid ${isConflict ? COLORS.amber : isSelected ? COLORS.blue : '#e2e6ed'}`,
+                  background: isSelected ? '#e8eef7' : '#ffffff',
                   outline: 'none',
                 }}
               >
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-xl">{details.icon}</span>
-                  <span className="font-semibold text-gray-900">
-                    {isConflict ? '🔒 Locked' : profile.label}
+                <div className="flex items-center justify-center gap-2">
+                  <span
+                    aria-hidden="true"
+                    style={{
+                      width: 10,
+                      height: 10,
+                      borderRadius: 999,
+                      background: details.dot,
+                    }}
+                  />
+                  <span
+                    className="font-semibold"
+                    style={{ color: isConflict ? COLORS.amber : COLORS.text }}
+                  >
+                    {isConflict ? 'Locked' : profile.label}
                   </span>
                 </div>
                 {!isConflict && (
-                  <div className="text-[11px] font-bold text-[#224c87] bg-blue-50 px-2 py-0.5 rounded ml-8 mb-2">
+                  <div
+                    style={{
+                      marginTop: 8,
+                      padding: '4px 8px',
+                      borderRadius: 999,
+                      background: '#e8eef7',
+                      color: '#224c87',
+                      fontSize: 10,
+                      fontWeight: 600,
+                      fontFamily: 'Montserrat, sans-serif',
+                    }}
+                  >
                     {details.returns}
                   </div>
                 )}
-                <div className="flex flex-col gap-1 text-[11px] ml-8" style={{ color: COLORS.grey }}>
-                  <span className="flex items-center gap-1"><span>•</span> {details.desc1}</span>
-                  <span className="flex items-center gap-1"><span>•</span> {details.desc2}</span>
-                </div>
               </button>
             </Tooltip>
           );

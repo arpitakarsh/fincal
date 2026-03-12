@@ -17,7 +17,7 @@ export default function QuickPresets({ value, onChange }) {
               aria-pressed={isActive}
               className="flex-1 py-2 px-3 text-sm font-medium rounded-full transition-all duration-200 focus:outline-none min-h-[44px]"
               style={{
-                backgroundColor: isActive ? '#224c87' : '#ffffff',
+                backgroundColor: isActive ? '#224c87' : '#f0f4fb',
                 color: isActive ? '#ffffff' : '#0f172a',
                 border: `1.5px solid ${isActive ? '#224c87' : '#e2e6ed'}`,
                 fontWeight: isActive ? 600 : 500,

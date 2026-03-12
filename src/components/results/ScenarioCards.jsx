@@ -9,14 +9,14 @@ const SCENARIOS = [
   { id: 'aggressive',   label: 'Aggressive',   color: '#059669' },
 ];
 
-export default function ScenarioCards({ scenarios, activeProfile }) {
+export default function ScenarioCards({ scenarios, activeProfile, onSelect }) {
   if (!scenarios?.length) return null;
 
   return (
-    <div className="flex flex-col sm:flex-row gap-3 w-full">
+    <div className="w-full flex flex-col sm:flex-row gap-3">
       {scenarios.map((s, i) => {
         const meta = SCENARIOS.find(sc => sc.id === s.id);
-        const isActive = s.id === 'moderate' || activeProfile === s.id;
+        const isActive = activeProfile === s.id;
 
         return (
           <motion.div
@@ -24,19 +24,43 @@ export default function ScenarioCards({ scenarios, activeProfile }) {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0, scale: isActive ? [1, 1.02, 1] : 1 }}
             transition={{ delay: i * 0.1, scale: { duration: 0.4, ease: "easeInOut" } }}
-            whileHover={{ y: -2, boxShadow: '0 4px 12px rgba(34,76,135,0.12)' }}
+            whileHover={{ y: -2, boxShadow: '0 8px 32px rgba(34,76,135,0.12)' }}
             style={{
-              background: '#fff',
-              border: `2px solid ${isActive ? meta.color : '#e2e6ed'}`,
+              background: isActive ? '#e8eef7' : '#fff',
+              border: `2px solid ${isActive ? '#224c87' : '#e2e6ed'}`,
               borderRadius: 16,
-              padding: 16,
+              padding: '20px 24px',
+              minHeight: 120,
               transition: 'all 0.15s ease',
-              cursor: 'default',
+              cursor: 'pointer',
+              position: 'relative',
+              boxShadow: '0 8px 32px rgba(34,76,135,0.12)',
+              flex: 1,
             }}
+            onClick={() => onSelect?.(s.id)}
           >
+            {isActive && (
+              <div
+                style={{
+                  position: 'absolute',
+                  top: -12,
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  fontSize: 10,
+                  fontWeight: 700,
+                  color: '#224c87',
+                  background: '#ffffff',
+                  border: '1px solid #c7d4f0',
+                  borderRadius: 999,
+                  padding: '3px 8px',
+                }}
+              >
+                Selected
+              </div>
+            )}
             <div className="flex flex-row justify-between items-center sm:flex-col sm:justify-center text-left sm:text-center w-full">
               <div>
-                <p style={{ fontSize: 12, color: meta.color, fontWeight: 600, marginBottom: 2 }}>
+                <p style={{ fontSize: 12, color: meta.color, fontWeight: isActive ? 700 : 600, marginBottom: 2 }}>
                   {s.label}
                 </p>
                 <p style={{ fontSize: 11, color: '#919090' }}>
@@ -46,7 +70,7 @@ export default function ScenarioCards({ scenarios, activeProfile }) {
               <div className="flex flex-col items-end sm:items-center mt-0 sm:mt-2">
                 <p style={{
                   fontFamily: 'var(--font-montserrat), Montserrat, sans-serif',
-                  fontWeight: 700, fontSize: 20, color: '#1a1a2e',
+                  fontWeight: 700, fontSize: 28, color: '#1a1a2e',
                 }}>
                   {s.sip > 0 ? (
                     <CountUp end={s.sip} duration={1} separator="," decimals={0} prefix="₹" />

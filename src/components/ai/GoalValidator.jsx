@@ -82,7 +82,7 @@ export default function GoalValidator({ results, goalType, cost, inflation, annu
               border: '1px solid #e2e6ed',
               borderLeft: '4px solid #224c87',
               borderRadius: 16,
-              boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
+              boxShadow: '0 8px 32px rgba(34,76,135,0.12)',
               padding: '10px 14px',
               display: 'flex',
               justifyContent: 'space-between',

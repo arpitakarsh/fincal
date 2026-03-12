@@ -5,10 +5,15 @@ import { COLORS, SLIDER_RANGES } from '@/lib/constants';
 export default function StepUpToggle({ stepUpEnabled, stepUpPercent, onToggle, onPercentChange }) {
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex items-center justify-between">
-        <span className="text-sm font-medium" style={{ color: COLORS.text }}>
-          Step-up SIP annually
-        </span>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <span className="text-sm font-medium" style={{ color: COLORS.text }}>
+            Step-up SIP annually
+          </span>
+          <div style={{ fontSize: 12, color: '#919090', marginTop: 2 }}>
+            Automatically increase SIP every year.
+          </div>
+        </div>
         <button
           role="switch"
           aria-checked={stepUpEnabled}

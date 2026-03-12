@@ -10,15 +10,19 @@ export default function StickyDisclaimer() {
         bottom: 0,
         left: 0,
         right: 0,
-        zIndex: 50,
+        zIndex: 30,
         backgroundColor: '#ffffff',
         borderTop: '1px solid #e2e6ed',
-        padding: '10px 24px',
+        height: 40,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '0 16px',
       }}
     >
       <p
         style={{
-          fontSize: 11,
+          fontSize: 13,
           color: '#919090',
           margin: 0,
           lineHeight: 1.5,

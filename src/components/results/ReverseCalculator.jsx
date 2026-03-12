@@ -54,7 +54,7 @@ export default function ReverseCalculator({ initialAnnualRet, initialInflation }
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
-        <div style={{ background: '#fff', border: '1px solid #e2e6ed', borderRadius: 16, boxShadow: '0 1px 4px rgba(0,0,0,0.04)', padding: 24 }}>
+        <div style={{ background: '#fff', border: '1px solid #e2e6ed', borderRadius: 16, boxShadow: '0 8px 32px rgba(34,76,135,0.12)', padding: 24 }}>
           <div className="flex flex-col gap-6">
             <div className="flex flex-col gap-2">
               <label className="text-[13px] font-bold text-gray-700 uppercase tracking-wide">
@@ -117,7 +117,7 @@ export default function ReverseCalculator({ initialAnnualRet, initialInflation }
           </div>
         </div>
 
-        <div className="bg-[#f0f4ff] border border-[#c7d4f0] rounded-[16px] p-6 lg:p-8 flex flex-col justify-center">
+        <div className="bg-[#f0f4ff] border border-[#c7d4f0] rounded-[16px] p-6 lg:p-8 flex flex-col justify-center" style={{ boxShadow: '0 8px 32px rgba(34,76,135,0.12)' }}>
           <p className="text-[13px] text-[#919090] font-medium mb-1">
             {mode === 'sip_to_goal' ? 'You can achieve a goal worth' : 'Monthly SIP Required'}
           </p>

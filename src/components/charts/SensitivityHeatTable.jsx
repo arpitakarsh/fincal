@@ -9,7 +9,7 @@ function getColor(sip, min, max) {
   return '#fee2e2';
 }
 
-export default function SensitivityHeatTable({ data, userInflation, userReturn }) {
+export default function SensitivityHeatTable({ data, userInflation, userReturn, fontSize = 12, minWidth = 500 }) {
   if (!data?.length) return null;
 
   const formatSIP = (val) => {
@@ -21,8 +21,8 @@ export default function SensitivityHeatTable({ data, userInflation, userReturn }
   const returns = data[0].cols.map(c => c.return);
 
   return (
-    <div className="w-full h-full min-w-[500px]">
-      <table className="w-full border-collapse text-xs">
+    <div className="w-full h-full" style={{ minWidth }}>
+      <table className="w-full border-collapse" style={{ fontSize }}>
         <thead>
           <tr>
             <th className="p-2 border border-gray-200 bg-gray-50 text-gray-500 font-medium text-left">
@@ -58,6 +58,7 @@ export default function SensitivityHeatTable({ data, userInflation, userReturn }
                         color: isUserActive ? '#fff' : '#1a1a2e',
                         borderWidth: isUserActive ? 2 : 1,
                         borderColor: isUserActive ? '#1a3a68' : '#e5e7eb',
+                        boxShadow: isUserActive ? '0 0 0 2px rgba(34,76,135,0.25)' : 'none',
                       }}
                     >
                       {formatSIP(col.sip)}
@@ -69,6 +70,16 @@ export default function SensitivityHeatTable({ data, userInflation, userReturn }
           })}
         </tbody>
       </table>
+      <div className="mt-3 flex items-center gap-4 text-[11px] text-gray-500">
+        <div className="flex items-center gap-2">
+          <span style={{ width: 10, height: 10, borderRadius: 3, background: '#dcfce7', border: '1px solid #e2e6ed' }} />
+          Green = lower SIP
+        </div>
+        <div className="flex items-center gap-2">
+          <span style={{ width: 10, height: 10, borderRadius: 3, background: '#fee2e2', border: '1px solid #e2e6ed' }} />
+          Red = higher SIP
+        </div>
+      </div>
     </div>
   );
 }

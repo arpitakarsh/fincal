@@ -33,7 +33,7 @@ export default function GoalInputForm({
   };
 
   const errorStyle = { borderColor: COLORS.red, backgroundColor: '#fff0f0' };
-  const focusStyle = { borderColor: '#224c87', backgroundColor: '#ffffff', boxShadow: `0 0 0 3px rgba(34,76,135,0.1)` };
+  const focusStyle = { borderColor: '#224c87', backgroundColor: '#ffffff', boxShadow: `0 0 0 3px rgba(34,76,135,0.2)` };
 
   const parsedCost = parseFloat(presentCost) || 0;
   const parsedYrs = parseFloat(years) || 0;
@@ -43,27 +43,12 @@ export default function GoalInputForm({
   return (
     <div className="flex flex-col gap-5">
 
-      <div className="flex flex-col gap-1">
+      <div className="rounded-[14px] bg-[#f8f9fb] p-3 border border-[#e2e6ed]">
+        <div className="flex flex-col gap-1">
         <div className="flex items-center justify-between">
           <label htmlFor="presentCost" className="text-sm font-medium" style={{ color: COLORS.text }}>
             How much does it cost today?
           </label>
-          <AnimatePresence mode="wait">
-            {inflatedCost > 0 && parsedYrs > 0 && parsedInf > 0 && (
-              <motion.div
-                key={inflatedCost}
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                className="text-xs font-semibold px-2 py-1 rounded bg-[#f1f5f9] text-[#64748b] flex gap-1 items-center"
-              >
-                <span>Cost in {parsedYrs} yrs:</span>
-                <span className="text-[#334155]">
-                  ₹<CountUp end={inflatedCost} duration={0.8} separator="," decimals={0} />
-                </span>
-              </motion.div>
-            )}
-          </AnimatePresence>
         </div>
         <div className="flex items-center gap-2">
           <span className="text-sm font-semibold" style={{ color: COLORS.grey }}>₹</span>
@@ -87,9 +72,25 @@ export default function GoalInputForm({
         {!getError('presentCost') && getWarning('presentCost') && (
           <AmberWarning message={getWarning('presentCost')} />
         )}
+        <AnimatePresence mode="wait">
+          {inflatedCost > 0 && parsedYrs > 0 && parsedInf > 0 && (
+            <motion.div
+              key={inflatedCost}
+              initial={{ opacity: 0, y: -4 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -4 }}
+              className="mt-2 flex items-center gap-2 rounded-md bg-[#eef2ff] px-3 py-2 text-xs font-semibold text-[#224c87] border-l-[3px] border-[#224c87]"
+            >
+              <span>Cost in {parsedYrs} yrs:</span>
+              <span className="text-[#1a1a2e]">
+                ₹<CountUp end={inflatedCost} duration={0.8} separator="," decimals={0} />
+              </span>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-1 mt-3">
         <label htmlFor="years" className="text-sm font-medium" style={{ color: COLORS.text }}>
           When do you need the money?
         </label>
@@ -116,6 +117,7 @@ export default function GoalInputForm({
           <AmberWarning message={getWarning('years')} />
         )}
       </div>
+      </div>
 
       <div className="flex flex-col gap-1">
         <div className="flex items-center justify-between">
@@ -125,7 +127,7 @@ export default function GoalInputForm({
           <AssumptionLock
             locked={assumptionLocks?.inflation}
             onToggle={() => onLockToggle('inflation')}
-            field="inflation"
+            label="Inflation"
           />
         </div>
         <div className="flex items-center gap-2">

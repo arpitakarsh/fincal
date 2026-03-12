@@ -47,15 +47,18 @@ export default function NLGoalInput({ onApply }) {
   };
 
   return (
-    <div style={{ marginBottom: 16 }}>
+    <div style={{ marginBottom: 16, width: '100%', overflow: 'hidden' }}>
       <div
         style={{
           display: 'flex',
           alignItems: 'center',
+          gap: 8,
+          width: '100%',
           background: '#ffffff',
           border: '2px solid #e2e6ed',
-          borderRadius: 12,
-          padding: '4px 4px 4px 16px',
+          borderRadius: 999,
+          padding: '4px 6px 4px 16px',
+          height: 48,
           transition: 'border-color 0.15s ease, box-shadow 0.15s ease',
         }}
         className="focus-within:!border-[#224c87] focus-within:shadow-[0_0_0_3px_rgba(34,76,135,0.1)]"
@@ -70,6 +73,9 @@ export default function NLGoalInput({ onApply }) {
           aria-label="Describe your goal in plain English"
           style={{
             flex: 1,
+            minWidth: 0,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
             border: 'none',
             outline: 'none',
             fontSize: 14,
@@ -83,18 +89,27 @@ export default function NLGoalInput({ onApply }) {
           disabled={loading || !text.trim()}
           aria-label="Parse goal"
           style={{
-            padding: '10px 20px',
-            borderRadius: 8,
+            padding: '0 16px',
+            borderRadius: 999,
             background: '#224c87',
             color: '#fff',
             border: 'none',
             fontSize: 14,
             fontWeight: 600,
+            flexShrink: 0,
             cursor: loading ? 'not-allowed' : 'pointer',
             opacity: loading || !text.trim() ? 0.7 : 1,
-            transition: 'background 0.15s ease, opacity 0.15s ease',
+            transition: 'background 0.15s ease, opacity 0.15s ease, transform 0.15s ease',
+            height: 40,
+            minWidth: 56,
           }}
           className="hover:!bg-[#1a3d6e] active:scale-[0.97]"
+          onMouseEnter={(e) => {
+            if (!loading && text.trim()) e.currentTarget.style.transform = 'scale(1.02)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'scale(1)';
+          }}
         >
           {loading ? '...' : 'Go'}
         </button>

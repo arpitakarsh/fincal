@@ -4,6 +4,7 @@ import { formatLakh } from '@/lib/utils';
 
 export default function DonutChart({ totalInvested, totalReturns }) {
   const total = totalInvested + totalReturns;
+  const multiple = totalInvested > 0 ? total / totalInvested : 0;
 
   const data = [
     { name: 'Invested', value: totalInvested },
@@ -14,26 +15,32 @@ export default function DonutChart({ totalInvested, totalReturns }) {
 
   const renderCustomLabel = () => (
     <text x="50%" y="50%" textAnchor="middle" dominantBaseline="middle">
-      <tspan x="50%" dy="-0.4em" fontSize={13} fill={COLORS.grey} fontFamily="Arial, sans-serif">
+      <tspan x="50%" dy="-0.2em" fontSize={11} fill={COLORS.grey} fontFamily="Arial, sans-serif">
         Total Corpus
       </tspan>
-      <tspan x="50%" dy="1.4em" fontSize={16} fontWeight={700} fill="#1a1a2e" fontFamily="Montserrat, sans-serif">
+      <tspan x="50%" dy="1.1em" fontSize={14} fontWeight={700} fill="#1a1a2e" fontFamily="Montserrat, sans-serif">
         {formatLakh(total)}
       </tspan>
+      {multiple > 0 && (
+        <tspan x="50%" dy="1.4em" fontSize={10} fill={COLORS.grey} fontFamily="Arial, sans-serif">
+          {multiple.toFixed(1)}x growth
+        </tspan>
+      )}
     </text>
   );
 
   return (
-    <div className="w-full h-full flex flex-col items-center">
-      <div style={{ width: 400, height: 240, maxWidth: '100%' }}>
+    <div className="w-full h-full rounded-[16px] border border-[#e2e6ed] bg-white p-4" style={{ boxShadow: '0 8px 32px rgba(34,76,135,0.12)' }}>
+      <div className="text-[13px] font-semibold text-[#1a1a2e] mb-2">Corpus Breakdown</div>
+      <div style={{ width: '100%', height: 'calc(100% - 56px)' }}>
         <ResponsiveContainer width="100%" height="100%">
-          <PieChart>
+          <PieChart margin={{ top: 6, right: 6, left: 6, bottom: 6 }}>
             <Pie
               data={data}
               cx="50%"
-              cy="50%"
-              innerRadius={70}
-              outerRadius={100}
+              cy="48%"
+              innerRadius="58%"
+              outerRadius="88%"
               paddingAngle={3}
               dataKey="value"
               labelLine={false}
@@ -54,7 +61,8 @@ export default function DonutChart({ totalInvested, totalReturns }) {
           </PieChart>
         </ResponsiveContainer>
       </div>
-      <div style={{ display: 'flex', gap: 24, justifyContent: 'center', marginTop: 12 }}>
+      <div className="h-px w-full bg-[#e2e6ed] my-2"></div>
+      <div style={{ display: 'flex', gap: 24, justifyContent: 'center' }}>
         {data.map((d, i) => (
           <div key={d.name} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: '#919090' }}>
             <div style={{ width: 8, height: 8, borderRadius: '50%', background: PIE_COLORS[i] }} />

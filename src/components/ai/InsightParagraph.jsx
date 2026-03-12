@@ -8,30 +8,35 @@ export default function InsightParagraph({ results, goalType, yrs, inflation, an
   const [loading, setLoading] = useState(false);
   const debounceRef = useRef(null);
 
+  const generateInsight = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch('/api/ai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'insight',
+          data: { goalType, cost: results.fv, sip: results.sip, yrs, inflation, annualRet },
+        }),
+      });
+      const { result } = await res.json();
+      setText(result);
+    } catch {
+      setText('');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (!results) return;
     if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(async () => {
-      setLoading(true);
-      try {
-        const res = await fetch('/api/ai', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            type: 'insight',
-            data: { goalType, cost: results.fv, sip: results.sip, yrs, inflation, annualRet },
-          }),
-        });
-        const { result } = await res.json();
-        setText(result);
-      } catch {
-        setText('');
-      } finally {
-        setLoading(false);
-      }
+    const timer = setTimeout(() => {
+      generateInsight();
     }, 1500);
-    return () => clearTimeout(debounceRef.current);
-  }, [results?.sip, goalType, yrs, inflation, annualRet]);
+    debounceRef.current = timer;
+    return () => clearTimeout(timer);
+  }, [results, goalType, yrs, inflation, annualRet]);
 
   useEffect(() => {
     if (!text || loading) {
@@ -53,12 +58,12 @@ export default function InsightParagraph({ results, goalType, yrs, inflation, an
   if (!results) return null;
 
   return (
-    <div style={{ background: '#fff', border: '1px solid #e2e6ed', borderRadius: 16, boxShadow: '0 1px 4px rgba(0,0,0,0.04)', padding: 20 }}>
+    <div style={{ background: '#fff', border: '1px solid #e2e6ed', borderRadius: 16, boxShadow: '0 8px 32px rgba(34,76,135,0.12)', padding: 20 }}>
       <p style={{ fontSize: 11, color: '#224c87', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 8 }}>
         Your Goal Summary
       </p>
 
-      {loading ? (
+      {(loading || (!text && results)) ? (
         <div>
           {[100, 80, 60].map((w, i) => (
             <div key={i} style={{
@@ -74,7 +79,7 @@ export default function InsightParagraph({ results, goalType, yrs, inflation, an
         </div>
       ) : (
         <p style={{ fontSize: 14, color: '#1a1a2e', lineHeight: 1.7, minHeight: 60 }}>
-          {displayedText || text || '—'}
+          {displayedText || text}
         </p>
       )}
 

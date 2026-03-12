@@ -37,7 +37,7 @@ export default function GoalRealityIndicator({ results, goalType }) {
   }
 
   return (
-    <div className="mb-4 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+    <div className="mb-4 rounded-2xl border border-gray-100 bg-white p-5" style={{ boxShadow: '0 8px 32px rgba(34,76,135,0.12)' }}>
       <div className="mb-3 flex items-center justify-between">
         <h3 className="text-sm font-semibold text-gray-800 tracking-wide uppercase">🎯 Confidence Meter</h3>
         <Tooltip content="Indicates how realistic this monthly SIP stands relative to standard income brackets.">

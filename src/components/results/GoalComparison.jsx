@@ -21,7 +21,7 @@ function GoalCard({ goal, onChange, label, color }) {
   const handleField = (key, val) => onChange(key, val);
 
   return (
-    <div style={{ background: '#fff', border: '1px solid #e2e6ed', borderRadius: 16, boxShadow: '0 1px 4px rgba(0,0,0,0.04)', padding: 20, flex: 1 }}>
+    <div style={{ background: '#fff', border: '1px solid #e2e6ed', borderRadius: 16, boxShadow: '0 8px 32px rgba(34,76,135,0.12)', padding: 20, flex: 1 }}>
       <p className="font-bold text-[14px] uppercase tracking-wider mb-4 border-b border-[#e2e6ed] pb-2" style={{ color }}>{label}</p>
       <div className="flex flex-col gap-4">
         <select
@@ -129,7 +129,7 @@ export default function GoalComparison() {
 
       {showReport && (
         <>
-          <div style={{ background: '#fff', border: '1px solid #e2e6ed', borderRadius: 16, boxShadow: '0 1px 4px rgba(0,0,0,0.04)', padding: 24, marginTop: 24, overflow: 'hidden' }}>
+          <div style={{ background: '#fff', border: '1px solid #e2e6ed', borderRadius: 16, boxShadow: '0 8px 32px rgba(34,76,135,0.12)', padding: 24, marginTop: 24, overflow: 'hidden' }}>
             <div className="overflow-x-auto">
               <table className="w-full text-[13px]" style={{ borderCollapse: 'collapse' }}>
                 <thead>
@@ -167,7 +167,7 @@ export default function GoalComparison() {
             </p>
           </div>
 
-          <div style={{ background: '#fff', border: '1px solid #e2e6ed', borderRadius: 16, boxShadow: '0 1px 4px rgba(0,0,0,0.04)', padding: 20, marginTop: 16 }}>
+          <div style={{ background: '#fff', border: '1px solid #e2e6ed', borderRadius: 16, boxShadow: '0 8px 32px rgba(34,76,135,0.12)', padding: 20, marginTop: 16 }}>
             <p className="text-[14px] font-bold text-[#1a1a2e] mb-4">Monthly SIP Comparison</p>
             <div className="flex flex-col gap-4">
               <div>

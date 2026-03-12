@@ -1,9 +1,10 @@
 import { GOAL_TYPES, GOAL_LABELS, COLORS } from '@/lib/constants';
 import { motion } from 'framer-motion';
 
-export default function GoalSelector({ selectedGoal, onGoalChange }) {
+export default function GoalSelector({ selectedGoal, onGoalChange, columns = 2 }) {
+  const gridClass = columns === 2 ? 'grid-cols-2' : 'grid-cols-2 md:grid-cols-4';
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+    <div className={`grid ${gridClass} gap-3`}>
       {GOAL_TYPES.map((goal) => {
         const isSelected = selectedGoal === goal;
         const parts = GOAL_LABELS[goal].split(' ');
@@ -18,10 +19,13 @@ export default function GoalSelector({ selectedGoal, onGoalChange }) {
             onClick={() => onGoalChange(goal)}
             aria-label={`Select goal: ${text}`}
             aria-pressed={isSelected}
-            className={`relative flex flex-col items-center justify-center p-5 rounded-[16px] border transition-all duration-150 focus:outline-none ${isSelected ? 'bg-blue-50/50' : 'bg-slate-50 hover:bg-white'}`}
+            className={`relative flex flex-col items-center justify-center rounded-[16px] border transition-all duration-150 focus:outline-none ${isSelected ? '' : 'hover:bg-white'}`}
             style={{
-              borderColor: isSelected ? COLORS.blue : '#e2e6ed',
-              boxShadow: isSelected ? '0 4px 20px rgba(34,76,135,0.1)' : '0 1px 2px rgba(0,0,0,0.02)',
+              background: isSelected ? '#e8eef7' : '#ffffff',
+              border: isSelected ? '2px solid #224c87' : '1px solid #e2e6ed',
+              boxShadow: '0 8px 32px rgba(34,76,135,0.12)',
+              height: 80,
+              padding: 12,
             }}
           >
             {isSelected && (
@@ -29,10 +33,19 @@ export default function GoalSelector({ selectedGoal, onGoalChange }) {
                 ✓
               </div>
             )}
-            <span className="text-3xl mb-2">{icon}</span>
+            <div
+              className="mb-2 flex h-8 w-8 items-center justify-center rounded-full"
+              style={{ background: '#e8eef7' }}
+            >
+              <span className="text-[20px] leading-none">{icon}</span>
+            </div>
             <span
-              className="text-sm font-semibold text-center"
-              style={{ color: isSelected ? COLORS.blue : COLORS.grey }}
+              className="text-[12px] font-semibold text-center"
+              style={{
+                color: isSelected ? '#224c87' : COLORS.grey,
+                fontFamily: isSelected ? 'Montserrat, sans-serif' : 'inherit',
+                fontWeight: isSelected ? 600 : 500,
+              }}
             >
               {text}
             </span>

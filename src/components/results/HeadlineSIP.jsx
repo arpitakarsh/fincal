@@ -18,6 +18,7 @@ function useWindowSize() {
 
 export default function HeadlineSIP({ results, fv, yrs, inflation, annualRet }) {
   const { width, height } = useWindowSize();
+  const isSmall = width && width < 768;
 
   if (!results) return null;
 
@@ -33,7 +34,7 @@ export default function HeadlineSIP({ results, fv, yrs, inflation, annualRet }) 
         textAlign: 'center',
         position: 'relative',
         overflow: 'hidden',
-        boxShadow: '0 8px 30px rgba(22, 163, 74, 0.08)',
+        boxShadow: '0 8px 32px rgba(34,76,135,0.12)',
       }}>
         <Confetti 
           width={width || 300} 
@@ -63,15 +64,15 @@ export default function HeadlineSIP({ results, fv, yrs, inflation, annualRet }) 
         borderRadius: 16,
         padding: '32px',
         border: '2px solid #da3832',
-        boxShadow: '0 8px 30px rgba(218, 56, 50, 0.08)',
+        boxShadow: '0 8px 32px rgba(34,76,135,0.12)',
       }}>
         <p style={{ color: '#919090', fontSize: 14, marginBottom: 8 }}>
           Monthly SIP Required
         </p>
         <h1 style={{
           fontFamily: 'Montserrat, sans-serif',
-          fontWeight: 800,
-          fontSize: 'clamp(32px, 8vw, 52px)',
+          fontWeight: 700,
+          fontSize: isSmall ? 48 : 56,
           color: '#da3832',
           marginBottom: 4,
           lineHeight: 1,
@@ -108,12 +109,12 @@ export default function HeadlineSIP({ results, fv, yrs, inflation, annualRet }) 
       color: '#ffffff',
       position: 'relative',
       overflow: 'hidden',
-      boxShadow: '0 12px 40px rgba(34, 76, 135, 0.25)',
+      boxShadow: '0 8px 32px rgba(34,76,135,0.12)',
     }}>
       {/* Texture Layer */}
       <div style={{
         position: 'absolute', inset: 0,
-        backgroundImage: 'linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)',
+        backgroundImage: 'linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px)',
         backgroundSize: '20px 20px',
         pointerEvents: 'none',
         zIndex: 0,
@@ -138,33 +139,33 @@ export default function HeadlineSIP({ results, fv, yrs, inflation, annualRet }) 
       </div>
 
       <div style={{ position: 'relative', zIndex: 1 }}>
-        <p style={{ color: '#e2e8f0', fontSize: 16, marginBottom: 4, fontWeight: 500 }}>
+        <p style={{ color: '#e2e8f0', fontSize: isSmall ? 13 : 16, marginBottom: 4, fontWeight: 500 }}>
           You need to invest
         </p>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 16 }}>
           <h1 style={{
             fontFamily: 'Montserrat, sans-serif',
-            fontWeight: 800,
-            fontSize: 'clamp(32px, 8vw, 52px)',
+            fontWeight: 700,
+            fontSize: isSmall ? 48 : 56,
             color: '#ffffff',
             lineHeight: 1,
             letterSpacing: '-1px',
           }}>
             ₹<CountUp end={sip} duration={1} separator="," decimals={0} />
           </h1>
-          <span style={{ color: '#93c5fd', fontSize: 18, fontWeight: 500 }}>per month</span>
+          <span style={{ color: '#93c5fd', fontSize: isSmall ? 16 : 18, fontWeight: 500 }}>per month</span>
         </div>
       
-      <div className="bg-white/10 rounded-lg p-3 sm:p-4 flex flex-col sm:flex-row flex-wrap gap-4 sm:gap-6 mb-5">
-        <div className="flex-1 border-l-[3px] border-white/30 pl-3">
+      <div className="rounded-lg p-3 sm:p-4 flex flex-col sm:flex-row flex-wrap gap-4 sm:gap-6 mb-5" style={{ background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.2)', backdropFilter: 'blur(10px)' }}>
+        <div className="flex-1 pl-3">
           <p style={{ fontSize: 11, color: '#93c5fd', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 2 }}>Goal after inflation</p>
           <p style={{ fontSize: 15, fontWeight: 600 }}>₹<CountUp end={fv} duration={1} separator="," decimals={0} /></p>
         </div>
-        <div className="flex-1 border-l-[3px] border-white/30 pl-3">
+        <div className="flex-1 pl-3">
           <p style={{ fontSize: 11, color: '#93c5fd', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 2 }}>Time Horizon</p>
           <p style={{ fontSize: 15, fontWeight: 600 }}>{yrs} years</p>
         </div>
-        <div className="flex-1 border-l-[3px] border-white/30 pl-3">
+        <div className="flex-1 pl-3">
           <p style={{ fontSize: 11, color: '#93c5fd', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 2 }}>Expected Return</p>
           <p style={{ fontSize: 15, fontWeight: 600 }}>{annualRet}% p.a.</p>
         </div>
