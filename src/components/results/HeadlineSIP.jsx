@@ -4,6 +4,7 @@ import NumberCounter from '../ui/NumberCounter';
 import Confetti from 'react-confetti';
 import { useState, useEffect } from 'react';
 import AssumptionTransparency from '../shared/AssumptionTransparency';
+import BorderBeam from '../magicui/border-beam';
 import {
   Accordion,
   AccordionItem,
@@ -115,7 +116,7 @@ export default function HeadlineSIP({ results, fv, yrs, inflation, annualRet }) 
   }
 
   return (
-    <div style={{
+    <div className="relative overflow-hidden rounded-2xl" style={{
       background: 'linear-gradient(135deg, #224c87 0%, #2f5fa3 100%)',
       borderRadius: 20,
       padding: '36px',
@@ -125,6 +126,9 @@ export default function HeadlineSIP({ results, fv, yrs, inflation, annualRet }) 
       overflow: 'hidden',
       boxShadow: '0 8px 32px rgba(34,76,135,0.12)',
     }}>
+      {sip > 0 && !isSmall && (
+        <BorderBeam duration={6} size={150} colorFrom="#93c5fd" colorTo="#ffffff" />
+      )}
       {/* Texture Layer */}
       <div style={{
         position: 'absolute', inset: 0,

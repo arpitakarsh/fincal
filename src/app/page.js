@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import FeatureSteps from "@/components/blocks/feature-section";
 import AnimatedShinyText from "@/components/magicui/animated-shiny-text";
+import { HoverEffect } from "@/components/ui/card-hover-effect";
 import { motion, AnimatePresence, useReducedMotion, useInView } from "framer-motion";
 import CountUp from "react-countup";
 
@@ -13,37 +14,37 @@ const SUBTITLES = [
   "Your dream wedding. Funded.",
 ];
 
-const FEATURES = [
+const features = [
   {
-    icon: "🤖",
     title: "AI Goal Parser",
-    desc: 'Type "Buy a house in 10 years for 50 lakhs" and we fill the form — estimated and illustrative only.',
+    description: "Type in plain English like 'Buy a house in 10 years for 50 lakhs' and we'll fill the form instantly. All parsing is illustrative only.",
+    link: "/calculator"
   },
   {
-    icon: "📈",
     title: "3 Scenario Analysis",
-    desc: "Compare conservative, moderate, and aggressive return assumptions with estimated SIPs.",
+    description: "Compare estimated SIP across Conservative (8%), Moderate (10%), and Aggressive (12%) return assumptions side by side.",
+    link: "/calculator"
   },
   {
-    icon: "🔥",
     title: "Sensitivity Heatmap",
-    desc: "See how estimated SIP changes across 36 combinations of inflation and return rates.",
+    description: "See how your estimated SIP changes across 36 combinations of inflation and return assumptions.",
+    link: "/calculator"
   },
   {
-    icon: "⏰",
     title: "Cost of Delay",
-    desc: "Understand how much more you may need if you wait — illustrative only.",
+    description: "See how much more you may need to invest for every year you delay starting. All figures are estimated and illustrative only.",
+    link: "/calculator"
   },
   {
-    icon: "📉",
     title: "Step-Up SIP",
-    desc: "Model annual SIP increases to match your growing income — estimated projections.",
+    description: "Model assumed annual SIP increases to account for your expected income growth over time.",
+    link: "/calculator"
   },
   {
-    icon: "🎯",
     title: "Goal Reality Check",
-    desc: "AI-powered confidence score on whether a goal looks achievable — illustrative only.",
-  },
+    description: "Get an AI-powered confidence indicator on your goal assumptions. Not financial advice — illustrative only.",
+    link: "/calculator"
+  }
 ];
 
 const STATS = [
@@ -203,28 +204,12 @@ export default function Page() {
           />
         </section>
 
-        <section className="mt-16 md:mt-20">
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {FEATURES.map((feature, idx) => (
-              <motion.div
-                key={feature.title}
-                initial={{ opacity: 0, y: 16 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-50px" }}
-                transition={{ duration: reduceMotion ? 0 : 0.4, delay: reduceMotion ? 0 : idx * 0.05 }}
-                className="rounded-[16px] border border-[#e2e6ed] bg-white p-5 shadow-[0_4px_20px_rgba(34,76,135,0.08)] transition-all hover:-translate-y-1 hover:shadow-[0_10px_26px_rgba(34,76,135,0.12)]"
-              >
-                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-[#e8eef7]">
-                  <span className="text-[18px]">{feature.icon}</span>
-                </div>
-                <h3 className="text-[16px] font-[600]" style={{ fontFamily: "Montserrat, sans-serif" }}>
-                  {feature.title}
-                </h3>
-                <p className="mt-2 text-[14px] text-[#919090]" style={{ fontFamily: "Arial, sans-serif" }}>
-                  {feature.desc}
-                </p>
-              </motion.div>
-            ))}
+        <section className="mt-16 md:mt-20 bg-[#f8f9fb] py-12">
+          <h2 className="text-2xl md:text-3xl font-[700] text-center mb-8" style={{ fontFamily: "Montserrat, sans-serif", color: "#1a1a2e" }}>
+            Why FinCal?
+          </h2>
+          <div className="max-w-5xl mx-auto px-8">
+            <HoverEffect items={features} />
           </div>
         </section>
 

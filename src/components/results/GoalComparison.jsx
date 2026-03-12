@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { GOAL_TYPES, GOAL_LABELS } from '@/lib/constants';
 
 const calcSIP = (cost, inflation, yrs, annualRet = 10) => {
   const fv = cost * Math.pow(1 + inflation / 100, yrs);
@@ -15,33 +17,48 @@ const getInflationDefault = (type) => {
   return map[type] ?? 6;
 };
 
-const fmt = (val) => `₹${Math.round(val).toLocaleString('en-IN')}`;
+const fmt = (val) => `?${Math.round(val).toLocaleString('en-IN')}`;
 
 function GoalCard({ goal, onChange, label, color }) {
   const handleField = (key, val) => onChange(key, val);
 
   return (
-    <div style={{ background: '#fff', border: '1px solid #e2e6ed', borderRadius: 16, boxShadow: '0 8px 32px rgba(34,76,135,0.12)', padding: 20, flex: 1 }}>
+    <div style={{ background: '#fff', border: '1px solid #e2e6ed', borderRadius: 16, boxShadow: '0 4px 20px rgba(34,76,135,0.08)', padding: 20, flex: 1, minHeight: 420 }}>
       <p className="font-bold text-[14px] uppercase tracking-wider mb-4 border-b border-[#e2e6ed] pb-2" style={{ color }}>{label}</p>
       <div className="flex flex-col gap-4">
-        <select
-          value={goal.type}
-          onChange={(e) => handleField('type', e.target.value)}
-          className="w-full bg-slate-50 border border-[#e2e6ed] rounded-[10px] py-[10px] px-[14px] text-[14px] font-semibold text-[#1a1a2e] outline-none capitalize"
-        >
-          <option value="house">House</option>
-          <option value="education">Education</option>
-          <option value="healthcare">Healthcare</option>
-          <option value="wedding">Wedding</option>
-          <option value="travel">Travel</option>
-          <option value="car">Car</option>
-          <option value="general">General Wealth</option>
-        </select>
+        <div className="grid grid-cols-3 gap-2">
+          {GOAL_TYPES.map((g) => {
+            const parts = GOAL_LABELS[g].split(' ');
+            const icon = parts[0];
+            const text = parts.slice(1).join(' ');
+            const selected = goal.type === g;
+            return (
+              <button
+                key={g}
+                type="button"
+                onClick={() => handleField('type', g)}
+                className="relative rounded-[12px] border px-2 py-3 text-[11px] font-[600] text-center"
+                style={{
+                  background: selected ? '#e8eef7' : '#ffffff',
+                  border: selected ? '2px solid #224c87' : '1px solid #e2e6ed',
+                  color: selected ? '#224c87' : '#919090',
+                  minHeight: 72,
+                }}
+              >
+                {selected && (
+                  <span className="absolute top-1 right-1 text-[10px] bg-[#224c87] text-white rounded-full w-4 h-4 flex items-center justify-center">?</span>
+                )}
+                <div className="text-[18px] leading-none mb-1">{icon}</div>
+                <div className="leading-tight">{text}</div>
+              </button>
+            );
+          })}
+        </div>
 
         <div className="flex flex-col gap-1">
           <label className="text-[12px] text-gray-500 font-medium">Current cost today</label>
           <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-[13px] font-semibold">₹</span>
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-[13px] font-semibold">?</span>
             <input
               type="number"
               value={goal.cost}
@@ -65,14 +82,34 @@ function GoalCard({ goal, onChange, label, color }) {
         <div className="inline-flex max-w-max bg-gray-100 rounded-md px-2 py-1 items-center">
           <span className="text-[11px] font-medium text-gray-600">Inflation: {goal.inflation}% (default)</span>
         </div>
+
+        <div className="flex flex-col gap-1">
+          <label className="text-[12px] text-gray-500 font-medium">Inflation override</label>
+          <input
+            type="number"
+            value={goal.inflation}
+            onChange={(e) => handleField('inflation', Number(e.target.value))}
+            className="w-full bg-slate-50 border border-[#e2e6ed] rounded-[10px] py-[8px] px-[12px] text-[14px] font-semibold text-[#1a1a2e] outline-none"
+          />
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <label className="text-[12px] text-gray-500 font-medium">Assumed return rate (%)</label>
+          <input
+            type="number"
+            value={goal.annualRet}
+            onChange={(e) => handleField('annualRet', Number(e.target.value))}
+            className="w-full bg-slate-50 border border-[#e2e6ed] rounded-[10px] py-[8px] px-[12px] text-[14px] font-semibold text-[#1a1a2e] outline-none"
+          />
+        </div>
       </div>
     </div>
   );
 }
 
 export default function GoalComparison() {
-  const [goal1, setGoal1] = useState({ type: 'house', cost: 10000000, yrs: 10, inflation: 9 });
-  const [goal2, setGoal2] = useState({ type: 'education', cost: '', yrs: 5, inflation: 11 });
+  const [goal1, setGoal1] = useState({ type: 'house', cost: 10000000, yrs: 10, inflation: 9, annualRet: 10 });
+  const [goal2, setGoal2] = useState({ type: 'education', cost: '', yrs: 5, inflation: 11, annualRet: 10 });
 
   const handleChange = (setter, key, val) => {
     setter(p => {
@@ -88,48 +125,66 @@ export default function GoalComparison() {
   const g1FV = g1Cost * Math.pow(1 + goal1.inflation / 100, goal1.yrs);
   const g2FV = g2Cost * Math.pow(1 + goal2.inflation / 100, goal2.yrs);
 
-  const g1SIP = g1Cost > 0 ? calcSIP(g1Cost, goal1.inflation, goal1.yrs) : 0;
-  const g2SIP = g2Cost > 0 ? calcSIP(g2Cost, goal2.inflation, goal2.yrs) : 0;
+  const g1SIP = g1Cost > 0 ? calcSIP(g1Cost, goal1.inflation, goal1.yrs, goal1.annualRet) : 0;
+  const g2SIP = g2Cost > 0 ? calcSIP(g2Cost, goal2.inflation, goal2.yrs, goal2.annualRet) : 0;
 
   const g1TotalInv = g1SIP * goal1.yrs * 12;
   const g2TotalInv = g2SIP * goal2.yrs * 12;
 
-  const g1Returns = g1FV - g1TotalInv;
-  const g2Returns = g2FV - g2TotalInv;
-
   const showReport = g1Cost > 0 && g2Cost > 0;
   const g1Higher = g1SIP > g2SIP;
-  const maxSIP = Math.max(g1SIP, g2SIP);
 
   const rows = [
-    { label: 'Goal Type', g1: <span className="capitalize">{goal1.type}</span>, g2: <span className="capitalize">{goal2.type}</span> },
-    { label: 'Current Cost', g1: fmt(g1Cost), g2: fmt(g2Cost) },
-    { label: 'Future Cost', g1: fmt(g1FV), g2: fmt(g2FV) },
-    { label: 'Inflation Used', g1: `${goal1.inflation}%`, g2: `${goal2.inflation}%` },
-    { label: 'Time Horizon', g1: `${goal1.yrs} years`, g2: `${goal2.yrs} years` },
-    { label: 'Monthly SIP', g1: fmt(g1SIP), g2: fmt(g2SIP), highlight: true },
-    { label: 'Total Investment', g1: fmt(g1TotalInv), g2: fmt(g2TotalInv) },
-    { label: 'Returns Earned', g1: fmt(g1Returns), g2: fmt(g2Returns) },
+    { label: 'Estimated SIP required', g1: g1SIP, g2: g2SIP, format: fmt },
+    { label: 'Goal after inflation', g1: g1FV, g2: g2FV, format: fmt },
+    { label: 'Time horizon', g1: goal1.yrs, g2: goal2.yrs, format: (v) => `${v} years` },
+    { label: 'Total amount invested', g1: g1TotalInv, g2: g2TotalInv, format: fmt },
+    { label: 'Estimated corpus', g1: g1FV, g2: g2FV, format: fmt },
   ];
 
-  const winnerType = g1Higher ? goal1.type : goal2.type;
+  const chartData = [
+    { metric: 'SIP Required', goal1: g1SIP, goal2: g2SIP },
+    { metric: 'Total Invested', goal1: g1TotalInv, goal2: g2TotalInv },
+    { metric: 'Estimated Corpus', goal1: g1FV, goal2: g2FV },
+  ];
+
+  const winnerType = g1Higher ? 'Goal 1' : 'Goal 2';
   const winnerSIP = g1Higher ? g1SIP : g2SIP;
 
   return (
-    <div className="w-full mb-12 max-w-[1120px] mx-auto px-6">
+    <div
+      className="w-full mb-12 max-w-[1120px] mx-auto px-6"
+      style={{
+        backgroundImage: 'radial-gradient(rgba(34,76,135,0.03) 1px, transparent 1px)',
+        backgroundSize: '20px 20px',
+      }}
+    >
       <div className="mb-6 text-center">
-        <h2 style={{ fontSize: 18, fontWeight: 700, color: '#1a1a2e', marginBottom: 4 }}>Compare Two Goals</h2>
-        <p style={{ fontSize: 13, color: '#919090', marginBottom: 16 }}>See which goal needs more urgent attention</p>
+        <div className="inline-flex items-center rounded-full bg-[#e8eef7] px-3 py-1 text-[11px] font-[700] tracking-[2px] text-[#224c87]" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+          COMPARE GOALS
+        </div>
+        <h2 style={{ fontSize: 28, fontWeight: 700, color: '#1a1a2e', marginTop: 10, marginBottom: 4, fontFamily: 'Montserrat, sans-serif' }}>
+          Compare Two Goals
+        </h2>
+        <p style={{ fontSize: 14, color: '#919090', marginBottom: 16, fontFamily: 'Arial, sans-serif' }}>
+          See which goal needs more estimated SIP investment
+        </p>
       </div>
 
       <div className="flex flex-col md:flex-row gap-4 mb-0">
-        <GoalCard goal={goal1} onChange={(key, val) => handleChange(setGoal1, key, val)} label="Goal 1" color="#224c87" />
-        <GoalCard goal={goal2} onChange={(key, val) => handleChange(setGoal2, key, val)} label="Goal 2" color="#c2410c" />
+        <GoalCard goal={goal1} onChange={(key, val) => handleChange(setGoal1, key, val)} label="GOAL 1" color="#224c87" />
+        <GoalCard goal={goal2} onChange={(key, val) => handleChange(setGoal2, key, val)} label="GOAL 2" color="#da3832" />
       </div>
 
       {showReport && (
         <>
-          <div style={{ background: '#fff', border: '1px solid #e2e6ed', borderRadius: 16, boxShadow: '0 8px 32px rgba(34,76,135,0.12)', padding: 24, marginTop: 24, overflow: 'hidden' }}>
+          <div style={{ background: '#fff', border: '1px solid #e2e6ed', borderRadius: 16, boxShadow: '0 4px 20px rgba(34,76,135,0.08)', padding: 20, marginTop: 24, borderLeft: '4px solid #224c87' }}>
+            <div className="text-[14px] text-[#1a1a2e]">
+              {winnerType} needs more attention ? estimated SIP {fmt(winnerSIP)} vs {fmt(g1Higher ? g2SIP : g1SIP)}.
+            </div>
+          </div>
+
+          <div style={{ background: '#fff', border: '1px solid #e2e6ed', borderRadius: 16, boxShadow: '0 4px 20px rgba(34,76,135,0.08)', padding: 24, marginTop: 16, overflow: 'hidden' }}>
             <div className="overflow-x-auto">
               <table className="w-full text-[13px]" style={{ borderCollapse: 'collapse' }}>
                 <thead>
@@ -142,15 +197,15 @@ export default function GoalComparison() {
                 <tbody>
                   {rows.map((row, i) => {
                     const isAlt = i % 2 === 1;
-                    const g1HigherSIP = g1SIP > g2SIP;
+                    const g1HigherRow = row.g1 > row.g2;
                     return (
                       <tr key={row.label} style={{ background: isAlt ? '#fafafa' : 'white', borderBottom: '1px solid #f1f3f6' }}>
                         <td className="px-4 py-3 font-medium text-gray-600">{row.label}</td>
-                        <td className="px-4 py-3" style={row.highlight ? { background: g1HigherSIP ? '#fff5f5' : '#f0fdf4', color: g1HigherSIP ? '#da3832' : '#16a34a', fontWeight: 700 } : {}}>
-                          {row.g1}
+                        <td className="px-4 py-3" style={g1HigherRow ? { background: '#e8eef7', fontWeight: 700 } : {}}>
+                          {row.format(row.g1)}
                         </td>
-                        <td className="px-4 py-3" style={row.highlight ? { background: !g1HigherSIP ? '#fff5f5' : '#f0fdf4', color: !g1HigherSIP ? '#da3832' : '#16a34a', fontWeight: 700 } : {}}>
-                          {row.g2}
+                        <td className="px-4 py-3" style={!g1HigherRow ? { background: '#e8eef7', fontWeight: 700 } : {}}>
+                          {row.format(row.g2)}
                         </td>
                       </tr>
                     );
@@ -160,40 +215,39 @@ export default function GoalComparison() {
             </div>
           </div>
 
-          <div className="mt-4 bg-[#fff8e1] border border-[#fde68a] rounded-[12px] px-5 py-4 flex items-start gap-3">
-            <span className="text-[20px] mt-0.5">⚡</span>
-            <p className="text-[14px] font-medium text-[#92400e]">
-              <span className="capitalize font-bold">{winnerType}</span> needs more urgent SIP ({fmt(winnerSIP)}/mo). Consider starting this investment first.
-            </p>
-          </div>
-
-          <div style={{ background: '#fff', border: '1px solid #e2e6ed', borderRadius: 16, boxShadow: '0 8px 32px rgba(34,76,135,0.12)', padding: 20, marginTop: 16 }}>
-            <p className="text-[14px] font-bold text-[#1a1a2e] mb-4">Monthly SIP Comparison</p>
-            <div className="flex flex-col gap-4">
-              <div>
-                <div className="flex justify-between items-center mb-1.5">
-                  <span className="text-[13px] font-medium text-gray-600 capitalize">{goal1.type}</span>
-                  <span className="text-[13px] font-bold text-[#224c87]">{fmt(g1SIP)}/mo</span>
-                </div>
-                <div className="w-full bg-slate-100 rounded-md overflow-hidden" style={{ height: 36 }}>
-                  <div className="h-full transition-all duration-500" style={{ width: maxSIP > 0 ? `${Math.max((g1SIP / maxSIP) * 100, 2)}%` : '0%', background: '#224c87', borderRadius: 6 }} />
-                </div>
-              </div>
-              <div>
-                <div className="flex justify-between items-center mb-1.5">
-                  <span className="text-[13px] font-medium text-gray-600 capitalize">{goal2.type}</span>
-                  <span className="text-[13px] font-bold text-[#059669]">{fmt(g2SIP)}/mo</span>
-                </div>
-                <div className="w-full bg-slate-100 rounded-md overflow-hidden" style={{ height: 36 }}>
-                  <div className="h-full transition-all duration-500" style={{ width: maxSIP > 0 ? `${Math.max((g2SIP / maxSIP) * 100, 2)}%` : '0%', background: '#059669', borderRadius: 6 }} />
-                </div>
-              </div>
+          <div style={{ background: '#fff', border: '1px solid #e2e6ed', borderRadius: 16, boxShadow: '0 4px 20px rgba(34,76,135,0.08)', padding: 20, marginTop: 16 }}>
+            <p className="text-[14px] font-bold text-[#1a1a2e] mb-4">Estimated SIP Comparison</p>
+            <div style={{ height: 280 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={chartData}>
+                  <XAxis dataKey="metric" tick={{ fontSize: 12, fill: '#919090' }} />
+                  <YAxis tick={{ fontSize: 12, fill: '#919090' }} />
+                  <Tooltip formatter={(v) => fmt(v)} />
+                  <Legend />
+                  <Bar dataKey="goal1" name="Goal 1" fill="#224c87" radius={[6, 6, 0, 0]} />
+                  <Bar dataKey="goal2" name="Goal 2" fill="#da3832" radius={[6, 6, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
             </div>
           </div>
 
-          <p className="text-[11px] text-[#919090] mt-4">
-            * Illustrative only. Assumes 10% p.a. return for both goals. Figures are estimated.
-          </p>
+          <div style={{ background: '#fff', border: '1px solid #e2e6ed', borderRadius: 16, boxShadow: '0 4px 20px rgba(34,76,135,0.08)', padding: 20, marginTop: 16 }}>
+            <p className="text-[14px] font-medium text-[#1a1a2e]">
+              Based on your inputs, {g1Higher ? `Goal 1 (${goal1.type}, ${goal1.yrs} years)` : `Goal 2 (${goal2.type}, ${goal2.yrs} years)`} may need earlier attention due to its shorter time horizon.
+            </p>
+            <p className="text-[11px] text-[#919090] mt-2">
+              * All figures estimated and illustrative only. Assumptions may vary. Not financial advice.
+            </p>
+          </div>
+
+          <div className="mt-6 flex flex-col sm:flex-row gap-3">
+            <button className="w-full border border-[#e2e6ed] text-[#224c87] rounded-full py-3 text-[14px] font-[600]">
+              Compare Another Pair
+            </button>
+            <button className="w-full bg-[#224c87] text-white rounded-full py-3 text-[14px] font-[600]">
+              Go to Goal Calculator
+            </button>
+          </div>
         </>
       )}
     </div>

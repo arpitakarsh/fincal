@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import CountUp from 'react-countup';
-import { COLORS } from '../../lib/constants';
+import { TrendingUp } from 'lucide-react';
+import DonutChart from '../charts/DonutChart';
 
 export default function ReverseCalculator({ initialAnnualRet, initialInflation }) {
   const [mode, setMode] = useState('sip_to_goal');
@@ -11,6 +12,7 @@ export default function ReverseCalculator({ initialAnnualRet, initialInflation }
   const [yrs, setYrs] = useState(10);
   const [annualRet, setAnnualRet] = useState(initialAnnualRet || 10);
   const [inflation, setInflation] = useState(initialInflation || 6);
+  const [riskProfile, setRiskProfile] = useState('balanced');
 
   const r = (annualRet / 100) / 12;
   const n = yrs * 12;
@@ -25,14 +27,38 @@ export default function ReverseCalculator({ initialAnnualRet, initialInflation }
   const goalTotalInvested = requiredSip * n;
   const goalEstimatedReturns = futureTargetCost - goalTotalInvested;
 
+  const displaySip = mode === 'sip_to_goal' ? sip : requiredSip || 0;
+  const donutInvested = mode === 'sip_to_goal' ? sipTotalInvested : goalTotalInvested;
+  const donutReturns = mode === 'sip_to_goal' ? sipEstimatedReturns : goalEstimatedReturns;
+
+  const delayedYears = Math.max(1, yrs - 1);
+  const delayedN = delayedYears * 12;
+  const delayedCorpus = (mode === 'sip_to_goal'
+    ? sip * (((Math.pow(1 + r, delayedN) - 1)) / r) * (1 + r)
+    : (targetCost * Math.pow(1 + inflation / 100, delayedYears)));
+  const currentCorpus = mode === 'sip_to_goal' ? futureCorpus : futureTargetCost;
+  const delayImpact = Math.max(0, currentCorpus - delayedCorpus);
+
   return (
-    <div className="w-full mb-12 max-w-[1120px] mx-auto px-6">
+    <div
+      className="w-full mb-12 max-w-[1120px] mx-auto px-6"
+      style={{
+        backgroundImage: 'radial-gradient(rgba(34,76,135,0.03) 1px, transparent 1px)',
+        backgroundSize: '20px 20px',
+      }}
+    >
       <div className="mb-6 text-center">
-        <h2 style={{ fontSize: 18, fontWeight: 700, color: '#1a1a2e', marginBottom: 4 }}>
+        <div
+          className="inline-flex items-center rounded-full bg-[#e8eef7] px-3 py-1 text-[11px] font-[700] tracking-[2px] text-[#224c87]"
+          style={{ fontFamily: 'Montserrat, sans-serif' }}
+        >
+          REVERSE CALCULATOR
+        </div>
+        <h2 style={{ fontSize: 28, fontWeight: 700, color: '#1a1a2e', marginTop: 10, marginBottom: 4, fontFamily: 'Montserrat, sans-serif' }}>
           What can I achieve with my SIP?
         </h2>
-        <p style={{ fontSize: 13, color: '#919090', marginBottom: 16 }}>
-          Enter what you can invest monthly and we'll show you what goal you can reach
+        <p style={{ fontSize: 14, color: '#919090', marginBottom: 16, fontFamily: 'Arial, sans-serif' }}>
+          Enter what you can invest monthly and we'll show you what goal you can reach — illustrative only.
         </p>
       </div>
 
@@ -54,8 +80,16 @@ export default function ReverseCalculator({ initialAnnualRet, initialInflation }
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
-        <div style={{ background: '#fff', border: '1px solid #e2e6ed', borderRadius: 16, boxShadow: '0 8px 32px rgba(34,76,135,0.12)', padding: 24 }}>
+        <div style={{ background: '#fff', border: '1px solid #e2e6ed', borderRadius: 16, boxShadow: '0 8px 32px rgba(34,76,135,0.12)', padding: 24, minHeight: 480 }}>
           <div className="flex flex-col gap-6">
+            <div className="flex flex-col items-center gap-1">
+              <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 36, color: '#224c87' }}>
+                ₹{Math.round(displaySip || 0).toLocaleString('en-IN')}
+              </div>
+              <div style={{ fontSize: 13, color: '#919090', fontFamily: 'Arial, sans-serif' }}>
+                per month
+              </div>
+            </div>
             <div className="flex flex-col gap-2">
               <label className="text-[13px] font-bold text-gray-700 uppercase tracking-wide">
                 {mode === 'sip_to_goal' ? 'I can invest every month' : 'My target goal today'}
@@ -89,6 +123,35 @@ export default function ReverseCalculator({ initialAnnualRet, initialInflation }
                 <label className="text-[13px] font-bold text-gray-700 uppercase tracking-wide">Expected annual return</label>
                 <div className="bg-[#eef2ff] px-2 py-0.5 rounded text-[13px] font-bold text-[#224c87]">{annualRet}%</div>
               </div>
+              <div className="flex gap-2">
+                {[
+                  { id: 'safe', label: 'Safe', value: 8 },
+                  { id: 'balanced', label: 'Balanced', value: 10 },
+                  { id: 'growth', label: 'Growth', value: 12 },
+                ].map((p) => {
+                  const active = riskProfile === p.id;
+                  return (
+                    <button
+                      key={p.id}
+                      type="button"
+                      onClick={() => {
+                        setRiskProfile(p.id);
+                        setAnnualRet(p.value);
+                      }}
+                      className="flex-1 min-w-0 rounded-full border px-3 py-1 text-[12px] font-[600]"
+                      style={{
+                        background: active ? '#e8eef7' : '#ffffff',
+                        borderColor: active ? '#224c87' : '#e2e6ed',
+                        color: active ? '#224c87' : '#919090',
+                        fontFamily: 'Montserrat, sans-serif',
+                        minHeight: 36,
+                      }}
+                    >
+                      {p.label}
+                    </button>
+                  );
+                })}
+              </div>
               <input
                 type="range" min="1" max="20" step="0.5"
                 value={annualRet} onChange={(e) => setAnnualRet(Number(e.target.value))}
@@ -117,7 +180,7 @@ export default function ReverseCalculator({ initialAnnualRet, initialInflation }
           </div>
         </div>
 
-        <div className="bg-[#f0f4ff] border border-[#c7d4f0] rounded-[16px] p-6 lg:p-8 flex flex-col justify-center" style={{ boxShadow: '0 8px 32px rgba(34,76,135,0.12)' }}>
+        <div className="bg-[#f0f4ff] border border-[#c7d4f0] rounded-[16px] p-6 lg:p-8 flex flex-col justify-center" style={{ boxShadow: '0 8px 32px rgba(34,76,135,0.12)', minHeight: 480 }}>
           <p className="text-[13px] text-[#919090] font-medium mb-1">
             {mode === 'sip_to_goal' ? 'You can achieve a goal worth' : 'Monthly SIP Required'}
           </p>
@@ -130,26 +193,48 @@ export default function ReverseCalculator({ initialAnnualRet, initialInflation }
 
           <div className="w-full h-[1px] bg-[#c7d4f0] mb-6"></div>
 
-          <div className="flex flex-col gap-4 w-full">
-            <div className="flex justify-between items-center bg-white/50 px-3 py-2 rounded-lg">
-              <span className="text-[13px] font-medium text-gray-700">Future value of corpus</span>
-              <span className="text-[14px] font-bold text-[#1a1a2e]">₹{Math.round(mode === 'sip_to_goal' ? futureCorpus : futureTargetCost).toLocaleString('en-IN')}</span>
+            <div className="flex flex-col gap-6 w-full">
+            <div className="w-full flex justify-center">
+              <div style={{ height: 280, width: '100%', maxWidth: 360 }}>
+                <DonutChart totalInvested={donutInvested} totalReturns={donutReturns} />
+              </div>
             </div>
 
-            <div className="flex justify-between items-center bg-white/50 px-3 py-2 rounded-lg">
-              <span className="text-[13px] font-medium text-gray-600">Total amount invested</span>
-              <span className="text-[14px] font-bold text-gray-800">₹{Math.round(mode === 'sip_to_goal' ? sipTotalInvested : goalTotalInvested).toLocaleString('en-IN')}</span>
+            <div className="flex flex-col gap-4 w-full">
+              <div className="flex justify-between items-center bg-white/50 px-3 py-2 rounded-lg">
+                <span className="text-[13px] font-medium text-gray-700">Future value of corpus</span>
+                <span className="text-[14px] font-bold text-[#1a1a2e]">₹{Math.round(currentCorpus).toLocaleString('en-IN')}</span>
+              </div>
+
+              <div className="flex justify-between items-center bg-white/50 px-3 py-2 rounded-lg">
+                <span className="text-[13px] font-medium text-gray-600">Total amount invested</span>
+                <span className="text-[14px] font-bold text-gray-800">₹{Math.round(donutInvested).toLocaleString('en-IN')}</span>
+              </div>
+
+              <div className="flex justify-between items-center bg-[#e8f5e9]/10 px-3 py-2 rounded-lg border border-[#c8e6c9]/30">
+                <span className="text-[13px] font-medium text-[#2e7d32] flex items-center gap-2">
+                  <TrendingUp size={14} color="#059669" />
+                  Estimated returns not guaranteed or assured
+                </span>
+                <span className="text-[14px] font-bold text-[#1b5e20]">+ ₹{Math.round(donutReturns).toLocaleString('en-IN')}</span>
+              </div>
             </div>
 
-            <div className="flex justify-between items-center bg-[#e8f5e9] px-3 py-2 rounded-lg border border-[#c8e6c9]">
-              <span className="text-[13px] font-medium text-[#2e7d32]">✨ Estimated returns earned</span>
-              <span className="text-[14px] font-bold text-[#1b5e20]">+ ₹{Math.round(mode === 'sip_to_goal' ? sipEstimatedReturns : goalEstimatedReturns).toLocaleString('en-IN')}</span>
+            <div className="text-[13px] text-[#1a1a2e]" style={{ fontFamily: 'Arial, sans-serif' }}>
+              Investing ₹{Math.round(displaySip || 0).toLocaleString('en-IN')}/month for {yrs} years at {annualRet}% p.a. could help you build an estimated corpus of ₹{Math.round(currentCorpus).toLocaleString('en-IN')}.
+            </div>
+
+            <div className="text-[11px] text-[#919090]" style={{ fontFamily: 'Arial, sans-serif' }}>
+              * Illustrative only. Assumes constant monthly SIP. Not financial advice.
             </div>
           </div>
+        </div>
+      </div>
 
-          <p className="text-[10px] text-slate-400 mt-6 text-center leading-tight">
-            * Illustrative only. Assumes constant monthly SIP over the entire duration.
-          </p>
+      <div className="mt-8 rounded-[16px] border border-[#e2e6ed] bg-white px-6 py-4 shadow-[0_8px_32px_rgba(34,76,135,0.12)]">
+        <div className="text-[13px] text-[#919090] mb-1">Cost of Delay</div>
+        <div className="text-[15px] font-[600] text-[#1a1a2e]">
+          If you start 1 year later, your estimated corpus reduces by ₹{Math.round(delayImpact).toLocaleString('en-IN')}.
         </div>
       </div>
     </div>

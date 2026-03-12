@@ -684,7 +684,13 @@ export default function FinCalApp() {
                           </div>
 
                           <div style={{ marginBottom: 16 }}>
-                            <GoalRealityIndicator results={results} goalType={s.goalType} />
+                            <GoalRealityIndicator
+                              presentCost={s.cost}
+                              years={s.yrs}
+                              inflation={s.inflation}
+                              annualReturn={s.annualRet}
+                              goalType={s.goalType}
+                            />
                           </div>
 
                           <div style={{ marginBottom: 16 }}>
@@ -825,14 +831,12 @@ export default function FinCalApp() {
 
                 <div style={{ flex: 1, border: '1px solid #e2e6ed', borderRadius: '12px', padding: '24px' }}>
                   <p style={{ fontSize: '16px', fontWeight: 700, color: '#1a1a2e', marginBottom: '16px' }}>Wealth Accumulation Roadmap</p>
-                  <table style={{ width: '100%', fontSize: '14px', borderCollapse: 'collapse' }}>
-                    <thead>
-                      <tr style={{ borderBottom: '1px solid #e2e6ed' }}>
-                        <th style={{ textAlign: 'left', paddingBottom: '12px', color: '#919090', fontWeight: 600 }}>Milestone</th>
-                        <th style={{ textAlign: 'right', paddingBottom: '12px', color: '#919090', fontWeight: 600 }}>Expected Corpus</th>
-                      </tr>
-                    </thead>
-                    <tbody>
+                  <div style={{ width: '100%', fontSize: '14px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #e2e6ed', paddingBottom: '12px', color: '#919090', fontWeight: 600 }}>
+                      <div>Milestone</div>
+                      <div>Expected Corpus</div>
+                    </div>
+                    <div>
                       {[
                         Math.floor(s.yrs * 0.2) || 1,
                         Math.floor(s.yrs * 0.4) || 2,
@@ -845,18 +849,18 @@ export default function FinCalApp() {
                           const n = yr * 12;
                           const corpusval = (results?.sip || 0) * (((Math.pow(1 + r, n) - 1) * (1 + r)) / r);
                           return (
-                            <tr key={yr} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                              <td style={{ padding: '12px 0', fontWeight: 500, color: '#1a1a2e' }}>
+                            <div key={yr} style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #f1f5f9', padding: '12px 0' }}>
+                              <div style={{ fontWeight: 500, color: '#1a1a2e' }}>
                                 Year {yr} {yr === s.yrs && <span style={{ color: '#059669', fontSize: '12px', marginLeft: '4px' }}>(Target)</span>}
-                              </td>
-                              <td style={{ padding: '12px 0', textAlign: 'right', fontWeight: 600, color: '#224c87' }}>
-                                ₹{Math.round(corpusval).toLocaleString('en-IN')}
-                              </td>
-                            </tr>
+                              </div>
+                              <div style={{ textAlign: 'right', fontWeight: 600, color: '#224c87' }}>
+                                ???{Math.round(corpusval).toLocaleString('en-IN')}
+                              </div>
+                            </div>
                           );
                         })}
-                    </tbody>
-                  </table>
+                    </div>
+                  </div>
                 </div>
               </div>
 

@@ -34,3 +34,12 @@ export function getSoftWarnings({ cost, yrs, annualRet, goalType, riskProfile })
 
   return warns;
 }
+
+export function computeConfidenceScore({ presentCost, years, inflation, annualReturn, goalType }) {
+  let score = 100;
+  if (annualReturn > 14) score -= 30;
+  if (inflation < 4) score -= 20;
+  if (years < 2) score -= 25;
+  if (presentCost > 50000000) score -= 15;
+  return Math.max(10, Math.min(score, 95));
+}
