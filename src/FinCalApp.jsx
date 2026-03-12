@@ -252,8 +252,8 @@ export default function FinCalApp() {
 
                       <div style={{ opacity: isFocusMode ? 0.3 : 1, transition: 'opacity 0.3s ease' }}>
                         <QuickPresets value={s.cost} onChange={v => set('cost', v)} />
-                        <StepUpToggle enabled={s.stepUpOn} pct={s.stepUpPct} onToggle={() => set('stepUpOn', !s.stepUpOn)} onPctChange={v => set('stepUpPct', v)} />
-                        <LumpsumToggle enabled={s.lumpsumOn} amount={s.lumpsum} onToggle={() => set('lumpsumOn', !s.lumpsumOn)} onAmountChange={v => set('lumpsum', v)} />
+                        <StepUpToggle stepUpEnabled={s.stepUpOn} stepUpPercent={s.stepUpPct} onToggle={() => set('stepUpOn', !s.stepUpOn)} onPercentChange={v => set('stepUpPct', v)} />
+                        <LumpsumToggle lumpsumEnabled={s.lumpsumOn} lumpsumAmount={s.lumpsum} onToggle={() => set('lumpsumOn', !s.lumpsumOn)} onAmountChange={v => set('lumpsum', v)} />
                       </div>
                     </div>
                   </div>
