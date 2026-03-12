@@ -49,7 +49,16 @@ export default function GoalRealityIndicator({ results, goalType }) {
         </Tooltip>
       </div>
 
-      <div className="relative mb-2 mt-4 h-4 w-full rounded-full bg-gray-100 overflow-hidden">
+      <div className="flex items-center justify-between mt-4 mb-2">
+        <span className="text-xs font-semibold text-gray-500 uppercase tracking-widest">
+          Reality check
+        </span>
+        <span className="text-[12px] text-gray-800 font-bold bg-gray-100 px-3 py-1 rounded-full ring-1 ring-gray-200">
+          {Math.round(100 - score)}% confident
+        </span>
+      </div>
+
+      <div className="relative mb-2 h-4 w-full rounded-full bg-gray-100 overflow-hidden">
         {/* Gradients to show zones */}
         <div className="absolute inset-0" style={{
           background: `linear-gradient(to right, ${COLORS.green}33 0%, ${COLORS.amber}33 50%, ${COLORS.red}33 90%)`,
@@ -81,12 +90,7 @@ export default function GoalRealityIndicator({ results, goalType }) {
           </svg>
         </div>
         <div>
-          <div className="flex items-center">
-            <div className="text-base font-extrabold text-gray-900">{statusText}</div>
-            <span className="ml-3 text-[11px] text-gray-600 font-bold bg-gray-200 px-2.5 py-0.5 rounded-full ring-1 ring-gray-300">
-              {Math.round(100 - score)}% confident
-            </span>
-          </div>
+          <div className="text-base font-extrabold text-gray-900">{statusText}</div>
           <div className="text-xs leading-relaxed text-gray-600 mt-1.5">{statusMsg}</div>
         </div>
       </div>

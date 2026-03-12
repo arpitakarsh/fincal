@@ -11,7 +11,11 @@ export default function AssumptionTransparency() {
         aria-expanded={isOpen}
       >
         <span className="font-medium text-gray-700">How we calculated this (Formulas)</span>
-        <span className={`text-gray-500 text-xs transition-transform duration-200 ${isOpen ? 'rotate-180' : 'rotate-0'}`}>▼</span>
+        <span 
+          className={`text-gray-500 text-[10px] transform transition-transform duration-300 ${isOpen ? 'rotate-180' : 'rotate-0'}`}
+        >
+          ▼
+        </span>
       </button>
       
       {isOpen && (

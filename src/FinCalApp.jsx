@@ -168,6 +168,15 @@ export default function FinCalApp() {
                 {/* Vertical Line */}
                 <div className="hidden md:block absolute left-[15px] top-[40px] bottom-[150px] w-[2px] bg-[#e2e6ed] z-0"></div>
 
+              {/* HERO AI INPUT */}
+              <div className="mb-10 flex flex-col items-start gap-1 relative z-10">
+                <h2 className="text-[20px] font-bold text-[#1a1a2e] font-montserrat tracking-tight">Describe your goal in plain English</h2>
+                <p className="text-[13px] text-[#919090] mb-3 font-medium">Our AI will set up the calculator for you</p>
+                <div className="w-full relative">
+                  <NLGoalInput onApply={(p) => setS(prev => ({ ...prev, ...p, inflationSrc: 'custom' }))} />
+                </div>
+              </div>
+
               {/* STEP 1: Goal */}
               <div className="mb-6 flex flex-col items-start gap-2 relative z-10">
                 <span className="bg-[#eef2ff] text-[#224c87] text-[11px] font-bold px-2.5 py-1 rounded-md tracking-widest uppercase mb-1">
@@ -318,9 +327,15 @@ export default function FinCalApp() {
           annualRet={s.annualRet}
         />
 
-        {/* Phase 3 items: Scenario, AI, Heatmap */}
-        <div className="mt-8 mb-8">
-          <ScenarioCards scenarios={scenarios} activeProfile={s.riskProfile} />
+        {/* Phase 1 (Re-ordered): AI Summary & Validator */}
+        <div className="mt-8 mb-6">
+          <InsightParagraph
+            results={results}
+            goalType={s.goalType}
+            yrs={s.yrs}
+            inflation={s.inflation}
+            annualRet={s.annualRet}
+          />
         </div>
 
         <div className="mb-8">
@@ -334,8 +349,13 @@ export default function FinCalApp() {
           />
         </div>
 
+        {/* Phase 3 items: Scenario, AI, Heatmap */}
+        <div className="mb-8">
+          <ScenarioCards scenarios={scenarios} activeProfile={s.riskProfile} />
+        </div>
+
         <div className="mb-8 rounded-[16px] border border-[#e2e6ed] bg-white p-6 shadow-[0_1px_4px_rgba(0,0,0,0.04)]">
-          <p className="font-montserrat font-semibold text-[13px] text-[#1a1a2e] mb-3">
+          <p className="font-montserrat font-semibold text-[14px] text-[#1a1a2e] mb-3">
             Sensitivity Analysis — SIP vs Inflation & Return
           </p>
           <div className="overflow-auto w-full">
@@ -347,17 +367,17 @@ export default function FinCalApp() {
         <CostOfDelayCard cost={s.cost} inflation={s.inflation} annualRet={s.annualRet} yrs={s.yrs} />
 
         {/* What If Scenarios (Phase 2 requirement) */}
-        <div className="mt-4 mb-6 flex flex-wrap gap-3">
-          <span className="text-sm font-medium text-gray-500 w-full mb-[-8px]">What If?</span>
+        <div className="mt-4 mb-6 flex flex-wrap gap-3 items-center">
+          <span className="text-sm font-medium text-gray-500 w-full md:w-auto mb-1 md:mb-0 mr-2">What If?</span>
           <button
             onClick={() => set('cost', Math.round(s.cost * 1.1))}
-            className="px-5 py-2.5 bg-[#224c87] hover:bg-[#1a3d6e] text-white text-[14px] font-semibold rounded-[10px] transition-all active:scale-[0.97]"
+            className="px-[14px] py-[6px] border border-[#224c87] bg-white text-[#224c87] text-[12px] font-[600] rounded-[8px] transition-all hover:bg-[#224c87] hover:text-white active:scale-[0.97]"
           >
             Increase target by 10%
           </button>
           <button
             onClick={() => set('yrs', s.yrs + 2)}
-            className="px-5 py-2.5 bg-[#224c87] hover:bg-[#1a3d6e] text-white text-[14px] font-semibold rounded-[10px] transition-all active:scale-[0.97]"
+            className="px-[14px] py-[6px] border border-[#224c87] bg-white text-[#224c87] text-[12px] font-[600] rounded-[8px] transition-all hover:bg-[#224c87] hover:text-white active:scale-[0.97]"
           >
             Delay by 2 years
           </button>

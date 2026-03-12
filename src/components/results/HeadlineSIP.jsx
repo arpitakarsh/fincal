@@ -155,24 +155,16 @@ export default function HeadlineSIP({ results, fv, yrs, inflation, annualRet }) 
           <span style={{ color: '#93c5fd', fontSize: 18, fontWeight: 500 }}>per month</span>
         </div>
       
-      <div style={{
-        background: 'rgba(255,255,255,0.1)',
-        borderRadius: 8,
-        padding: '12px 16px',
-        display: 'flex',
-        flexWrap: 'wrap',
-        gap: '12px 24px',
-        marginBottom: 20
-      }}>
-        <div style={{ flex: '1 1 auto', borderLeft: '3px solid rgba(255,255,255,0.3)', paddingLeft: 12 }}>
+      <div className="bg-white/10 rounded-lg p-3 sm:p-4 flex flex-col sm:flex-row flex-wrap gap-4 sm:gap-6 mb-5">
+        <div className="flex-1 border-l-[3px] border-white/30 pl-3">
           <p style={{ fontSize: 11, color: '#93c5fd', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 2 }}>Goal after inflation</p>
           <p style={{ fontSize: 15, fontWeight: 600 }}>₹<CountUp end={fv} duration={1} separator="," decimals={0} /></p>
         </div>
-        <div style={{ flex: '1 1 auto', borderLeft: '3px solid rgba(255,255,255,0.3)', paddingLeft: 12 }}>
+        <div className="flex-1 border-l-[3px] border-white/30 pl-3">
           <p style={{ fontSize: 11, color: '#93c5fd', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 2 }}>Time Horizon</p>
           <p style={{ fontSize: 15, fontWeight: 600 }}>{yrs} years</p>
         </div>
-        <div style={{ flex: '1 1 auto', borderLeft: '3px solid rgba(255,255,255,0.3)', paddingLeft: 12 }}>
+        <div className="flex-1 border-l-[3px] border-white/30 pl-3">
           <p style={{ fontSize: 11, color: '#93c5fd', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 2 }}>Expected Return</p>
           <p style={{ fontSize: 15, fontWeight: 600 }}>{annualRet}% p.a.</p>
         </div>

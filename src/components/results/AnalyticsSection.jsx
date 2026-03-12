@@ -40,22 +40,10 @@ export default function AnalyticsSection({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full">
         
-        {/* Glide Path Card */}
-        <div className="bg-white rounded-[16px] shadow-[0_1px_4px_rgba(0,0,0,0.04)] hover:-translate-y-[2px] transition-all duration-200 border border-[#e2e6ed] p-4 lg:p-6 flex flex-col h-[300px]">
-          <p className="font-montserrat font-semibold text-[13px] text-[#1a1a2e] mb-3">
-            Asset Allocation Glide Path
-          </p>
-          <div className="flex-1 w-full relative">
-            <div className="absolute inset-0">
-               <GlidePath years={yrs} />
-            </div>
-          </div>
-        </div>
-
         {/* Year-by-Year Stacked Bar Card */}
-        <div className="bg-white rounded-[16px] shadow-[0_1px_4px_rgba(0,0,0,0.04)] hover:-translate-y-[2px] transition-all duration-200 border border-[#e2e6ed] p-4 lg:p-6 flex flex-col h-[300px]">
+        <div className="bg-white rounded-[16px] shadow-[0_1px_4px_rgba(0,0,0,0.04)] hover:-translate-y-[2px] transition-all duration-200 border border-[#e2e6ed] p-4 lg:p-6 flex flex-col h-[360px] w-full">
           <p className="font-montserrat font-semibold text-[13px] text-[#1a1a2e] mb-3">
             Corpus Breakdown
           </p>
@@ -67,17 +55,30 @@ export default function AnalyticsSection({
         </div>
 
         {/* Invested vs Returns Donut Card */}
-        <div className="bg-white rounded-[16px] shadow-[0_1px_4px_rgba(0,0,0,0.04)] hover:-translate-y-[2px] transition-all duration-200 border border-[#e2e6ed] p-4 lg:p-6 flex flex-col h-[300px]">
+        <div className="bg-white rounded-[16px] shadow-[0_1px_4px_rgba(0,0,0,0.04)] hover:-translate-y-[2px] transition-all duration-200 border border-[#e2e6ed] p-4 lg:p-6 flex flex-col h-[360px] w-full">
           <p className="font-montserrat font-semibold text-[13px] text-[#1a1a2e] mb-3">
-            Investment Summary
+            Asset Allocation
           </p>
           <div className="flex-1 w-full relative">
+            <div className="absolute inset-0">
+               <GlidePath years={yrs} />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 w-full gap-6 mt-[-16px]">
+        {/* Invested vs Returns Donut Card */}
+        <div className="bg-white rounded-[16px] shadow-[0_1px_4px_rgba(0,0,0,0.04)] hover:-translate-y-[2px] transition-all duration-200 border border-[#e2e6ed] p-4 lg:p-6 flex flex-col h-[360px] max-w-[600px] mx-auto w-full">
+          <p className="font-montserrat font-semibold text-[13px] text-[#1a1a2e] mb-3 text-center">
+            Investment Summary
+          </p>
+          <div className="flex-1 w-full relative min-h-[250px]">
             <div className="absolute inset-0 flex items-center justify-center">
                <DonutChart totalInvested={results?.invested || 0} totalReturns={results?.returns || 0} />
             </div>
           </div>
         </div>
-
       </div>
     </div>
   );

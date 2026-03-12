@@ -70,9 +70,9 @@ export default function InsightParagraph({ results, goalType, yrs, inflation, an
       background: '#fff',
       border: '1px solid #e2e6ed',
       borderRadius: 16,
-      padding: '16px 20px',
+      padding: '20px',
     }}>
-      <p style={{ fontSize: 11, color: '#224c87', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>
+      <p style={{ fontSize: 11, color: '#224c87', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 8 }}>
         Your Goal Summary
       </p>
 

@@ -48,7 +48,7 @@ export default function NLGoalInput({ onApply }) {
 
   return (
     <div style={{ marginBottom: 16 }}>
-      <div style={{ display: 'flex', gap: 8 }}>
+      <div style={{ position: 'relative', width: '100%' }}>
         <input
           ref={inputRef}
           value={text}
@@ -58,13 +58,15 @@ export default function NLGoalInput({ onApply }) {
           inputMode="text"
           aria-label="Describe your goal in plain English"
           style={{
-            flex: 1,
-            padding: '10px 14px',
-            borderRadius: 10,
+            width: '100%',
+            padding: '14px 16px',
+            paddingRight: '64px',
+            borderRadius: 12,
             border: '1px solid #e2e6ed',
             fontSize: 14,
             color: '#1a1a2e',
             outline: 'none',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
           }}
         />
         <button
@@ -72,14 +74,19 @@ export default function NLGoalInput({ onApply }) {
           disabled={loading || !text.trim()}
           aria-label="Parse goal"
           style={{
-            padding: '10px 16px',
-            borderRadius: 10,
+            position: 'absolute',
+            right: 6,
+            top: 6,
+            bottom: 6,
+            padding: '0 18px',
+            borderRadius: 8,
             background: '#224c87',
             color: '#fff',
             border: 'none',
             fontWeight: 600,
             cursor: loading ? 'not-allowed' : 'pointer',
-            opacity: loading ? 0.7 : 1,
+            opacity: loading || !text.trim() ? 0.7 : 1,
+            transition: 'opacity 0.2s',
           }}
         >
           {loading ? '...' : 'Go'}
