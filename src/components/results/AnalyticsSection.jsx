@@ -27,15 +27,7 @@ export default function AnalyticsSection({
 
       {/* 1. Hero Growth Chart */}
       <div className="w-full bg-white rounded-2xl shadow-[0_1px_2px_rgba(0,0,0,0.04),0_6px_20px_rgba(0,0,0,0.06)] hover:-translate-y-[2px] transition-all duration-200 border border-[#e2e6ed] overflow-hidden">
-        <div className="px-8 pt-8 pb-4">
-          <h3 className="font-montserrat font-semibold text-lg text-[#1a1a2e]">
-            See how your wealth can build over time
-          </h3>
-          <p className="text-sm text-[#555] mt-1">
-            Based on assumed return and inflation inputs.
-          </p>
-        </div>
-        <div className="px-8 pb-8" style={{ height: '420px' }}>
+        <div className="px-8 pb-8 pt-8" style={{ height: '420px' }}>
           <AreaChart scenarios={scenarios} yrs={yrs} activeProfile={riskProfile} />
         </div>
       </div>
