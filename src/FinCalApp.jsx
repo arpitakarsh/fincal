@@ -65,7 +65,7 @@ function getReturnDefault(yrs) {
 export default function FinCalApp() {
   const [activeTab, setActiveTab] = useState('calculator');
   const [s, setS] = useState(DEFAULTS);
-  const [showHero, setShowHero] = useState(true);
+  const [showHero, setShowHero] = useState(false);
   const [isFocusMode, setIsFocusMode] = useState(false);
   const [showTaxBanner, setShowTaxBanner] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
