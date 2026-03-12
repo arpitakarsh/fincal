@@ -22,8 +22,15 @@ export default function ScenarioCards({ scenarios, activeProfile }) {
           <motion.div
             key={s.id}
             initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.1 }}
+            animate={{ 
+              opacity: 1, 
+              y: 0,
+              scale: isActive ? [1, 1.02, 1] : 1, // Pulse effect on load/active
+            }}
+            transition={{ 
+              delay: i * 0.1,
+              scale: { duration: 0.4, ease: "easeInOut" }
+            }}
             style={{
               flex: '1 1 140px',
               background: '#fff',

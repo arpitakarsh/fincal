@@ -8,11 +8,12 @@ import {
   Tooltip,
   ResponsiveContainer,
   Legend,
+  ReferenceLine,
 } from 'recharts';
 
 const COLORS = {
   conservative: '#64748b',
-  moderate: '#224c87',
+  moderate: '#224c87', // Primary Brand Blue
   aggressive: '#059669',
 };
 
@@ -37,24 +38,21 @@ function formatY(val) {
   return `₹${val}`;
 }
 
-export default function AreaChart({ scenarios, yrs, activeProfile }) {
+export default function AreaChart({ scenarios, yrs, activeProfile, fv }) {
   if (!scenarios?.length) return null;
 
   const data = buildData(scenarios, yrs);
 
   return (
-    <div style={{ background: '#fff', borderRadius: 16, padding: '16px', border: '1px solid #e2e6ed' }}>
-      <p style={{ fontSize: 13, fontWeight: 600, color: '#1a1a2e', marginBottom: 12 }}>
-        Corpus Growth Over Time
-      </p>
-      <ResponsiveContainer width="100%" height={240}>
+    <div className="w-full h-full">
+      <ResponsiveContainer width="100%" height="100%">
         <ReAreaChart data={data}>
           <defs>
             {scenarios.map(s => {
               const color = COLORS[s.id] || '#224c87';
               return (
                 <linearGradient key={s.id} id={`grad-${s.id}`} x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%"  stopColor={color} stopOpacity={0.2} />
+                  <stop offset="5%"  stopColor={color} stopOpacity={0.12} />
                   <stop offset="95%" stopColor={color} stopOpacity={0} />
                 </linearGradient>
               );
@@ -65,6 +63,15 @@ export default function AreaChart({ scenarios, yrs, activeProfile }) {
           <YAxis tickFormatter={formatY} tick={{ fontSize: 11, fill: '#919090' }} width={60} />
           <Tooltip formatter={(val) => formatY(val)} />
           <Legend />
+
+          {fv && (
+            <ReferenceLine 
+              y={fv} 
+              stroke="#da3832" 
+              strokeDasharray="3 3" 
+              label={{ position: 'insideTopLeft', value: 'Target Goal', fill: '#da3832', fontSize: 11, fontWeight: 600 }} 
+            />
+          )}
 
           {scenarios.map(s => {
             const color = COLORS[s.id] || '#224c87';
@@ -77,14 +84,13 @@ export default function AreaChart({ scenarios, yrs, activeProfile }) {
                 stroke={color}
                 strokeWidth={activeProfile === s.id ? 3 : 1.5}
                 fill={`url(#grad-${s.id})`}
+                animationDuration={800}
+                animationEasing="ease-in-out"
               />
             );
           })}
         </ReAreaChart>
       </ResponsiveContainer>
-      <p style={{ fontSize: 11, color: '#919090', marginTop: 8 }}>
-        * Illustrative only. Assumes constant monthly SIP.
-      </p>
     </div>
   );
 }

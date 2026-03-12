@@ -21,14 +21,8 @@ export default function GlidePath({ years }) {
   });
 
   return (
-    <div className="flex flex-col gap-2">
-      <span className="text-sm font-medium" style={{ color: COLORS.text }}>
-        Asset Allocation Glide Path
-      </span>
-      <p className="text-xs" style={{ color: COLORS.grey }}>
-        Equity reduces gradually as your goal approaches.
-      </p>
-      <ResponsiveContainer width="100%" height={200}>
+    <div className="w-full h-full flex flex-col justify-end">
+      <ResponsiveContainer width="100%" height="100%">
         <AreaChart data={data} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
           <defs>
             <linearGradient id="equityGrad" x1="0" y1="0" x2="0" y2="1">

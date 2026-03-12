@@ -11,22 +11,22 @@ export default function StickyDisclaimer() {
         left: 0,
         right: 0,
         zIndex: 50,
-        backgroundColor: COLORS.card,
-        borderTop: `1px solid ${COLORS.border}`,
-        padding: '8px 16px',
+        backgroundColor: '#ffffff',
+        borderTop: '1px solid #e2e6ed',
+        padding: '10px 24px',
       }}
     >
       <p
         style={{
           fontSize: 11,
-          color: COLORS.grey,
+          color: '#919090',
           margin: 0,
           lineHeight: 1.5,
           textAlign: 'center',
           fontFamily: 'Arial, sans-serif',
         }}
       >
-        {DISCLAIMER}
+        Mutual Fund investments are subject to market risks. All figures are estimated and illustrative only. This does not constitute financial advice.
       </p>
     </div>
   );

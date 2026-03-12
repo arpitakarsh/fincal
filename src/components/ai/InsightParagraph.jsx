@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 
 export default function InsightParagraph({ results, goalType, yrs, inflation, annualRet }) {
   const [text, setText] = useState('');
+  const [displayedText, setDisplayedText] = useState('');
   const [loading, setLoading] = useState(false);
   const debounceRef = useRef(null);
 
@@ -42,6 +43,26 @@ export default function InsightParagraph({ results, goalType, yrs, inflation, an
     return () => clearTimeout(debounceRef.current);
   }, [results?.sip, goalType, yrs, inflation, annualRet]);
 
+  // Typewriter effect
+  useEffect(() => {
+    if (!text || loading) {
+      setDisplayedText('');
+      return;
+    }
+    
+    let currentIndex = 0;
+    const intervalId = setInterval(() => {
+      if (currentIndex < text.length) {
+        setDisplayedText(text.slice(0, currentIndex + 1));
+        currentIndex++;
+      } else {
+        clearInterval(intervalId);
+      }
+    }, 20); // 20ms per character
+
+    return () => clearInterval(intervalId);
+  }, [text, loading]);
+
   if (!results) return null;
 
   return (
@@ -68,8 +89,8 @@ export default function InsightParagraph({ results, goalType, yrs, inflation, an
           ))}
         </div>
       ) : (
-        <p style={{ fontSize: 14, color: '#1a1a2e', lineHeight: 1.7 }}>
-          {text || '—'}
+        <p style={{ fontSize: 14, color: '#1a1a2e', lineHeight: 1.7, minHeight: '60px' }}>
+          {displayedText || text || '—'}
         </p>
       )}
 

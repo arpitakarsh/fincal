@@ -13,6 +13,9 @@ export default function SliderInput({
   onChange,
   locked,
   tooltip,
+  onDragStart,
+  onDragEnd,
+  bottomContext,
 }) {
   const [isDragging, setIsDragging] = useState(false);
 
@@ -51,8 +54,14 @@ export default function SliderInput({
         value={[value]}
         disabled={locked}
         onValueChange={([val]) => onChange(val)}
-        onPointerDown={() => setIsDragging(true)}
-        onPointerUp={() => setIsDragging(false)}
+        onPointerDown={() => {
+          setIsDragging(true);
+          if (onDragStart) onDragStart();
+        }}
+        onPointerUp={() => {
+          setIsDragging(false);
+          if (onDragEnd) onDragEnd();
+        }}
         aria-label={label}
         aria-valuenow={value}
         aria-valuemin={min}
@@ -61,9 +70,9 @@ export default function SliderInput({
         style={{ height: 44 }}
       >
         <RadixSlider.Track
-          className="relative grow rounded-full"
+          className="relative grow rounded-full transition-colors duration-200"
           style={{
-            height: 6,
+            height: 8,
             backgroundColor: locked ? '#e2e6ed' : '#e8eef7',
           }}
         >
@@ -74,12 +83,12 @@ export default function SliderInput({
         </RadixSlider.Track>
 
         <RadixSlider.Thumb
-          className="block rounded-full focus:outline-none"
+          className="block rounded-full focus:outline-none transition-all duration-150 ease-out"
           style={{
-            width: 22,
-            height: 22,
-            backgroundColor: locked ? COLORS.grey : COLORS.card,
-            border: `2.5px solid ${locked ? COLORS.grey : COLORS.blue}`,
+            width: 24,
+            height: 24,
+            backgroundColor: locked ? COLORS.grey : '#fff',
+            border: `3px solid ${locked ? COLORS.grey : COLORS.blue}`,
             boxShadow: isDragging ? `0 0 0 3px rgba(34,76,135,0.2)` : '0 1px 4px rgba(0,0,0,0.15)',
             cursor: locked ? 'not-allowed' : 'pointer',
             outline: 'none',
@@ -94,8 +103,13 @@ export default function SliderInput({
         />
       </RadixSlider.Root>
 
-      <div className="flex justify-between">
+      <div className="flex justify-between items-center mt-1">
         <span className="text-xs" style={{ color: COLORS.grey }}>{min}{unit}</span>
+        {bottomContext && (
+          <span className="text-xs font-medium text-gray-500 bg-gray-50 px-2 py-1 rounded">
+            {bottomContext}
+          </span>
+        )}
         <span className="text-xs" style={{ color: COLORS.grey }}>{max}{unit}</span>
       </div>
     </div>

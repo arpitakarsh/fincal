@@ -59,9 +59,11 @@ export default function GoalValidator({ results, goalType, cost, inflation, annu
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 6 }}
             style={{
-              background: '#e8eef7',
-              border: '1px solid #224c87',
-              borderRadius: 10,
+              background: '#f8fafe',
+              border: '1px solid #e2e6ed',
+              borderLeft: '4px solid #224c87',
+              borderRadius: 16,
+              boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
               padding: '10px 14px',
               display: 'flex',
               justifyContent: 'space-between',

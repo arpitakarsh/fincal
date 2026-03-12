@@ -21,11 +21,8 @@ export default function StackedBarChart({ yearByYearData }) {
   }));
 
   return (
-    <div className="flex flex-col gap-2">
-      <span className="text-sm font-medium" style={{ color: COLORS.text }}>
-        Year-by-Year Growth
-      </span>
-      <ResponsiveContainer width="100%" height={240}>
+    <div className="w-full h-full flex flex-col justify-end">
+      <ResponsiveContainer width="100%" height="100%">
         <BarChart data={chartData} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke={COLORS.border} vertical={false} />
           <XAxis

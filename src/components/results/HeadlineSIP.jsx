@@ -1,8 +1,24 @@
 'use client';
 
 import CountUp from 'react-countup';
+import Confetti from 'react-confetti';
+import { useState, useEffect } from 'react';
+import AssumptionTransparency from '../shared/AssumptionTransparency';
 
-export default function HeadlineSIP({ results, fv, yrs, inflation }) {
+function useWindowSize() {
+  const [size, setSize] = useState([0, 0]);
+  useEffect(() => {
+    setSize([window.innerWidth, window.innerHeight]);
+    const updateSize = () => setSize([window.innerWidth, window.innerHeight]);
+    window.addEventListener('resize', updateSize);
+    return () => window.removeEventListener('resize', updateSize);
+  }, []);
+  return { width: size[0], height: size[1] };
+}
+
+export default function HeadlineSIP({ results, fv, yrs, inflation, annualRet }) {
+  const { width, height } = useWindowSize();
+
   if (!results) return null;
 
   const sip = results.sip;
@@ -12,20 +28,30 @@ export default function HeadlineSIP({ results, fv, yrs, inflation }) {
       <div style={{
         background: '#f0fdf4',
         borderRadius: 16,
-        padding: '24px',
+        padding: '32px',
         border: '2px solid #86efac',
         textAlign: 'center',
+        position: 'relative',
+        overflow: 'hidden',
+        boxShadow: '0 8px 30px rgba(22, 163, 74, 0.08)',
       }}>
+        <Confetti 
+          width={width || 300} 
+          height={height || 600} 
+          recycle={false} 
+          numberOfPieces={400} 
+          style={{ position: 'fixed', top: 0, left: 0, zIndex: 100 }}
+        />
         <p style={{ fontSize: 28, marginBottom: 8 }}>🎉</p>
         <p style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 20, color: '#16a34a', marginBottom: 6 }}>
           You're already there!
         </p>
         <p style={{ fontSize: 13, color: '#15803d' }}>
-          Your lumpsum investment already covers this goal. No SIP needed.
+          Your lumpsum investment already covers this goal. No monthly investment needed.
         </p>
-        <p style={{ fontSize: 12, color: '#919090', marginTop: 8 }}>
-          * Estimated value. Illustrative only.
-        </p>
+        <div style={{ marginTop: 24 }}>
+          <AssumptionTransparency />
+        </div>
       </div>
     );
   }
@@ -35,18 +61,20 @@ export default function HeadlineSIP({ results, fv, yrs, inflation }) {
       <div style={{
         background: '#fff',
         borderRadius: 16,
-        padding: '24px',
+        padding: '32px',
         border: '2px solid #da3832',
+        boxShadow: '0 8px 30px rgba(218, 56, 50, 0.08)',
       }}>
         <p style={{ color: '#919090', fontSize: 14, marginBottom: 8 }}>
           Monthly SIP Required
         </p>
         <h1 style={{
           fontFamily: 'Montserrat, sans-serif',
-          fontWeight: 700,
-          fontSize: 'clamp(28px, 5vw, 42px)',
+          fontWeight: 800,
+          fontSize: 'clamp(32px, 8vw, 52px)',
           color: '#da3832',
           marginBottom: 4,
+          lineHeight: 1,
         }}>
           ₹<CountUp end={sip} duration={1} separator="," decimals={0} />
         </h1>
@@ -58,47 +86,100 @@ export default function HeadlineSIP({ results, fv, yrs, inflation }) {
           marginTop: 12,
         }}>
           <p style={{ fontSize: 13, color: '#da3832', fontWeight: 600, marginBottom: 4 }}>
-            ⚠️ This SIP amount may be unrealistic
+            ⚠️ This investment amount might be difficult to maintain
           </p>
           <p style={{ fontSize: 12, color: '#b91c1c' }}>
-            Consider extending your timeline, increasing your lumpsum, or revising your goal amount.
+            Consider delaying your goal, increasing your starting lumpsum, or revising your target amount.
           </p>
         </div>
-        <p style={{ fontSize: 12, color: '#919090', marginTop: 10 }}>
-          * Estimated value. Illustrative only.
-        </p>
+        <div style={{ marginTop: 24 }}>
+          <AssumptionTransparency />
+        </div>
       </div>
     );
   }
 
   return (
     <div style={{
-      background: '#fff',
-      borderRadius: 16,
-      padding: '24px',
-      border: '1px solid #e2e6ed',
+      background: 'linear-gradient(135deg, #224c87 0%, #2f5fa3 100%)',
+      borderRadius: 20,
+      padding: '36px',
+      border: '1px solid #1a3a68',
+      color: '#ffffff',
+      position: 'relative',
+      overflow: 'hidden',
+      boxShadow: '0 12px 40px rgba(34, 76, 135, 0.25)',
     }}>
-      <p style={{ color: '#919090', fontSize: 14, marginBottom: 8 }}>
-        Monthly SIP Required
-      </p>
-      <h1 style={{
-        fontFamily: 'Montserrat, sans-serif',
-        fontWeight: 700,
-        fontSize: 'clamp(28px, 5vw, 42px)',
-        color: '#224c87',
-        marginBottom: 4,
+      {/* Texture Layer */}
+      <div style={{
+        position: 'absolute', inset: 0,
+        backgroundImage: 'linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)',
+        backgroundSize: '20px 20px',
+        pointerEvents: 'none',
+        zIndex: 0,
+      }} />
+      
+      {/* Background Watermark */}
+      <div 
+        style={{
+          position: 'absolute',
+          right: '-20px',
+          bottom: '-40px',
+          fontSize: '200px',
+          fontWeight: 800,
+          color: 'rgba(255,255,255,0.03)',
+          lineHeight: 1,
+          pointerEvents: 'none',
+          userSelect: 'none',
+          zIndex: 0,
+        }}
+      >
+        ₹
+      </div>
+
+      <div style={{ position: 'relative', zIndex: 1 }}>
+        <p style={{ color: '#e2e8f0', fontSize: 16, marginBottom: 4, fontWeight: 500 }}>
+          You need to invest
+        </p>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 16 }}>
+          <h1 style={{
+            fontFamily: 'Montserrat, sans-serif',
+            fontWeight: 800,
+            fontSize: 'clamp(32px, 8vw, 52px)',
+            color: '#ffffff',
+            lineHeight: 1,
+            letterSpacing: '-1px',
+          }}>
+            ₹<CountUp end={sip} duration={1} separator="," decimals={0} />
+          </h1>
+          <span style={{ color: '#93c5fd', fontSize: 18, fontWeight: 500 }}>per month</span>
+        </div>
+      
+      <div style={{
+        background: 'rgba(255,255,255,0.1)',
+        borderRadius: 8,
+        padding: '12px 16px',
+        display: 'flex',
+        flexWrap: 'wrap',
+        gap: '12px 24px',
+        marginBottom: 20
       }}>
-        ₹<CountUp end={sip} duration={1} separator="," decimals={0} />
-      </h1>
-      <p style={{ color: '#919090', fontSize: 13, marginTop: 8 }}>
-        Goal value in {yrs}y at {inflation}% inflation ={' '}
-        <span style={{ color: '#1a1a2e', fontWeight: 600 }}>
-          ₹<CountUp end={fv} duration={1} separator="," decimals={0} />
-        </span>
-      </p>
-      <p style={{ fontSize: 12, color: '#919090', marginTop: 6 }}>
-        * Estimated value. Illustrative only.
-      </p>
+        <div style={{ flex: '1 1 auto', borderLeft: '3px solid rgba(255,255,255,0.3)', paddingLeft: 12 }}>
+          <p style={{ fontSize: 11, color: '#93c5fd', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 2 }}>Goal after inflation</p>
+          <p style={{ fontSize: 15, fontWeight: 600 }}>₹<CountUp end={fv} duration={1} separator="," decimals={0} /></p>
+        </div>
+        <div style={{ flex: '1 1 auto', borderLeft: '3px solid rgba(255,255,255,0.3)', paddingLeft: 12 }}>
+          <p style={{ fontSize: 11, color: '#93c5fd', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 2 }}>Time Horizon</p>
+          <p style={{ fontSize: 15, fontWeight: 600 }}>{yrs} years</p>
+        </div>
+        <div style={{ flex: '1 1 auto', borderLeft: '3px solid rgba(255,255,255,0.3)', paddingLeft: 12 }}>
+          <p style={{ fontSize: 11, color: '#93c5fd', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 2 }}>Expected Return</p>
+          <p style={{ fontSize: 15, fontWeight: 600 }}>{annualRet}% p.a.</p>
+        </div>
+      </div>
+
+      <AssumptionTransparency />
+      </div>
     </div>
   );
 }

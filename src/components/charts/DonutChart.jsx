@@ -37,11 +37,8 @@ export default function DonutChart({ totalInvested, totalReturns }) {
   );
 
   return (
-    <div className="flex flex-col gap-2">
-      <span className="text-sm font-medium" style={{ color: COLORS.text }}>
-        Corpus Breakdown
-      </span>
-      <ResponsiveContainer width="100%" height={220}>
+    <div className="w-full h-full">
+      <ResponsiveContainer width="100%" height="100%">
         <PieChart>
           <Pie
             data={data}

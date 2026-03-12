@@ -5,8 +5,10 @@ export default function Header() {
     <header
       className="w-full flex items-center justify-between px-6 py-4"
       style={{
-        backgroundColor: COLORS.card,
-        borderBottom: `1px solid ${COLORS.border}`,
+        backgroundColor: '#ffffff',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
+        zIndex: 50,
+        position: 'relative'
       }}
     >
       <span
