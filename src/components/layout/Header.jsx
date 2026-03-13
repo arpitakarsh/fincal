@@ -16,30 +16,11 @@ export default function Header({ tabBar }) {
         }}
       >
         <div className="flex items-center gap-3">
-          <div
-            style={{
-              width: 18,
-              height: 18,
-              display: 'grid',
-              gridTemplateColumns: 'repeat(3, 1fr)',
-              gap: 2,
-            }}
-            aria-hidden="true"
-          >
-            {[6, 10, 14].map((h, i) => (
-              <div key={i} style={{ alignSelf: 'end', height: h, background: '#224c87', borderRadius: 2 }} />
-            ))}
-          </div>
-          <span
-            className="text-xl tracking-tight"
-            style={{
-              fontFamily: 'Montserrat, sans-serif',
-              fontWeight: 700,
-              color: '#224c87',
-            }}
-          >
-            Fin<span style={{ color: '#da3832' }}>Cal</span>
-          </span>
+          <img 
+            src="/logo.png" 
+            alt="FinCal Logo" 
+            style={{ height: 42, width: 'auto', objectFit: 'contain' }} 
+          />
           <span
             style={{
               background: '#f59e0b',
