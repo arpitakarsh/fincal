@@ -4,7 +4,6 @@
 
 [![Live Demo](https://img.shields.io/badge/Live%20Demo-fincal--eight.vercel.app-2ea44f?style=for-the-badge)](https://fincal-eight.vercel.app/)
 ![Next.js](https://img.shields.io/badge/Next.js-16.1.6-black?logo=next.js&logoColor=white&style=for-the-badge)
-![Node.js](https://img.shields.io/badge/Node.js-Not%20specified-333?logo=node.js&logoColor=white&style=for-the-badge)
 ![Google Gemini](https://img.shields.io/badge/Google%20Gemini-gemini--3.1--flash--lite--preview-4285F4?logo=google&logoColor=white&style=for-the-badge)
 ![Hackathon](https://img.shields.io/badge/TECHNEX%20'26%20%7C%20HDFC%20Mutual%20Fund%20%7C%20%E2%82%B940,000%20prize%20pool-DA3832?style=for-the-badge)
 
