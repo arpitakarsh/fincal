@@ -1,6 +1,6 @@
 # FinCal - Goal-Based Investment Calculator
 
-![Next.js](https://img.shields.io/badge/Next.js-15-black) ![Node.js](https://img.shields.io/badge/Node.js-22-green) ![License](https://img.shields.io/badge/License-MIT-blue)
+![Next.js](https://img.shields.io/badge/Next.js-15-black) ![Node.js](https://img.shields.io/badge/Node.js-22-green) 
 
 🌐 **Live Demo**: [https://fincal-eight.vercel.app/](https://fincal-eight.vercel.app/)
 
