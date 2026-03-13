@@ -214,7 +214,7 @@ export default function ReverseCalculator({ initialAnnualRet, initialInflation }
               <div className="flex justify-between items-center bg-[#e8f5e9]/10 px-3 py-2 rounded-lg border border-[#c8e6c9]/30">
                 <span className="text-[13px] font-medium text-[#2e7d32] flex items-center gap-2">
                   <TrendingUp size={14} color="#059669" />
-                  Estimated returns not guaranteed or assured
+                  Estimated returns are not certain and are illustrative only
                 </span>
                 <span className="text-[14px] font-bold text-[#1b5e20]">+ ₹{Math.round(donutReturns).toLocaleString('en-IN')}</span>
               </div>

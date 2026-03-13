@@ -66,7 +66,7 @@ export default function HeroSection({ onGetStarted }) {
           textTransform: 'uppercase',
           color: '#224c87',
         }}>
-          HDFC Mutual Fund × FinCal
+          HDFC Mutual Fund  FinCal
         </span>
       </div>
 
@@ -132,7 +132,7 @@ export default function HeroSection({ onGetStarted }) {
           e.target.style.boxShadow = '0 10px 30px rgba(34,76,135,0.25)';
         }}
       >
-        Calculate My SIP <span style={{ marginLeft: 8, opacity: 0.8 }}>→</span>
+        Calculate My SIP <span style={{ marginLeft: 8, opacity: 0.8 }}></span>
       </button>
 
       <p style={{ fontSize: 12, color: '#94a3b8', marginTop: 20, fontWeight: 500 }}>

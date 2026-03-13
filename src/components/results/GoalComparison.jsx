@@ -107,9 +107,11 @@ function GoalCard({ goal, onChange, label, color }) {
   );
 }
 
-export default function GoalComparison() {
-  const [goal1, setGoal1] = useState({ type: 'house', cost: 10000000, yrs: 10, inflation: 9, annualRet: 10 });
-  const [goal2, setGoal2] = useState({ type: 'education', cost: '', yrs: 5, inflation: 11, annualRet: 10 });
+export default function GoalComparison({ onSwitchTab }) {
+  const initialGoal1 = { type: 'house', cost: 10000000, yrs: 10, inflation: 9, annualRet: 10 };
+  const initialGoal2 = { type: 'education', cost: '', yrs: 5, inflation: 11, annualRet: 10 };
+  const [goal1, setGoal1] = useState(initialGoal1);
+  const [goal2, setGoal2] = useState(initialGoal2);
 
   const handleChange = (setter, key, val) => {
     setter(p => {
@@ -150,6 +152,10 @@ export default function GoalComparison() {
 
   const winnerType = g1Higher ? 'Goal 1' : 'Goal 2';
   const winnerSIP = g1Higher ? g1SIP : g2SIP;
+  const handleReset = () => {
+    setGoal1(initialGoal1);
+    setGoal2(initialGoal2);
+  };
 
   return (
     <div
@@ -241,10 +247,16 @@ export default function GoalComparison() {
           </div>
 
           <div className="mt-6 flex flex-col sm:flex-row gap-3">
-            <button className="w-full border border-[#e2e6ed] text-[#224c87] rounded-full py-3 text-[14px] font-[600]">
+            <button
+              onClick={handleReset}
+              className="w-full border border-[#e2e6ed] text-[#224c87] rounded-full py-3 text-[14px] font-[600]"
+            >
               Compare Another Pair
             </button>
-            <button className="w-full bg-[#224c87] text-white rounded-full py-3 text-[14px] font-[600]">
+            <button
+              onClick={() => onSwitchTab?.('calculator')}
+              className="w-full bg-[#224c87] text-white rounded-full py-3 text-[14px] font-[600]"
+            >
               Go to Goal Calculator
             </button>
           </div>

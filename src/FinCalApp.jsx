@@ -25,7 +25,6 @@ import ReverseCalculator from '../src/components/results/ReverseCalculator';
 import GoalComparison from '../src/components/results/GoalComparison';
 import ExportPdfButton from '../src/components/shared/ExportPdfButton';
 import Header from '../src/components/layout/Header';
-import StickyDisclaimer from '../src/components/layout/StickyDisclaimer';
 import GoalSelector from '../src/components/inputs/GoalSelector';
 import GoalInputForm from '../src/components/inputs/GoalInputForm';
 import RiskProfileSelector from '../src/components/inputs/RiskProfileSelector';
@@ -288,6 +287,7 @@ export default function FinCalApp() {
         background: '#f8f9fb',
         display: 'flex',
         flexDirection: 'column',
+        paddingBottom: '40px',
         backgroundImage: "radial-gradient(rgba(34,76,135,0.03) 1px, transparent 1px)",
         backgroundSize: '20px 20px',
       }}
@@ -762,7 +762,7 @@ export default function FinCalApp() {
             {activeTab === 'compare' && (
               <div key="tab-compare" className="animate-fadeIn w-full" style={{ overflowY: 'auto', height: 'calc(100vh - 56px)', paddingBottom: 48, paddingTop: 24 }}>
                 <div className="max-w-[960px] mx-auto px-6">
-                  <GoalComparison />
+                  <GoalComparison onSwitchTab={setActiveTab} />
                 </div>
               </div>
             )}
@@ -870,12 +870,8 @@ export default function FinCalApp() {
               </div>
             </div>
 
-            <div className="w-full relative">
-              <StickyDisclaimer />
-            </div>
-
             {activeTab === 'calculator' && isMobile && showFloatingPill && results?.sip > 0 && (
-              <div className="fixed bottom-[44px] left-0 right-0 z-40 px-4">
+              <div className="fixed bottom-[76px] left-0 right-0 z-40 px-4">
                 <motion.button
                   type="button"
                   onClick={() => heroCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}

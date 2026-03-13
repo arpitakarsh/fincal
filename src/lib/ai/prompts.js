@@ -1,4 +1,4 @@
-const BASE_RULE = 'Never use words like guaranteed, will earn, assured, or certain returns.';
+const BASE_RULE = 'Avoid certainty claims; do not imply fixed returns or outcomes.';
 
 export const INSIGHT_PROMPT = ({ goalType, cost, sip, yrs, inflation, annualRet }) =>
   `You are a warm, friendly financial guide for Indian investors.

@@ -7,6 +7,7 @@ import AnimatedShinyText from "@/components/magicui/animated-shiny-text";
 import { HoverEffect } from "@/components/ui/card-hover-effect";
 import { motion, AnimatePresence, useReducedMotion, useInView } from "framer-motion";
 import CountUp from "react-countup";
+import StickyDisclaimer from "@/components/layout/StickyDisclaimer";
 
 const SUBTITLES = [
   "Your dream house. Financially.",
@@ -42,7 +43,7 @@ const features = [
   },
   {
     title: "Goal Reality Check",
-    description: "Get an AI-powered confidence indicator on your goal assumptions. Not financial advice — illustrative only.",
+    description: "Get an AI-powered confidence indicator on your goal assumptions. Not financial advice  illustrative only.",
     link: "/calculator"
   }
 ];
@@ -82,7 +83,7 @@ export default function Page() {
   );
 
   return (
-    <div className="min-h-screen bg-[#f8f9fb] text-[#1a1a2e]">
+    <div className="min-h-screen bg-[#f8f9fb] text-[#1a1a2e] pb-8">
       <div className="mx-auto w-full max-w-[1200px] px-6 py-10 md:py-16">
         <motion.section
           initial="hidden"
@@ -93,7 +94,7 @@ export default function Page() {
           <motion.div variants={heroMotion} className="flex flex-col gap-6">
             <Link href="/calculator" className="group rounded-full border border-[#224c87]/20 bg-[#e8eef7] text-base transition-all ease-in hover:cursor-pointer hover:bg-[#dce6f5] inline-block">
               <AnimatedShinyText className="inline-flex items-center justify-center px-4 py-1 text-[#224c87] transition ease-out hover:text-[#1a3d6e] hover:duration-300 text-[11px] uppercase tracking-[0.18em] font-[600]">
-                <span>● HDFC Mutual Fund × FinCal</span>
+                <span> HDFC Mutual Fund  FinCal</span>
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-1 transition-transform duration-300 ease-in-out group-hover:translate-x-0.5"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
               </AnimatedShinyText>
             </Link>
@@ -117,7 +118,7 @@ export default function Page() {
               </AnimatePresence>
             </div>
             <p className="text-[15px] text-[#465063]" style={{ fontFamily: "Arial, sans-serif" }}>
-              Calculate exactly how much SIP you need for any financial goal. Powered by smart assumptions — not
+              Calculate exactly how much SIP you need for any financial goal. Powered by smart assumptions  not
               guesswork. All figures are estimated and illustrative only.
             </p>
             <div className="flex flex-wrap items-center gap-4">
@@ -126,7 +127,7 @@ export default function Page() {
                 className="inline-flex items-center justify-center rounded-full bg-[#224c87] px-6 py-3 text-white text-[14px] font-[600] shadow-[0_8px_20px_rgba(34,76,135,0.18)]"
                 style={{ fontFamily: "Montserrat, sans-serif" }}
               >
-                Calculate My SIP →
+                Calculate My SIP 
               </Link>
               <button
                 type="button"
@@ -138,7 +139,7 @@ export default function Page() {
               </button>
             </div>
             <p className="text-[12px] text-[#919090]">
-              Free · No login required · Illustrative only
+              Free  No login required  Illustrative only
             </p>
           </motion.div>
 
@@ -155,12 +156,12 @@ export default function Page() {
               <div className="relative z-10">
                 <p className="text-[13px] text-[#cfe1ff]">Estimated SIP required</p>
                 <p className="mt-2 text-[36px] font-[700]" style={{ fontFamily: "Montserrat, sans-serif" }}>
-                  ₹5,338/month
+                  5,338/month
                 </p>
                 <div className="mt-4 grid grid-cols-3 gap-3 rounded-[14px] border border-[rgba(255,255,255,0.2)] bg-[rgba(255,255,255,0.15)] p-3 text-[12px]">
                   <div className="text-white/90">
                     Goal after inflation
-                    <div className="text-white font-[600] mt-1">₹12.7L</div>
+                    <div className="text-white font-[600] mt-1">12.7L</div>
                   </div>
                   <div className="text-white/90">
                     Time horizon
@@ -243,7 +244,7 @@ export default function Page() {
             className="mt-6 inline-flex items-center justify-center rounded-full bg-[#224c87] px-8 h-[56px] text-white text-[15px] font-[600]"
             style={{ fontFamily: "Montserrat, sans-serif" }}
           >
-            Calculate My SIP →
+            Calculate My SIP 
           </Link>
         </section>
 
@@ -257,7 +258,7 @@ export default function Page() {
               </span>
             </div>
             <div className="text-center text-[12px] text-[#919090]">
-              Built for TECHNEX '26 · FinCal Innovation Hackathon · Co-sponsored by HDFC Mutual Fund
+              Built for TECHNEX '26  FinCal Innovation Hackathon  Co-sponsored by HDFC Mutual Fund
             </div>
             <div className="flex items-center gap-4 text-[12px] text-[#224c87]">
               <Link href="/calculator" className="hover:underline">Reverse Calculator</Link>
@@ -271,6 +272,7 @@ export default function Page() {
           </div>
         </footer>
       </div>
+      <StickyDisclaimer />
     </div>
   );
 }
