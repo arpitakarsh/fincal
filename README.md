@@ -28,7 +28,7 @@
 ## ?? Overview
 FinCal is a goal-based investment calculator that estimates the SIP required to reach a future goal, with scenario analysis, sensitivity checks, and optional lumpsum and step-up modeling.
 
-It solves the common problem of guessing “how much should I invest per month” by turning a present-day goal cost into a future value and deriving the required SIP with transparent assumptions.
+It solves the common problem of guessing ï¿½how much should I invest per monthï¿½ by turning a present-day goal cost into a future value and deriving the required SIP with transparent assumptions.
 
 Built for TECHNEX '26, the project emphasizes clarity, speed, and investor-safe language for a hackathon-grade financial planning tool.
 
@@ -60,7 +60,7 @@ Note: AI features require `GEMINI_API_KEY`. College networks may block Google AP
 
 **Return Defaults by Time Horizon:**
 - `< 3 years` ? 6.5% (Debt)
-- `3–5 years` ? 9.5% (Hybrid)
+- `3ï¿½5 years` ? 9.5% (Hybrid)
 - `> 5 years` ? 12% (Equity)
 
 **Calculation Modes (confirmed):**
@@ -69,8 +69,8 @@ Note: AI features require `GEMINI_API_KEY`. College networks may block Google AP
 - Step-up SIP modeling: annual SIP increase affects year-by-year projections.
 
 **Other Confirmed Features:**
-- Sensitivity Heatmap (6×6 grid of inflation vs return assumptions).
-- Cost of Delay: 1–3 year delay impact on SIP.
+- Sensitivity Heatmap (6ï¿½6 grid of inflation vs return assumptions).
+- Cost of Delay: 1ï¿½3 year delay impact on SIP.
 - Goal Reality Indicator (confidence score from input sanity checks).
 - Reverse Calculator (SIP ? Goal and Goal ? SIP).
 - Compare Goals (side-by-side comparison with chart).
@@ -93,9 +93,9 @@ Note: AI features require `GEMINI_API_KEY`. College networks may block Google AP
 | Goal comparison chart | No | No | Yes |
 
 ## ?? AI Features
-- **NL Goal Parser** — Parses a plain-English goal into `{goalType, cost, yrs}` via `/api/ai` and applies it to the form. Triggered manually by user action (Enter/Go button).
-- **Goal Insight Paragraph** — Auto-generates a 3–4 line summary after input changes with a 1.5s debounce. Triggered automatically when results update.
-- **Goal Validator** — Auto-checks realism of cost, inflation, and return assumptions, returning warning flags. Triggered automatically when results update.
+- **NL Goal Parser** ï¿½ Parses a plain-English goal into `{goalType, cost, yrs}` via `/api/ai` and applies it to the form. Triggered manually by user action (Enter/Go button).
+- **Goal Insight Paragraph** ï¿½ Auto-generates a 3ï¿½4 line summary after input changes with a 1.5s debounce. Triggered automatically when results update.
+- **Goal Validator** ï¿½ Auto-checks realism of cost, inflation, and return assumptions, returning warning flags. Triggered automatically when results update.
 
 All AI runs server-side via `src/app/api/ai/route.js` using `GEMINI_API_KEY`. The API key is never sent to the client.
 
@@ -138,14 +138,14 @@ monthlyRate = annualReturn / 100 / 12
 corpusValue = (corpusValue + sipThisYear) * (1 + monthlyRate)
 ```
 
-**Cost of Delay (1–3 years):**
+**Cost of Delay (1ï¿½3 years):**
 ```text
 newSIP = calculateSIP({ presentCost, inflation, annualReturn, years: remainingYears })
 extraSIP = newSIP - originalSIP
 extraTotal = extraSIP * remainingYears * 12
 ```
 
-**Sensitivity Grid (6×6):**
+**Sensitivity Grid (6ï¿½6):**
 ```text
 INFLATIONS = [4, 6, 8, 10, 12, 14]
 RETURNS    = [6, 8, 10, 12, 14, 16]
@@ -171,7 +171,7 @@ SIP = calcSIP(calcFV(cost, inflation, yrs), return, yrs)
 | Charts | Recharts | 3.8.0 |
 | Animation | Framer Motion | 12.35.2 |
 | Styling | Tailwind CSS | 3.4.1 |
-| UI Primitives | Radix UI | 1.2.x–1.3.x |
+| UI Primitives | Radix UI | 1.2.xï¿½1.3.x |
 | Icons | lucide-react | 0.482.0 |
 | PDF Export | html2canvas + jsPDF | 1.4.1 + 4.2.0 |
 | Deployment | Vercel (live demo URL) | vercel.app |
@@ -182,89 +182,89 @@ SIP = calcSIP(calcFV(cost, inflation, yrs), return, yrs)
 +- package.json                 # Scripts and dependencies
 +- next.config.js               # Next.js configuration
 +- public/                      # Static assets
-¦  +- logo.png                  # FinCal logo used in header
-¦  +- file.svg                  # Default Next assets
-¦  +- globe.svg                 # Default Next assets
-¦  +- next.svg                  # Default Next assets
-¦  +- vercel.svg                # Default Next assets
-¦  +- window.svg                # Default Next assets
+ï¿½  +- logo.png                  # FinCal logo used in header
+ï¿½  +- file.svg                  # Default Next assets
+ï¿½  +- globe.svg                 # Default Next assets
+ï¿½  +- next.svg                  # Default Next assets
+ï¿½  +- vercel.svg                # Default Next assets
+ï¿½  +- window.svg                # Default Next assets
 +- src/
    +- app/
-   ¦  +- layout.js              # Root layout + Montserrat font + global body styles
-   ¦  +- globals.css            # Tailwind base + key animations
-   ¦  +- page.js                # Landing page (marketing + feature highlights)
-   ¦  +- calculator/
-   ¦  ¦  +- page.js             # Calculator entry (renders FinCalApp)
-   ¦  +- api/
-   ¦     +- ai/
-   ¦        +- route.js          # AI API handler (insight/validator/parser)
+   ï¿½  +- layout.js              # Root layout + Montserrat font + global body styles
+   ï¿½  +- globals.css            # Tailwind base + key animations
+   ï¿½  +- page.js                # Landing page (marketing + feature highlights)
+   ï¿½  +- calculator/
+   ï¿½  ï¿½  +- page.js             # Calculator entry (renders FinCalApp)
+   ï¿½  +- api/
+   ï¿½     +- ai/
+   ï¿½        +- route.js          # AI API handler (insight/validator/parser)
    +- FinCalApp.jsx             # Main app orchestrator (state, tabs, data flow)
    +- engine/                   # Financial calculation engine
-   ¦  +- defaults.js            # Goal inflation and return defaults
-   ¦  +- delay.js               # Cost-of-delay computation
-   ¦  +- formulas.js            # FV, SIP, lumpsum, aggregate outputs
-   ¦  +- lumpsum.js             # Lumpsum future value
-   ¦  +- scenarios.js           # Conservative/Moderate/Aggressive scenarios
-   ¦  +- sensitivity.js         # Inflation/return heatmap grid
-   ¦  +- stepUp.js              # Step-up SIP calculator
-   ¦  +- validators.js          # Input validation + confidence score
-   ¦  +- yearByYear.js          # Year-by-year compounding engine
+   ï¿½  +- defaults.js            # Goal inflation and return defaults
+   ï¿½  +- delay.js               # Cost-of-delay computation
+   ï¿½  +- formulas.js            # FV, SIP, lumpsum, aggregate outputs
+   ï¿½  +- lumpsum.js             # Lumpsum future value
+   ï¿½  +- scenarios.js           # Conservative/Moderate/Aggressive scenarios
+   ï¿½  +- sensitivity.js         # Inflation/return heatmap grid
+   ï¿½  +- stepUp.js              # Step-up SIP calculator
+   ï¿½  +- validators.js          # Input validation + confidence score
+   ï¿½  +- yearByYear.js          # Year-by-year compounding engine
    +- lib/
-   ¦  +- constants.js           # Colors, goals, presets, ranges, breakpoints
-   ¦  +- utils.js               # Currency formatters + helpers
-   ¦  +- ai/
-   ¦     +- parser.js           # AI JSON response parsing
-   ¦     +- prompts.js          # Prompt templates + compliance rule
-   ¦     +- service.js          # Gemini model wrapper (server-side)
+   ï¿½  +- constants.js           # Colors, goals, presets, ranges, breakpoints
+   ï¿½  +- utils.js               # Currency formatters + helpers
+   ï¿½  +- ai/
+   ï¿½     +- parser.js           # AI JSON response parsing
+   ï¿½     +- prompts.js          # Prompt templates + compliance rule
+   ï¿½     +- service.js          # Gemini model wrapper (server-side)
    +- components/
       +- ai/
-      ¦  +- GoalValidator.jsx   # AI warning flags for inputs
-      ¦  +- InsightParagraph.jsx# AI-generated goal summary
-      ¦  +- NLGoalInput.jsx     # Natural-language goal parser input
+      ï¿½  +- GoalValidator.jsx   # AI warning flags for inputs
+      ï¿½  +- InsightParagraph.jsx# AI-generated goal summary
+      ï¿½  +- NLGoalInput.jsx     # Natural-language goal parser input
       +- blocks/
-      ¦  +- feature-section.jsx # Landing page stepper block
+      ï¿½  +- feature-section.jsx # Landing page stepper block
       +- charts/
-      ¦  +- AreaChart.jsx       # Scenario growth over time
-      ¦  +- DonutChart.jsx      # Invested vs returns breakdown
-      ¦  +- GlidePath.jsx       # Equity/debt glide path
-      ¦  +- SensitivityHeatTable.jsx # Inflation vs return SIP heatmap
-      ¦  +- StackedBarChart.jsx # Year-by-year invested vs returns
-      ¦  +- StepUpBarChart.jsx  # Step-up SIP yearly bars
-      ¦  +- TimelineVisual.jsx  # Goal milestone timeline
+      ï¿½  +- AreaChart.jsx       # Scenario growth over time
+      ï¿½  +- DonutChart.jsx      # Invested vs returns breakdown
+      ï¿½  +- GlidePath.jsx       # Equity/debt glide path
+      ï¿½  +- SensitivityHeatTable.jsx # Inflation vs return SIP heatmap
+      ï¿½  +- StackedBarChart.jsx # Year-by-year invested vs returns
+      ï¿½  +- StepUpBarChart.jsx  # Step-up SIP yearly bars
+      ï¿½  +- TimelineVisual.jsx  # Goal milestone timeline
       +- inputs/
-      ¦  +- GoalInputForm.jsx   # Cost, years, inflation inputs + validation
-      ¦  +- GoalSelector.jsx    # Goal type selector
-      ¦  +- LumpsumToggle.jsx   # Lumpsum toggle + input
-      ¦  +- QuickPresets.jsx    # Goal amount presets
-      ¦  +- RiskProfileSelector.jsx # Safe/Balanced/Growth selection
-      ¦  +- SliderInput.jsx     # Reusable slider with tooltip
-      ¦  +- StepUpToggle.jsx    # Step-up SIP toggle + percent slider
+      ï¿½  +- GoalInputForm.jsx   # Cost, years, inflation inputs + validation
+      ï¿½  +- GoalSelector.jsx    # Goal type selector
+      ï¿½  +- LumpsumToggle.jsx   # Lumpsum toggle + input
+      ï¿½  +- QuickPresets.jsx    # Goal amount presets
+      ï¿½  +- RiskProfileSelector.jsx # Safe/Balanced/Growth selection
+      ï¿½  +- SliderInput.jsx     # Reusable slider with tooltip
+      ï¿½  +- StepUpToggle.jsx    # Step-up SIP toggle + percent slider
       +- layout/
-      ¦  +- BottomSheet.jsx     # Mobile bottom sheet container
-      ¦  +- EducationTips.jsx   # Education-specific tips block
-      ¦  +- Header.jsx          # Sticky header with logo + tab bar
-      ¦  +- HeroSection.jsx     # Full-screen hero
-      ¦  +- StickyDisclaimer.jsx# Fixed compliance disclaimer bar
-      ¦  +- TaxationBanner.jsx  # LTCG pre-tax banner
+      ï¿½  +- BottomSheet.jsx     # Mobile bottom sheet container
+      ï¿½  +- EducationTips.jsx   # Education-specific tips block
+      ï¿½  +- Header.jsx          # Sticky header with logo + tab bar
+      ï¿½  +- HeroSection.jsx     # Full-screen hero
+      ï¿½  +- StickyDisclaimer.jsx# Fixed compliance disclaimer bar
+      ï¿½  +- TaxationBanner.jsx  # LTCG pre-tax banner
       +- magicui/
-      ¦  +- animated-shiny-text.jsx # Shimmering badge text
-      ¦  +- border-beam.jsx     # Decorative border animation
+      ï¿½  +- animated-shiny-text.jsx # Shimmering badge text
+      ï¿½  +- border-beam.jsx     # Decorative border animation
       +- results/
-      ¦  +- AnalyticsSection.jsx# Aggregated analysis blocks
-      ¦  +- CostOfDelayCard.jsx # Delay impact card
-      ¦  +- GoalComparison.jsx  # Compare two goals view
-      ¦  +- GoalRealityIndicator.jsx # Confidence score visual
-      ¦  +- HeadlineSIP.jsx     # Primary SIP hero card
-      ¦  +- ReverseCalculator.jsx # SIP ? Goal calculator
-      ¦  +- ScenarioCards.jsx   # Scenario SIP cards
+      ï¿½  +- AnalyticsSection.jsx# Aggregated analysis blocks
+      ï¿½  +- CostOfDelayCard.jsx # Delay impact card
+      ï¿½  +- GoalComparison.jsx  # Compare two goals view
+      ï¿½  +- GoalRealityIndicator.jsx # Confidence score visual
+      ï¿½  +- HeadlineSIP.jsx     # Primary SIP hero card
+      ï¿½  +- ReverseCalculator.jsx # SIP ? Goal calculator
+      ï¿½  +- ScenarioCards.jsx   # Scenario SIP cards
       +- shared/
-      ¦  +- AmberWarning.jsx    # Soft warning block
-      ¦  +- AssumptionLock.jsx  # Lock/unlock assumptions
-      ¦  +- AssumptionTransparency.jsx # Formula disclosure accordion
-      ¦  +- ErrorMessage.jsx    # Error message w/ shake animation
-      ¦  +- ExportPdfButton.jsx # PDF export action
-      ¦  +- SkeletonLoader.jsx  # Loading placeholder
-      ¦  +- Tooltip.jsx         # Radix-based tooltip
+      ï¿½  +- AmberWarning.jsx    # Soft warning block
+      ï¿½  +- AssumptionLock.jsx  # Lock/unlock assumptions
+      ï¿½  +- AssumptionTransparency.jsx # Formula disclosure accordion
+      ï¿½  +- ErrorMessage.jsx    # Error message w/ shake animation
+      ï¿½  +- ExportPdfButton.jsx # PDF export action
+      ï¿½  +- SkeletonLoader.jsx  # Loading placeholder
+      ï¿½  +- Tooltip.jsx         # Radix-based tooltip
       +- ui/
          +- Accordion.jsx       # Styled accordion wrapper
          +- AnimatedCircularProgressBar.jsx # Circular gauge
@@ -275,7 +275,7 @@ SIP = calcSIP(calcFV(cost, inflation, yrs), return, yrs)
 
 ## ?? How to Use the App
 1. Open the calculator from the landing page or directly at `/calculator`.
-2. Pick a goal type and enter today’s cost, time horizon, and inflation assumption.
+2. Pick a goal type and enter todayï¿½s cost, time horizon, and inflation assumption.
 3. Use Quick Presets for goal amount or type directly for custom values.
 4. Choose a risk profile or adjust the return slider (lock if you want to preserve a value).
 5. Toggle Step-up SIP or Lumpsum to model alternate investment styles.
@@ -330,7 +330,7 @@ Note: Use a hotspot if campus networks block Google Gemini API calls.
 - Animated number counters (react-countup + custom NumberCounter).
 - Shimmer loaders and skeleton states.
 - Accordion open/close animations.
-- Confetti celebration for “goal already met” state.
+- Confetti celebration for ï¿½goal already metï¿½ state.
 
 ## ?? Charts & Visualizations
 
@@ -339,7 +339,7 @@ Note: Use a hotspot if campus networks block Google Gemini API calls.
 | AreaChart | Scenario-wise corpus growth across years using SIP compounding. |
 | DonutChart | Invested vs returns breakdown with growth multiple label. |
 | GlidePath | Equity/debt glide path that shifts toward debt as time reduces. |
-| SensitivityHeatTable | 6×6 heatmap of SIP vs inflation and return assumptions. |
+| SensitivityHeatTable | 6ï¿½6 heatmap of SIP vs inflation and return assumptions. |
 | StackedBarChart | Year-by-year invested vs returns stacked bars. |
 | StepUpBarChart | SIP growth per year for step-up mode. |
 | TimelineVisual | Milestone timeline of corpus buildup with count-up. |
@@ -355,7 +355,7 @@ WCAG 2.1 AA support is applied where implemented in code:
 
 ## ? Compliance
 - Sticky disclaimer is always visible at the bottom of the app.
-- AI prompts forbid guarantee language (no “assured” or “certain” returns).
+- AI prompts forbid guarantee language (no ï¿½assuredï¿½ or ï¿½certainï¿½ returns).
 - No specific fund promotion in UI or AI outputs.
 - All assumptions are user-editable and can be locked.
 - Results are labeled estimated/illustrative across UI and prompts.
