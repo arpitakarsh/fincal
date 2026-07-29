@@ -1,0 +1,317 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// --- Better Auth & Core Identity ---
+model User {
+  id            String    @id @default(uuid())
+  name          String
+  email         String    @unique
+  emailVerified Boolean   @default(false)
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  sessions         Session[]
+  accounts         Account[]
+  preferences      UserPreferences?
+  investorProfile  InvestorProfile?
+  goals            Goal[]
+  portfolio        Portfolio?
+  aiInsights       AIInsightHistory[]
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Account {
+  id                    String    @id @default(uuid())
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+}
+
+model Verification {
+  id         String    @id @default(uuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime? @default(now())
+  updatedAt  DateTime? @updatedAt
+}
+
+// --- Custom Preferences ---
+model UserPreferences {
+  id              String   @id @default(uuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  theme           String   @default("system")
+  currency        String   @default("INR")
+  emailAlerts     Boolean  @default(true)
+  updatedAt       DateTime @updatedAt
+}
+
+// --- Investor Profile ---
+model InvestorProfile {
+  id                    String   @id @default(uuid())
+  userId                String   @unique
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Basic Info
+  age                   Int
+
+  // Financial Info
+  currentCapital        Float
+  monthlyInvestmentCap  Float
+  existingSip           Float
+  existingLumpsum       Float
+  emergencyFund         Float
+  annualIncome          Float?
+
+  // Preferences
+  goalType              String
+  targetAmount          Float?
+  targetYear            Int
+
+  // Behavior
+  riskAppetite          String   // Low, Moderate, High, Very High
+  investmentKnowledge   String   // Beginner, Intermediate, Advanced
+  liquidityPreference   String   // High, Medium, Low
+  investmentStyle       String   // Lumpsum, SIP, Both
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+}
+
+// --- Mutual Funds & AMC ---
+model AMC {
+  id        String       @id @default(uuid())
+  name      String       @unique
+  funds     MutualFund[]
+}
+
+model MutualFund {
+  id              String       @id @default(uuid())
+  isin            String       @unique
+  name            String
+  category        String
+  amcId           String
+  amc             AMC          @relation(fields: [amcId], references: [id])
+  
+  expenseRatio    Float
+  aumCr           Float
+  launchDate      DateTime
+  benchmark       String
+  riskometer      String
+  
+  minSip          Float
+  minLumpsum      Float
+  exitLoad        String?
+  
+  metrics         FundMetrics?
+  historicalNavs  HistoricalNAV[]
+  rollingReturns  RollingReturn[]
+  analyticsCache  AnalyticsCache?
+  sectorAllocations SectorAllocation[]
+  portfolioHoldings PortfolioHolding[]
+  providerMetadata ProviderMetadata?
+  recommendationHistories RecommendationHistory[]
+}
+
+model FundMetrics {
+  id              String     @id @default(uuid())
+  fundId          String     @unique
+  fund            MutualFund @relation(fields: [fundId], references: [id])
+  
+  cagr1Y          Float?
+  cagr3Y          Float?
+  cagr5Y          Float?
+  
+  sharpeRatio     Float?
+  sortinoRatio    Float?
+  alpha           Float?
+  beta            Float?
+  stdDev          Float?
+  
+  maxDrawdown     Float?
+  upsideCapture   Float?
+  downsideCapture Float?
+  
+  updatedAt       DateTime   @updatedAt
+}
+
+model HistoricalNAV {
+  id              String     @id @default(uuid())
+  fundId          String
+  fund            MutualFund @relation(fields: [fundId], references: [id])
+  date            DateTime
+  nav             Float
+
+  @@unique([fundId, date])
+}
+
+model RollingReturn {
+  id              String     @id @default(uuid())
+  fundId          String
+  fund            MutualFund @relation(fields: [fundId], references: [id])
+  windowYears     Int
+  date            DateTime
+  annualizedCagr  Float
+
+  @@unique([fundId, windowYears, date])
+}
+
+model AnalyticsCache {
+  id              String     @id @default(uuid())
+  fundId          String     @unique
+  fund            MutualFund @relation(fields: [fundId], references: [id])
+  
+  probabilityData Json       // Stores pre-calculated bucket distributions
+  riskData        Json       // Stores pre-calculated percentiles, max drawdown
+  
+  updatedAt       DateTime   @updatedAt
+}
+
+model SectorAllocation {
+  id              String     @id @default(uuid())
+  fundId          String
+  fund            MutualFund @relation(fields: [fundId], references: [id])
+  sectorName      String
+  percentage      Float
+
+  @@unique([fundId, sectorName])
+}
+
+model PortfolioHolding {
+  id              String     @id @default(uuid())
+  fundId          String
+  fund            MutualFund @relation(fields: [fundId], references: [id])
+  companyName     String
+  ticker          String?
+  percentage      Float
+
+  @@unique([fundId, companyName])
+}
+
+model ProviderMetadata {
+  id              String     @id @default(uuid())
+  fundId          String     @unique
+  fund            MutualFund @relation(fields: [fundId], references: [id])
+  providerName    String     // e.g. AMFI, Morningstar
+  providerFundId  String     // External ID
+  lastSyncedAt    DateTime
+}
+
+model SyncLog {
+  id              String     @id @default(uuid())
+  jobName         String     // e.g. DailyNavSync
+  status          String     // SUCCESS, PARTIAL, FAILED
+  recordsProcessed Int
+  errors          Json?
+  startedAt       DateTime   @default(now())
+  completedAt     DateTime?
+}
+
+// --- Portfolio & Goal Management ---
+
+model Goal {
+  id                  String     @id @default(uuid())
+  userId              String
+  user                User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  name                String     // e.g. "Retirement", "House"
+  type                String?    // Preserved from legacy placeholder model
+  targetAmount        Float
+  currentAmount       Float      @default(0)
+  targetDate          DateTime
+  monthlySip          Float      @default(0)
+  
+  priority            String     // CRITICAL, HIGH, MEDIUM, LOW
+  healthScore         String     // EXCELLENT, GOOD, NEEDS_ATTENTION, CRITICAL
+  status              String     @default("ACTIVE") // ACTIVE, COMPLETED, PAUSED
+  
+  successProbability  Float?
+  recommendedCategory String?
+  
+  progressSnapshots   GoalProgress[]
+  recommendations     RecommendationHistory[]
+  
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
+}
+
+model GoalProgress {
+  id              String   @id @default(uuid())
+  goalId          String
+  goal            Goal     @relation(fields: [goalId], references: [id], onDelete: Cascade)
+  date            DateTime @default(now())
+  amount          Float
+  percentage      Float
+}
+
+model Portfolio {
+  id              String   @id @default(uuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  totalInvested   Float    @default(0)
+  currentValue    Float    @default(0) // Future integration
+  totalMonthlySip Float    @default(0)
+  
+  snapshots       PortfolioSnapshot[]
+  
+  updatedAt       DateTime @updatedAt
+}
+
+model PortfolioSnapshot {
+  id              String    @id @default(uuid())
+  portfolioId     String
+  portfolio       Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  date            DateTime  @default(now())
+  totalValue      Float
+  netInvested     Float
+}
+
+model RecommendationHistory {
+  id              String   @id @default(uuid())
+  goalId          String
+  goal            Goal     @relation(fields: [goalId], references: [id], onDelete: Cascade)
+  fundId          String
+  fund            MutualFund @relation(fields: [fundId], references: [id])
+  rationale       String
+  scoreAtTime     Float
+  createdAt       DateTime @default(now())
+}
+
+model AIInsightHistory {
+  id              String   @id @default(uuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  topic           String   // e.g. "Goal Reality Check", "Portfolio Risk"
+  insight         Json     // Storing the structured AI response
+  createdAt       DateTime @default(now())
+}

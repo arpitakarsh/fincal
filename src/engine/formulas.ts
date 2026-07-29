@@ -1,0 +1,56 @@
+import { CalculationInputs, CalculationResults } from '@/types/analytics';
+
+export function calcFV(cost: number, inflation: number, yrs: number): number {
+  const rate = inflation / 100;
+  return parseFloat((cost * Math.pow(1 + rate, yrs)).toFixed(10));
+}
+
+export function calcSIP(fv: number, annualRet: number, yrs: number): number {
+  const r = annualRet / 12 / 100;
+  const n = yrs * 12;
+
+  if (r === 0) return parseFloat((fv / n).toFixed(2));
+
+  const sip = (fv * r) / ((Math.pow(1 + r, n) - 1) * (1 + r));  
+  return parseFloat(sip.toFixed(2));
+}
+
+export function calcAll({ cost, inflation, yrs, annualRet, lumpsum = 0 }: CalculationInputs): CalculationResults & { corpus: number, lumpsumFV: number, effFV: number } {
+  const fv = calcFV(cost, inflation, yrs);
+
+  const lumpsumFV = lumpsum > 0
+    ? parseFloat((lumpsum * Math.pow(1 + annualRet / 100, yrs)).toFixed(10))
+    : 0;
+
+  const effFV = Math.max(0, parseFloat((fv - lumpsumFV).toFixed(10)));
+
+  const sip = effFV > 0 ? calcSIP(effFV, annualRet, yrs) : 0;
+
+  const n = yrs * 12;
+  const invested = parseFloat((sip * n + lumpsum).toFixed(2));
+  const corpus = parseFloat(fv.toFixed(2));
+  const returns = parseFloat((corpus - invested).toFixed(2));
+
+  return {
+    fv: corpus,
+    sip,
+    invested,
+    returns,
+    corpus,
+    lumpsumFV: parseFloat(lumpsumFV.toFixed(2)),
+    effFV: parseFloat(effFV.toFixed(2)),
+  };
+}
+
+// For backward compatibility with existing code
+export function calculateSIP({ presentCost, inflation, annualReturn, years }: { presentCost: number, inflation: number, annualReturn: number, years: number }): number {
+  const FV = parseFloat(
+    (presentCost * Math.pow(1 + inflation / 100, years)).toFixed(10)
+  );
+  const r = parseFloat((annualReturn / 100 / 12).toFixed(10));
+  const n = years * 12;
+  const SIP = parseFloat(
+    (FV * r / ((Math.pow(1 + r, n) - 1) * (1 + r))).toFixed(10)
+  );
+  return parseFloat(SIP.toFixed(2));
+}
