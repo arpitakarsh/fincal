@@ -7,43 +7,49 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// --- Better Auth & Core Identity ---
-model User {
-  id            String    @id @default(uuid())
-  name          String
-  email         String    @unique
-  emailVerified Boolean   @default(false)
-  image         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+// ----------------------------------------------------------------------------
+// AUTH & USER SETTINGS (Better Auth)
+// ----------------------------------------------------------------------------
 
-  sessions         Session[]
-  accounts         Account[]
-  preferences      UserPreferences?
-  investorProfile  InvestorProfile?
-  goals            Goal[]
-  portfolio        Portfolio?
-  aiInsights       AIInsightHistory[]
+model User {
+  id            String   @id @default(uuid())
+  name          String
+  email         String   @unique
+  emailVerified Boolean  @default(false)
+  image         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  accounts          Account[]
+  sessions          Session[]
+  preferences       UserPreferences?
+  investorProfile   InvestorProfile?
+  portfolio         Portfolio?
+  goals             Goal[]
+  aiInsights        AIInsightHistory[]
+  aiRecommendations AIRecommendation[]
 }
 
 model Session {
   id        String   @id @default(uuid())
   expiresAt DateTime
   token     String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
   ipAddress String?
   userAgent String?
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 model Account {
   id                    String    @id @default(uuid())
   accountId             String
   providerId            String
-  userId                String
-  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   accessToken           String?
   refreshToken          String?
   idToken               String?
@@ -53,265 +59,204 @@ model Account {
   password              String?
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 model Verification {
-  id         String    @id @default(uuid())
+  id         String   @id @default(uuid())
   identifier String
   value      String
   expiresAt  DateTime
-  createdAt  DateTime? @default(now())
-  updatedAt  DateTime? @updatedAt
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }
 
-// --- Custom Preferences ---
 model UserPreferences {
-  id              String   @id @default(uuid())
-  userId          String   @unique
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  theme           String   @default("system")
-  currency        String   @default("INR")
-  emailAlerts     Boolean  @default(true)
-  updatedAt       DateTime @updatedAt
+  id          String   @id @default(uuid())
+  theme       String   @default("system")
+  currency    String   @default("INR")
+  emailAlerts Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-// --- Investor Profile ---
+// ----------------------------------------------------------------------------
+// INVESTOR & PORTFOLIO
+// ----------------------------------------------------------------------------
+
 model InvestorProfile {
-  id                    String   @id @default(uuid())
-  userId                String   @unique
-  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  // Basic Info
-  age                   Int
+  id                   String   @id @default(uuid())
+  age                  Int
+  currentCapital       Float
+  monthlyInvestmentCap Float
+  existingSip          Float
+  existingLumpsum      Float
+  emergencyFund        Float
+  annualIncome         Float?
+  goalType             String
+  targetAmount         Float?
+  targetYear           Int
+  riskAppetite         String
+  investmentKnowledge  String
+  liquidityPreference  String
+  investmentStyle      String
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
 
-  // Financial Info
-  currentCapital        Float
-  monthlyInvestmentCap  Float
-  existingSip           Float
-  existingLumpsum       Float
-  emergencyFund         Float
-  annualIncome          Float?
-
-  // Preferences
-  goalType              String
-  targetAmount          Float?
-  targetYear            Int
-
-  // Behavior
-  riskAppetite          String   // Low, Moderate, High, Very High
-  investmentKnowledge   String   // Beginner, Intermediate, Advanced
-  liquidityPreference   String   // High, Medium, Low
-  investmentStyle       String   // Lumpsum, SIP, Both
-
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
-}
-
-// --- Mutual Funds & AMC ---
-model AMC {
-  id        String       @id @default(uuid())
-  name      String       @unique
-  funds     MutualFund[]
-}
-
-model MutualFund {
-  id              String       @id @default(uuid())
-  isin            String       @unique
-  name            String
-  category        String
-  amcId           String
-  amc             AMC          @relation(fields: [amcId], references: [id])
-  
-  expenseRatio    Float
-  aumCr           Float
-  launchDate      DateTime
-  benchmark       String
-  riskometer      String
-  
-  minSip          Float
-  minLumpsum      Float
-  exitLoad        String?
-  
-  metrics         FundMetrics?
-  historicalNavs  HistoricalNAV[]
-  rollingReturns  RollingReturn[]
-  analyticsCache  AnalyticsCache?
-  sectorAllocations SectorAllocation[]
-  portfolioHoldings PortfolioHolding[]
-  providerMetadata ProviderMetadata?
-  recommendationHistories RecommendationHistory[]
-}
-
-model FundMetrics {
-  id              String     @id @default(uuid())
-  fundId          String     @unique
-  fund            MutualFund @relation(fields: [fundId], references: [id])
-  
-  cagr1Y          Float?
-  cagr3Y          Float?
-  cagr5Y          Float?
-  
-  sharpeRatio     Float?
-  sortinoRatio    Float?
-  alpha           Float?
-  beta            Float?
-  stdDev          Float?
-  
-  maxDrawdown     Float?
-  upsideCapture   Float?
-  downsideCapture Float?
-  
-  updatedAt       DateTime   @updatedAt
-}
-
-model HistoricalNAV {
-  id              String     @id @default(uuid())
-  fundId          String
-  fund            MutualFund @relation(fields: [fundId], references: [id])
-  date            DateTime
-  nav             Float
-
-  @@unique([fundId, date])
-}
-
-model RollingReturn {
-  id              String     @id @default(uuid())
-  fundId          String
-  fund            MutualFund @relation(fields: [fundId], references: [id])
-  windowYears     Int
-  date            DateTime
-  annualizedCagr  Float
-
-  @@unique([fundId, windowYears, date])
-}
-
-model AnalyticsCache {
-  id              String     @id @default(uuid())
-  fundId          String     @unique
-  fund            MutualFund @relation(fields: [fundId], references: [id])
-  
-  probabilityData Json       // Stores pre-calculated bucket distributions
-  riskData        Json       // Stores pre-calculated percentiles, max drawdown
-  
-  updatedAt       DateTime   @updatedAt
-}
-
-model SectorAllocation {
-  id              String     @id @default(uuid())
-  fundId          String
-  fund            MutualFund @relation(fields: [fundId], references: [id])
-  sectorName      String
-  percentage      Float
-
-  @@unique([fundId, sectorName])
-}
-
-model PortfolioHolding {
-  id              String     @id @default(uuid())
-  fundId          String
-  fund            MutualFund @relation(fields: [fundId], references: [id])
-  companyName     String
-  ticker          String?
-  percentage      Float
-
-  @@unique([fundId, companyName])
-}
-
-model ProviderMetadata {
-  id              String     @id @default(uuid())
-  fundId          String     @unique
-  fund            MutualFund @relation(fields: [fundId], references: [id])
-  providerName    String     // e.g. AMFI, Morningstar
-  providerFundId  String     // External ID
-  lastSyncedAt    DateTime
-}
-
-model SyncLog {
-  id              String     @id @default(uuid())
-  jobName         String     // e.g. DailyNavSync
-  status          String     // SUCCESS, PARTIAL, FAILED
-  recordsProcessed Int
-  errors          Json?
-  startedAt       DateTime   @default(now())
-  completedAt     DateTime?
-}
-
-// --- Portfolio & Goal Management ---
-
-model Goal {
-  id                  String     @id @default(uuid())
-  userId              String
-  user                User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  name                String     // e.g. "Retirement", "House"
-  type                String?    // Preserved from legacy placeholder model
-  targetAmount        Float
-  currentAmount       Float      @default(0)
-  targetDate          DateTime
-  monthlySip          Float      @default(0)
-  
-  priority            String     // CRITICAL, HIGH, MEDIUM, LOW
-  healthScore         String     // EXCELLENT, GOOD, NEEDS_ATTENTION, CRITICAL
-  status              String     @default("ACTIVE") // ACTIVE, COMPLETED, PAUSED
-  
-  successProbability  Float?
-  recommendedCategory String?
-  
-  progressSnapshots   GoalProgress[]
-  recommendations     RecommendationHistory[]
-  
-  createdAt           DateTime   @default(now())
-  updatedAt           DateTime   @updatedAt
-}
-
-model GoalProgress {
-  id              String   @id @default(uuid())
-  goalId          String
-  goal            Goal     @relation(fields: [goalId], references: [id], onDelete: Cascade)
-  date            DateTime @default(now())
-  amount          Float
-  percentage      Float
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Portfolio {
   id              String   @id @default(uuid())
-  userId          String   @unique
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
   totalInvested   Float    @default(0)
-  currentValue    Float    @default(0) // Future integration
+  currentValue    Float    @default(0)
   totalMonthlySip Float    @default(0)
-  
-  snapshots       PortfolioSnapshot[]
-  
+  createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  holdings  UserHolding[]
+  snapshots PortfolioSnapshot[]
+}
+
+model UserHolding {
+  id               String   @id @default(uuid())
+  fundId           String?
+  fundName         String?
+  schemeCode       String?
+  units            Float
+  averageNav       Float
+  investedValue    Float
+  currentValue     Float?
+  source           String?
+  recommendationId String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  portfolioId String
+  portfolio   Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+
+  @@index([portfolioId])
+  @@index([schemeCode])
 }
 
 model PortfolioSnapshot {
-  id              String    @id @default(uuid())
-  portfolioId     String
-  portfolio       Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
-  date            DateTime  @default(now())
-  totalValue      Float
-  netInvested     Float
+  id          String   @id @default(uuid())
+  date        DateTime @default(now())
+  totalValue  Float
+  netInvested Float
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  portfolioId String
+  portfolio   Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+
+  @@index([portfolioId])
 }
 
-model RecommendationHistory {
-  id              String   @id @default(uuid())
-  goalId          String
-  goal            Goal     @relation(fields: [goalId], references: [id], onDelete: Cascade)
-  fundId          String
-  fund            MutualFund @relation(fields: [fundId], references: [id])
-  rationale       String
-  scoreAtTime     Float
-  createdAt       DateTime @default(now())
+// ----------------------------------------------------------------------------
+// GOALS & RECOMMENDATIONS
+// ----------------------------------------------------------------------------
+
+enum InvestmentType {
+  lumpsum
+  sip
+}
+
+enum GoalType {
+  wealth_generation
+  education
+  retirement
+  house
+  other
+}
+
+enum RiskAppetiteGoal {
+  low
+  moderate
+  high
+}
+
+model Goal {
+  id                String           @id @default(uuid())
+  name              String?
+  investmentType    InvestmentType
+  lumpsumAmount     Float?
+  sipAmount         Float?
+  targetAmount      Float
+  timeHorizonYears  Float
+  isFlexibleHorizon Boolean          @default(false)
+  goalType          GoalType
+  riskAppetite      RiskAppetiteGoal
+  age               Int
+  additionalNotes   String?          @db.Text
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  progressSnapshots GoalProgress[]
+  aiRecommendations AIRecommendation[]
+
+  @@index([userId])
+}
+
+model GoalProgress {
+  id         String   @id @default(uuid())
+  date       DateTime @default(now())
+  amount     Float
+  percentage Float
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  goalId String
+  goal   Goal   @relation(fields: [goalId], references: [id], onDelete: Cascade)
+
+  @@index([goalId])
+}
+
+model AIRecommendation {
+  id                         String   @id @default(uuid())
+  schemeCode                 String
+  fundName                   String
+  category                   String
+  score                      Float
+  reason                     String   @db.Text
+  suggestedAllocationPercent Float
+  addedToPortfolio           Boolean  @default(false)
+  createdAt                  DateTime @default(now())
+  updatedAt                  DateTime @updatedAt
+
+  goalId String
+  goal   Goal   @relation(fields: [goalId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([goalId])
+  @@index([userId])
 }
 
 model AIInsightHistory {
-  id              String   @id @default(uuid())
-  userId          String
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  topic           String   // e.g. "Goal Reality Check", "Portfolio Risk"
-  insight         Json     // Storing the structured AI response
-  createdAt       DateTime @default(now())
+  id        String   @id @default(uuid())
+  topic     String
+  insight   Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }

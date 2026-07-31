@@ -1,279 +1,99 @@
-// @ts-nocheck
-'use client';
+import Link from 'next/link';
+import { Sparkles, TrendingUp, Shield, ArrowRight, CheckCircle2 } from 'lucide-react';
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import Link from "next/link";
-import FeatureSteps from "@/components/blocks/feature-section";
-import AnimatedShinyText from "@/components/magicui/animated-shiny-text";
-import { HoverEffect } from "@/components/ui/card-hover-effect";
-import { motion, AnimatePresence, useReducedMotion, useInView } from "framer-motion";
-import CountUp from "react-countup";
-import StickyDisclaimer from "@/components/layout/StickyDisclaimer";
-
-const SUBTITLES = [
-  "Your dream house. Financially.",
-  "Your child's education. Planned.",
-  "Your dream wedding. Funded.",
-];
-
-const features = [
-  {
-    title: "AI Goal Parser",
-    description: "Type in plain English like 'Buy a house in 10 years for 50 lakhs' and we'll fill the form instantly. All parsing is illustrative only.",
-    link: "/calculator"
-  },
-  {
-    title: "3 Scenario Analysis",
-    description: "Compare estimated SIP across Conservative (8%), Moderate (10%), and Aggressive (12%) return assumptions side by side.",
-    link: "/calculator"
-  },
-  {
-    title: "Sensitivity Heatmap",
-    description: "See how your estimated SIP changes across 36 combinations of inflation and return assumptions.",
-    link: "/calculator"
-  },
-  {
-    title: "Cost of Delay",
-    description: "See how much more you may need to invest for every year you delay starting. All figures are estimated and illustrative only.",
-    link: "/calculator"
-  },
-  {
-    title: "Step-Up SIP",
-    description: "Model assumed annual SIP increases to account for your expected income growth over time.",
-    link: "/calculator"
-  },
-  {
-    title: "Goal Reality Check",
-    description: "Get an AI-powered confidence indicator on your goal assumptions. Not financial advice  illustrative only.",
-    link: "/calculator"
-  }
-];
-
-const STATS = [
-  { value: 6, label: "Goal Types" },
-  { value: 3, label: "Return Scenarios" },
-  { value: 36, label: "Point Sensitivity Analysis" },
-  { value: 1, label: "AI-Powered Insights" },
-];
-
-export default function Page() {
-  const reduceMotion = useReducedMotion();
-  const [subtitleIndex, setSubtitleIndex] = useState(0);
-  const featuresRef = useRef(null);
-  const statsRef = useRef(null);
-  const statsInView = useInView(statsRef, { once: true, margin: "-50px" });
-
-  useEffect(() => {
-    if (reduceMotion) return;
-    const id = setInterval(() => {
-      setSubtitleIndex((prev) => (prev + 1) % SUBTITLES.length);
-    }, 3000);
-    return () => clearInterval(id);
-  }, [reduceMotion]);
-
-  const heroMotion = useMemo(
-    () => ({
-      hidden: { opacity: 0, y: 16 },
-      show: {
-        opacity: 1,
-        y: 0,
-        transition: { staggerChildren: 0.08, ease: [0.16, 1, 0.3, 1] },
-      },
-    }),
-    []
-  );
-
+export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-[#f8f9fb] text-[#1a1a2e] pb-8">
-      <div className="mx-auto w-full max-w-[1200px] px-6 py-10 md:py-16">
-        <motion.section
-          initial="hidden"
-          animate="show"
-          variants={heroMotion}
-          className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] items-center"
-        >
-          <motion.div variants={heroMotion} className="flex flex-col gap-6">
-            <Link href="/calculator" className="group rounded-full border border-[#224c87]/20 bg-[#e8eef7] text-base transition-all ease-in hover:cursor-pointer hover:bg-[#dce6f5] inline-block">
-              <AnimatedShinyText className="inline-flex items-center justify-center px-4 py-1 text-[#224c87] transition ease-out hover:text-[#1a3d6e] hover:duration-300 text-[11px] uppercase tracking-[0.18em] font-[600]">
-                <span> HDFC Mutual Fund  FinCal</span>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-1 transition-transform duration-300 ease-in-out group-hover:translate-x-0.5"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
-              </AnimatedShinyText>
-            </Link>
-            <h1 className="text-4xl md:text-5xl font-[700]" style={{ fontFamily: "Montserrat, sans-serif" }}>
-              Goal-Based Investment{" "}
-              <span className="text-[#224c87]">Calculator</span>
-            </h1>
-            <div className="h-7 text-base text-[#1a1a2e]">
-              <AnimatePresence mode="wait">
-                <motion.span
-                  key={subtitleIndex}
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -6 }}
-                  transition={{ duration: reduceMotion ? 0 : 0.4 }}
-                  className="block font-[600]"
-                  style={{ fontFamily: "Montserrat, sans-serif" }}
-                >
-                  {SUBTITLES[subtitleIndex]}
-                </motion.span>
-              </AnimatePresence>
-            </div>
-            <p className="text-[15px] text-[#465063]" style={{ fontFamily: "Arial, sans-serif" }}>
-              Calculate exactly how much SIP you need for any financial goal. Powered by smart assumptions  not
-              guesswork. All figures are estimated and illustrative only.
-            </p>
-            <div className="flex flex-wrap items-center gap-4">
-              <Link
-                href="/calculator"
-                className="inline-flex items-center justify-center rounded-full bg-[#224c87] px-6 py-3 text-white text-[14px] font-[600] shadow-[0_8px_20px_rgba(34,76,135,0.18)]"
-                style={{ fontFamily: "Montserrat, sans-serif" }}
-              >
-                Calculate My SIP 
-              </Link>
-              <button
-                type="button"
-                onClick={() => document.getElementById('how-it-works')?.scrollIntoView({ behavior: "smooth" })}
-                className="inline-flex items-center justify-center rounded-full border border-[#d7def0] px-6 py-3 text-[14px] font-[600] text-[#224c87] hover:bg-[#e8eef7]"
-                style={{ fontFamily: "Montserrat, sans-serif" }}
-              >
-                See How It Works
-              </button>
-            </div>
-            <p className="text-[12px] text-[#919090]">
-              Free  No login required  Illustrative only
-            </p>
-          </motion.div>
-
-          <motion.div variants={heroMotion} className="relative">
-            <div className="rounded-[20px] bg-[#224c87] p-6 text-white shadow-[0_16px_40px_rgba(34,76,135,0.2)] relative overflow-hidden">
-              <div
-                className="absolute inset-0 opacity-[0.08]"
-                style={{
-                  backgroundImage:
-                    "linear-gradient(rgba(255,255,255,0.8) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.8) 1px, transparent 1px)",
-                  backgroundSize: "20px 20px",
-                }}
-              />
-              <div className="relative z-10">
-                <p className="text-[13px] text-[#cfe1ff]">Estimated SIP required</p>
-                <p className="mt-2 text-[36px] font-[700]" style={{ fontFamily: "Montserrat, sans-serif" }}>
-                  5,338/month
-                </p>
-                <div className="mt-4 grid grid-cols-3 gap-3 rounded-[14px] border border-[rgba(255,255,255,0.2)] bg-[rgba(255,255,255,0.15)] p-3 text-[12px]">
-                  <div className="text-white/90">
-                    Goal after inflation
-                    <div className="text-white font-[600] mt-1">12.7L</div>
-                  </div>
-                  <div className="text-white/90">
-                    Time horizon
-                    <div className="text-white font-[600] mt-1">10 years</div>
-                  </div>
-                  <div className="text-white/90">
-                    Return (est.)
-                    <div className="text-white font-[600] mt-1">12% p.a.</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        </motion.section>
-
-        <section className="mt-16 md:mt-20" id="how-it-works" ref={featuresRef}>
-          <FeatureSteps
-            features={[
-              {
-                step: 'Step 1',
-                title: 'Set Your Financial Goal',
-                content: 'Choose from House, Education, Wedding, Car, Travel, Healthcare, or General. Enter today\'s cost and when you need the money.',
-                image: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?q=80&w=2070&auto=format&fit=crop',
-              },
-              {
-                step: 'Step 2',
-                title: 'Adjust Your Assumptions',
-                content: 'Set inflation rate, expected return, and risk profile. Smart defaults are pre-filled based on your goal type and time horizon.',
-                image: 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?q=80&w=2070&auto=format&fit=crop',
-              },
-              {
-                step: 'Step 3',
-                title: 'Get Your SIP Instantly',
-                content: 'See your estimated monthly SIP across Conservative, Moderate, and Aggressive scenarios. All figures are illustrative only.',
-                image: 'https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?q=80&w=2070&auto=format&fit=crop',
-              },
-            ]}
-            title="How It Works"
-            autoPlayInterval={4000}
-            imageHeight="h-[400px]"
-          />
-        </section>
-
-        <section className="mt-16 md:mt-20 bg-[#f8f9fb] py-12">
-          <h2 className="text-2xl md:text-3xl font-[700] text-center mb-8" style={{ fontFamily: "Montserrat, sans-serif", color: "#1a1a2e" }}>
-            Why FinCal?
-          </h2>
-          <div className="max-w-5xl mx-auto px-8">
-            <HoverEffect items={features} />
+    <div className="min-h-screen bg-gray-50 flex flex-col font-sans selection:bg-blue-100 selection:text-blue-900">
+      {/* Navigation */}
+      <nav className="w-full px-6 py-4 flex items-center justify-between border-b border-gray-200/50 bg-white/50 backdrop-blur-md sticky top-0 z-50">
+        <div className="flex items-center space-x-2">
+          <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center shadow-sm">
+            <TrendingUp className="w-5 h-5 text-white" />
           </div>
-        </section>
-
-        <section className="mt-16" ref={statsRef}>
-          <div className="rounded-[18px] bg-[#224c87] px-6 py-6 text-white">
-            <div className="grid gap-4 md:grid-cols-4 text-center">
-              {STATS.map((stat, idx) => (
-                <div key={stat.label} className="flex flex-col items-center gap-1">
-                  <div className="text-[26px] font-[700]" style={{ fontFamily: "Montserrat, sans-serif" }}>
-                    {statsInView ? <CountUp end={stat.value} duration={1.2} /> : stat.value}
-                  </div>
-                  <div className="text-[12px] text-white/80">{stat.label}</div>
-                  {idx < STATS.length - 1 && (
-                    <div className="hidden md:block h-6 w-px bg-white/25 mt-2" />
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="mt-16 md:mt-20 rounded-[20px] border border-[#e2e6ed] bg-white p-8 text-center">
-          <h2 className="text-2xl md:text-3xl font-[700]" style={{ fontFamily: "Montserrat, sans-serif" }}>
-            Start planning in 30 seconds
-          </h2>
-          <p className="mt-3 text-[14px] text-[#919090]" style={{ fontFamily: "Arial, sans-serif" }}>
-            No signup. No fees. All figures are estimated and illustrative only. Not financial advice.
-          </p>
-          <Link
-            href="/calculator"
-            className="mt-6 inline-flex items-center justify-center rounded-full bg-[#224c87] px-8 h-[56px] text-white text-[15px] font-[600]"
-            style={{ fontFamily: "Montserrat, sans-serif" }}
-          >
-            Calculate My SIP 
+          <span className="text-xl font-black tracking-tight text-gray-900">FinCal</span>
+        </div>
+        <div className="flex items-center space-x-4">
+          <Link href="/login" className="text-sm font-semibold text-gray-600 hover:text-gray-900 transition-colors">
+            Log in
           </Link>
-        </section>
+          <Link href="/register" className="text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-full transition-all shadow-sm hover:shadow">
+            Get Started
+          </Link>
+        </div>
+      </nav>
 
-        <footer className="mt-16 border-t border-[#e2e6ed] pt-6 pb-12 text-[12px] text-[#919090]">
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div className="text-[16px] font-[700]" style={{ fontFamily: "Montserrat, sans-serif" }}>
-              <span className="text-[#224c87]">Fin</span>
-              <span className="text-[#da3832]">Cal</span>{" "}
-              <span className="text-[12px] font-[500] text-[#919090]" style={{ fontFamily: "Arial, sans-serif" }}>
-                by Arpit Kumar & Himanshu
-              </span>
+      {/* Hero Section */}
+      <main className="flex-1 flex flex-col items-center justify-center px-6 py-24 text-center max-w-5xl mx-auto">
+        <div className="inline-flex items-center px-3 py-1.5 rounded-full bg-blue-50 text-blue-700 font-semibold text-xs mb-8 border border-blue-100 uppercase tracking-wider">
+          <Sparkles className="w-3.5 h-3.5 mr-1.5" />
+          Meet Your AI Investment Assistant
+        </div>
+        
+        <h1 className="text-5xl md:text-7xl font-black text-gray-900 tracking-tight leading-[1.1] mb-6">
+          Invest Smarter.<br />
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
+            Powered by AI.
+          </span>
+        </h1>
+        
+        <p className="text-lg md:text-xl text-gray-500 mb-10 max-w-2xl leading-relaxed">
+          FinCal analyzes your profile, goals, and risk appetite to generate intelligent, personalized mutual fund recommendations. Build wealth without the guesswork.
+        </p>
+        
+        <div className="flex flex-col sm:flex-row items-center gap-4 w-full justify-center">
+          <Link 
+            href="/register" 
+            className="w-full sm:w-auto px-8 py-4 bg-gray-900 text-white rounded-full font-bold text-lg hover:bg-black transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 flex items-center justify-center group"
+          >
+            Start Investing Free
+            <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+          </Link>
+          <Link 
+            href="/login" 
+            className="w-full sm:w-auto px-8 py-4 bg-white text-gray-900 border border-gray-200 rounded-full font-bold text-lg hover:bg-gray-50 transition-all flex items-center justify-center"
+          >
+            View Dashboard
+          </Link>
+        </div>
+
+        {/* Feature Highlights */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-24 text-left w-full">
+          <div className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+            <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center mb-6 text-blue-600">
+              <Sparkles className="w-6 h-6" />
             </div>
-            <div className="text-center text-[12px] text-[#919090]">
-              Built for TECHNEX '26  FinCal Innovation Hackathon  Co-sponsored by HDFC Mutual Fund
-            </div>
-            <div className="flex items-center gap-4 text-[12px] text-[#224c87]">
-              <Link href="/calculator" className="hover:underline">Reverse Calculator</Link>
-              <Link href="/calculator" className="hover:underline">Compare Goals</Link>
-            </div>
+            <h3 className="text-xl font-bold text-gray-900 mb-3">AI Recommendations</h3>
+            <p className="text-gray-500 leading-relaxed">
+              Our AI engine matches your goals with the best-performing mutual funds instantly, complete with rationales.
+            </p>
           </div>
-          <div className="mt-6 border-t border-[#e2e6ed] pt-4 text-center text-[12px] text-[#919090]">
-            Mutual Fund investments are subject to market risks. All figures are estimated and illustrative only. Past
-            performance is not indicative of future results. This does not constitute financial advice. HDFC AMC retains
-            IP ownership.
+          
+          <div className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+            <div className="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center mb-6 text-indigo-600">
+              <TrendingUp className="w-6 h-6" />
+            </div>
+            <h3 className="text-xl font-bold text-gray-900 mb-3">Goal Tracking</h3>
+            <p className="text-gray-500 leading-relaxed">
+              Set targets for retirement, education, or wealth creation and let FinCal track your progress automatically.
+            </p>
           </div>
-        </footer>
-      </div>
-      <StickyDisclaimer />
+
+          <div className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+            <div className="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center mb-6 text-emerald-600">
+              <Shield className="w-6 h-6" />
+            </div>
+            <h3 className="text-xl font-bold text-gray-900 mb-3">Bank-Grade Security</h3>
+            <p className="text-gray-500 leading-relaxed">
+              Your financial data is encrypted and secure. We focus on analytics and recommendations, not transactions.
+            </p>
+          </div>
+        </div>
+      </main>
+      
+      {/* Footer */}
+      <footer className="py-8 text-center text-gray-400 text-sm border-t border-gray-200">
+        <p>&copy; {new Date().getFullYear()} FinCal AI. All rights reserved.</p>
+      </footer>
     </div>
   );
 }
