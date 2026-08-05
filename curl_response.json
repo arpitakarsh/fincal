@@ -1,31 +1,0 @@
-Note: Unnecessary use of -X or --request, POST is already inferred.
-* Host localhost:3000 was resolved.
-* IPv6: ::1
-* IPv4: 127.0.0.1
-  % Total    % Received % Xferd  Average Speed  Time    Time    Time   Current
-                                 Dload  Upload  Total   Spent   Left   Speed
-  0      0   0      0   0      0      0      0                              0*   Trying [::1]:3000...
-* Established connection to localhost (::1 port 3000) from ::1 port 33332 
-* using HTTP/1.x
-> POST /api/recommendations/generate HTTP/1.1
-> Host: localhost:3000
-> User-Agent: curl/8.18.0
-> Accept: */*
-> Content-Type: application/json
-> Cookie: better-auth.session_token=hT4olS1YMp6a7KUkkwgWMPpCXUQgs4EU
-> Content-Length: 50
-> 
-} [50 bytes data]
-* upload completely sent off: 50 bytes
-100     50   0      0 100     50      0     41   00:01   00:01             41100     50   0      0 100     50      0     22   00:02   00:02             22100     50   0      0 100     50      0     15   00:03   00:03             15100     50   0      0 100     50      0     11   00:04   00:04             11100     50   0      0 100     50      0      9   00:05   00:05              9100     50   0      0 100     50      0      8   00:06   00:06              0100     50   0      0 100     50      0      6   00:08   00:07   00:01      0100     50   0      0 100     50      0      6   00:08   00:08              0100     50   0      0 100     50      0      5   00:10   00:09   00:01      0100     50   0      0 100     50      0      4   00:12   00:10   00:02      0100     50   0      0 100     50      0      4   00:12   00:11   00:01      0100     50   0      0 100     50      0      4   00:12   00:12              0100     50   0      0 100     50      0      3   00:16   00:13   00:03      0100     50   0      0 100     50      0      3   00:16   00:14   00:02      0100     50   0      0 100     50      0      3   00:16   00:15   00:01      0100     50   0      0 100     50      0      3   00:16   00:16              0100     50   0      0 100     50      0      2   00:25   00:17   00:08      0100     50   0      0 100     50      0      2   00:25   00:18   00:07      0100     50   0      0 100     50      0      2   00:25   00:19   00:06      0< HTTP/1.1 500 Internal Server Error
-< vary: rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch
-< content-type: application/json
-< Date: Thu, 30 Jul 2026 05:46:41 GMT
-< Connection: keep-alive
-< Keep-Alive: timeout=5
-< Transfer-Encoding: chunked
-< 
-{ [798 bytes data]
-100    836   0    786 100     50     40      2   00:25   00:19   00:06    150100    836   0    786 100     50     40      2   00:25   00:19   00:06    150100    836   0    786 100     50     40      2   00:25   00:19   00:06    150
-* Connection #0 to host localhost:3000 left intact
-{"error":"\nInvalid `prisma.investorProfile.findUnique()` invocation in\n/home/arpit/Documents/fincal_old/fincal/.next/dev/server/chunks/[root-of-the-server]__a99a09d7._.js:249:39\n\n  246 const prisma = new __TURBOPACK__imported__module__$5b$externals$5d2f40$prisma$2f$client__$5b$external$5d$__$2840$prisma$2f$client$2c$__cjs$2c$__$5b$project$5d2f$fincal$2f$node_modules$2f40$prisma$2f$client$29$__[\"PrismaClient\"]();\n  247 class InvestorProfileRepository {\n  248     async getByUserId(userId) {\n→ 249         return prisma.investorProfile.findUnique(\nCan't reach database server at `ep-floral-breeze-aypyy49w-pooler.c-5.us-east-2.aws.neon.tech:5432`\n\nPlease make sure your database server is running at `ep-floral-breeze-aypyy49w-pooler.c-5.us-east-2.aws.neon.tech:5432`."}

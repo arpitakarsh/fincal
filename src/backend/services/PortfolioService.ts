@@ -89,10 +89,14 @@ export class PortfolioService {
           : { schemeCode: '', schemeName: '', nav: 0, date: '', amc: '', category: '', navUnavailable: true };
 
         const currentNav = navData.navUnavailable ? (h.averageNav ?? 0) : navData.nav;
-        const currentValue = h.units * currentNav;
+        // When NAV is unavailable, fall back to the stored DB value to avoid showing fake losses
+        const currentValue = navData.navUnavailable 
+          ? (h.currentValue ?? h.units * (h.averageNav ?? 0))
+          : h.units * navData.nav;
         const investedAmount = h.investedValue ?? 0;
         const pnl = currentValue - investedAmount;
         const pnlPercentage = investedAmount > 0 ? (pnl / investedAmount) * 100 : 0;
+
 
         // Persist fresh NAV back to DB (fire and forget)
         if (!navData.navUnavailable) {
@@ -184,7 +188,7 @@ export class PortfolioService {
     }
 
     const purchaseNav = input.purchaseNav ?? navData.nav;
-    if (purchaseNav <= 0 || purchaseNav > 100000) {
+    if (purchaseNav <= 0 || purchaseNav > 1_000_000) {
       throw new Error(`The fetched or provided NAV (₹${purchaseNav}) seems absurdly high or low. Operation rejected for safety.`);
     }
 

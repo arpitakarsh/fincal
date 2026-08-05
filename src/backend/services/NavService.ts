@@ -250,14 +250,22 @@ export class NavService {
   ): number | null {
     if (history.length < 2) return null;
     const currentNav = history[0]!.nav;
-    // history is newest-first from mfapi
-    const targetDate = new Date(history[0]!.date.split('-').reverse().join('-'));
+    const parseDateStr = (dateStr: string) => {
+      // mfapi: DD-MM-YYYY -> YYYY-MM-DD
+      if (/^\d{2}-\d{2}-\d{4}$/.test(dateStr)) {
+        return new Date(dateStr.split('-').reverse().join('-'));
+      }
+      // AMFI or other: use standard Date parsing (works for DD-Mon-YYYY)
+      return new Date(dateStr);
+    };
+
+    const targetDate = parseDateStr(history[0]!.date);
     targetDate.setFullYear(targetDate.getFullYear() - years);
 
     // Find closest historical data point
     let oldNav: number | null = null;
     for (const h of history) {
-      const d = new Date(h.date.split('-').reverse().join('-'));
+      const d = parseDateStr(h.date);
       if (d <= targetDate) {
         oldNav = h.nav;
         break;

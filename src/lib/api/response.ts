@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
-import { v4 as uuidv4 } from 'uuid'; // Standard node uuid
 
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   success: boolean;
   data?: T;
   error?: string;
@@ -9,12 +8,18 @@ export interface ApiResponse<T = any> {
   requestId: string;
 }
 
+function requestId(): string {
+  return typeof crypto !== 'undefined' && crypto.randomUUID
+    ? crypto.randomUUID()
+    : `req-${Date.now()}`;
+}
+
 export function createSuccessResponse<T>(data: T, status = 200) {
   const payload: ApiResponse<T> = {
     success: true,
     data,
     timestamp: new Date().toISOString(),
-    requestId: crypto.randomUUID ? crypto.randomUUID() : 'req-uuid-fallback',
+    requestId: requestId(),
   };
   return NextResponse.json(payload, { status });
 }
@@ -24,7 +29,7 @@ export function createErrorResponse(error: string, status = 500) {
     success: false,
     error,
     timestamp: new Date().toISOString(),
-    requestId: crypto.randomUUID ? crypto.randomUUID() : 'req-uuid-fallback',
+    requestId: requestId(),
   };
   return NextResponse.json(payload, { status });
 }

@@ -55,23 +55,26 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const fetchDashboard = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch('/api/dashboard');
+      if (!res.ok) throw new Error('Failed to fetch dashboard data');
+      const json = await res.json();
+      // API now returns { success, data: { user, profileCompleted, goals, portfolio } }
+      setData(json.data || json);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchDashboard = async () => {
-      try {
-        const res = await fetch('/api/dashboard');
-        if (!res.ok) throw new Error('Failed to fetch dashboard data');
-        const json = await res.json();
-        // API now returns { success, data: { user, profileCompleted, goals, portfolio } }
-        setData(json.data || json);
-      } catch (err: any) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchDashboard();
-  }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); 
 
 
   if (loading) {
@@ -93,9 +96,16 @@ export default function DashboardPage() {
 
   if (error || !data) {
     return (
-      <div className="bg-red-50 text-red-600 p-4 rounded-lg flex items-center">
-        <AlertCircle className="w-5 h-5 mr-2" />
-        {error || 'Failed to load dashboard'}
+      <div className="bg-red-50 text-red-700 p-6 rounded-xl border border-red-100 flex flex-col items-center text-center">
+        <AlertCircle className="w-8 h-8 mb-3 text-red-500" />
+        <p className="font-semibold text-red-800 mb-1">Unable to load dashboard</p>
+        <p className="text-sm text-red-600 mb-4">{error || 'An unexpected error occurred.'}</p>
+        <button
+          onClick={fetchDashboard}
+          className="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors"
+        >
+          Try Again
+        </button>
       </div>
     );
   }
@@ -252,7 +262,7 @@ export default function DashboardPage() {
                         <div className="w-full bg-gray-200 rounded-full h-2 mb-4 overflow-hidden">
                           <div 
                             className="bg-blue-600 h-2 rounded-full transition-all duration-500" 
-                            style={{ width: `${goal.targetAmount ? Math.min(100, ((goal.lumpsumAmount || 0) / goal.targetAmount) * 100) : 0}%` }}
+                            style={{ width: `${goal.targetAmount ? Math.min(100, (((goal.investmentType === 'sip' ? goal.sipAmount : goal.lumpsumAmount) || 0) / goal.targetAmount) * 100) : 0}%` }}
                           />
                         </div>
                         

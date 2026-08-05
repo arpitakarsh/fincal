@@ -172,6 +172,22 @@ export default function PortfolioPage() {
     );
   }
 
+  if (error) {
+    return (
+      <div className="bg-red-50 text-red-700 p-6 rounded-xl border border-red-100 flex flex-col items-center text-center">
+        <AlertTriangle className="w-8 h-8 mb-3 text-red-500" />
+        <p className="font-semibold text-red-800 mb-1">Unable to load portfolio</p>
+        <p className="text-sm text-red-600 mb-4">{error}</p>
+        <button
+          onClick={fetchPortfolioData}
+          className="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors"
+        >
+          Try Again
+        </button>
+      </div>
+    );
+  }
+
   const isGain = analytics ? analytics.absoluteGainLoss >= 0 : true;
 
   const renderDonutChart = (data: any, title: string) => {
@@ -353,7 +369,7 @@ export default function PortfolioPage() {
                           <td className="px-6 py-4 text-right text-sm text-gray-900">
                             <div>₹{(h.purchaseNav || h.averageNav || 0).toFixed(2)}</div>
                             <div className="text-xs text-gray-500">
-                              LTP: {h.navUnavailable ? <span className="text-red-500">Error</span> : `₹${(h.currentNav || h.liveNav || 0).toFixed(2)}`}
+                              LTP: {h.navUnavailable ? <span className="text-amber-600 text-xs" title="Live NAV temporarily unavailable. Showing last known value.">⚠ NAV unavailable</span> : `₹${(h.currentNav || h.liveNav || 0).toFixed(2)}`}
                             </div>
                           </td>
                           <td className="px-6 py-4 text-right">

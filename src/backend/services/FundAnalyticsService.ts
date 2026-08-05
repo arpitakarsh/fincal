@@ -154,7 +154,7 @@ Output strictly valid JSON only:
 
     // Determine return rate to use
     let usedReturnPercent = input.expectedReturnPercent;
-    if (!usedReturnPercent) {
+    if (usedReturnPercent === undefined || usedReturnPercent === null) {
       if (input.years <= 3) {
         usedReturnPercent = details.returns['3Y'] ?? details.returns['1Y'] ?? undefined;
       } else {
