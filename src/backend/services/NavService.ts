@@ -31,7 +31,7 @@ export class NavService {
     // 2. Try mfapi.in /latest endpoint
     try {
       const res = await fetch(`${MFAPI_BASE}/${schemeCode}/latest`, {
-        next: { revalidate: 0 },
+        cache: 'no-store',
         signal: AbortSignal.timeout(5000),
       });
 
@@ -93,7 +93,7 @@ export class NavService {
 
     try {
       const res = await fetch(`${MFAPI_BASE}/${schemeCode}`, {
-        next: { revalidate: 0 },
+        cache: 'no-store',
         signal: AbortSignal.timeout(10000),
       });
       if (!res.ok) return [];
