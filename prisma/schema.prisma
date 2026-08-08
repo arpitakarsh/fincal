@@ -260,3 +260,34 @@ model AIInsightHistory {
 
   @@index([userId])
 }
+
+// ----------------------------------------------------------------------------
+// LATEST NAV CACHE (PostgreSQL — one row per scheme, updated daily)
+//
+// Purpose: Persistent latest-NAV store so the application does NOT need to
+// call mfapi.in or AMFI on every user request.  A daily ingest job UPSERTs
+// each scheme's current NAV.  There is exactly ONE row per schemeCode — the
+// same row is overwritten on each ingest run.
+//
+// What is NOT stored here:
+//   - Historical NAV series (those are fetched from mfapi on demand + Redis 24h)
+//   - Full AMFI universe metadata (that uses Redis 12h)
+// ----------------------------------------------------------------------------
+model LatestNAV {
+  /// AMFI/mfapi scheme code — uniquely identifies a mutual fund scheme.
+  schemeCode String   @id
+
+  schemeName String   @default("")
+  /// NAV value as of navDate.  Stored as Float, consistent with other
+  /// monetary fields in this schema.  Always > 0 when persisted.
+  nav        Float
+  /// Date string in the format returned by the data source (DD-MMM-YYYY from
+  /// AMFI, or DD-MM-YYYY from mfapi).  Stored as a string to avoid timezone
+  /// ambiguity; we never query by date range so DateTime adds no benefit.
+  navDate    String   @default("")
+  amc        String   @default("")
+  category   String   @default("")
+  /// Automatically updated by Prisma whenever the row is written.
+  updatedAt  DateTime @updatedAt
+}
+
