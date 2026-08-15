@@ -43,3 +43,29 @@ export async function POST(req: NextRequest) {
 export async function GET(req: NextRequest) {
   return handler.GET(req);
 }
+
+/**
+ * OPTIONS /api/auth/*
+ *
+ * Respond to CORS preflight requests. Browsers send OPTIONS before any
+ * cross-origin POST/PUT — without a 200/204 response the actual request
+ * is blocked before it even reaches the auth handler.
+ */
+export async function OPTIONS(_req: NextRequest) {
+  const appUrl =
+    process.env.BETTER_AUTH_URL ||
+    process.env.NEXT_PUBLIC_APP_URL ||
+    'http://localhost:3000';
+
+  return new NextResponse(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Origin': appUrl,
+      'Access-Control-Allow-Credentials': 'true',
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
+      'Access-Control-Max-Age': '86400', // cache preflight for 24 hours
+    },
+  });
+}
+
