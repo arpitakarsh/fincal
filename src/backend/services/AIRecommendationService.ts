@@ -37,6 +37,7 @@ CRITICAL RULES:
 2. Strictly respect the user's risk appetite: low -> debt/hybrid/large-cap, high -> mid/small/flexi/thematic.
 3. Time horizon must dictate equity allocation. Short term (<3 years) should be mostly debt/liquid.
 4. Score MUST be a number between 0 and 100 representing the match percentage. Do not use percentages like 9500.
+5. ONLY recommend currently active and accepting-investment mutual funds. NEVER recommend closed, merged, or terminated funds.
 
 Context:
 - Goal Type: ${goal.goalType}
