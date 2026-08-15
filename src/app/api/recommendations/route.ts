@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
 }
 
 const reqSchema = z.object({
-  goalId: z.string().uuid()
+  goalId: z.uuid()
 });
 
 export const POST = withApiAuthAndError(async (req, { session }) => {

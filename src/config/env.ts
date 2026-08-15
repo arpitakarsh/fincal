@@ -2,10 +2,10 @@ import { z } from 'zod';
 
 const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
-  DATABASE_URL: z.string().url(),
+  DATABASE_URL: z.url(),
   GEMINI_API_KEY: z.string().optional(),
-  BETTER_AUTH_SECRET: z.string().min(1, "BETTER_AUTH_SECRET is required"),
-  BETTER_AUTH_URL: z.string().url("BETTER_AUTH_URL is required"),
+  BETTER_AUTH_SECRET: z.string().min(1),
+  BETTER_AUTH_URL: z.url(),
   CRON_SECRET: z.string().optional(), // Used for sync APIs
   REDIS_URL: z.string().optional(), // Used for Redis fallback
 });

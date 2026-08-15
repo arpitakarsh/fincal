@@ -5,12 +5,16 @@ import { LatestNavRepository } from '@/backend/repositories/LatestNavRepository'
 import { logger } from '@/lib/logger';
 
 /**
- * POST /api/nav/ingest
+ * /api/nav/ingest
  *
  * Daily latest-NAV ingestion endpoint.
  *
  * This route is intended to be called by Vercel Cron (or any external
  * scheduler) once per day after AMFI publishes NAVs (~19:00 IST / 13:30 UTC).
+ *
+ * NOTE: Vercel Cron jobs always send GET requests, so both GET and POST are
+ * supported. GET is used by the Vercel Cron scheduler; POST is available for
+ * manual/script-based triggers.
  *
  * Flow:
  *   1. Verify CRON_SECRET bearer token.
@@ -28,7 +32,8 @@ import { logger } from '@/lib/logger';
  *   - Running this endpoint twice with the same AMFI data produces the same
  *     result (UPSERT semantics). Safe to retry on failure.
  */
-export async function POST(req: NextRequest): Promise<NextResponse> {
+
+async function handleIngest(req: NextRequest): Promise<NextResponse> {
   const startedAt = Date.now();
 
   // ── Authentication ──────────────────────────────────────────────────────────
@@ -116,4 +121,23 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       durationMs,
     },
   });
+}
+
+/**
+ * GET /api/nav/ingest
+ *
+ * Vercel Cron always sends GET requests. This handler allows the cron job
+ * configured in vercel.json to trigger the daily NAV ingest automatically.
+ */
+export async function GET(req: NextRequest): Promise<NextResponse> {
+  return handleIngest(req);
+}
+
+/**
+ * POST /api/nav/ingest
+ *
+ * Manual trigger for the NAV ingest (e.g. from scripts or admin tools).
+ */
+export async function POST(req: NextRequest): Promise<NextResponse> {
+  return handleIngest(req);
 }

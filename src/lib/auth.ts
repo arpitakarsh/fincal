@@ -7,14 +7,14 @@ import { z } from 'zod';
 // ─── Validation schemas (exported for use in auth routes) ─────────────────────
 
 export const registerSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters').max(100),
-  email: z.string().email('Invalid email address'),
-  password: z.string().min(8, 'Password must be at least 8 characters').max(128),
+  name: z.string().min(2).max(100),
+  email: z.email({ error: 'Invalid email address' }),
+  password: z.string().min(8).max(128),
 });
 
 export const loginSchema = z.object({
-  email: z.string().email('Invalid email address'),
-  password: z.string().min(1, 'Password is required'),
+  email: z.email({ error: 'Invalid email address' }),
+  password: z.string().min(1),
 });
 
 // ─── Rate limiter helper for auth endpoints ────────────────────────────────────
