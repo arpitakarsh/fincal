@@ -11,7 +11,6 @@ export const GET = withApiAuthAndError(async (req, { params, session }) => {
 
   const { searchParams } = new URL(req.url);
   const goalId = searchParams.get('goalId');
-  if (!goalId) throw new Error('goalId query parameter is required for insights');
 
   try {
     const insights = await analyticsService.getFundInsights(schemeCode, goalId, session.user.id);

@@ -79,10 +79,13 @@ export class FundAnalyticsService {
   }
 
   /**
-   * Goal-aware AI insights. Cached 24h per scheme+goal combo.
+   * Goal-aware AI insights. Cached 24h per scheme+goal combo (or general if no goal).
    */
-  async getFundInsights(schemeCode: string, goalId: string, userId: string) {
-    const cacheKey = `fund:insights:${schemeCode}:${goalId}`;
+  async getFundInsights(schemeCode: string, goalId: string | null, userId: string) {
+    const cacheKey = goalId 
+      ? `fund:insights:${schemeCode}:${goalId}`
+      : `fund:insights:${schemeCode}:general`;
+      
     const cached = await CacheManager.get(cacheKey);
     if (cached) return cached;
 
@@ -94,13 +97,25 @@ export class FundAnalyticsService {
     }
 
     // Fetch data context
-    const goal = await prisma.goal.findUnique({ where: { id: goalId, userId } });
-    if (!goal) throw new Error('Goal not found');
+    let goalContext = '';
+    if (goalId) {
+      const goal = await prisma.goal.findUnique({ where: { id: goalId, userId } });
+      if (goal) {
+        goalContext = `
+GOAL DETAILS:
+- Goal Type: ${goal.goalType}
+- Time Horizon: ${goal.timeHorizonYears} years
+- Investment Type: ${goal.investmentType}
+- User Risk Appetite: ${goal.riskAppetite}
+`;
+      }
+    }
 
     const fundDetails = await this.getFundDetails(schemeCode);
 
     const prompt = `
-You are an expert financial analyst. Analyze if the mutual fund '${fundDetails.fundName}' is suitable for the user's specific financial goal.
+You are an expert financial analyst. Analyze the mutual fund '${fundDetails.fundName}'.
+${goalContext ? "Analyze if this fund is suitable for the user's specific financial goal below." : "Provide a general analysis of this fund's performance and risk profile."}
 
 FUND DETAILS:
 - Category: ${fundDetails.category}
@@ -108,19 +123,13 @@ FUND DETAILS:
 - 3Y Return: ${fundDetails.returns['3Y'] !== null ? fundDetails.returns['3Y']?.toFixed(2) + '%' : 'N/A'}
 - Annualized Volatility: ${fundDetails.risk.volatility !== null ? (fundDetails.risk.volatility * 100).toFixed(2) + '%' : 'N/A'}
 - Sharpe Ratio: ${fundDetails.risk.sharpeRatio !== null ? fundDetails.risk.sharpeRatio.toFixed(2) : 'N/A'}
-
-GOAL DETAILS:
-- Goal Type: ${goal.goalType}
-- Time Horizon: ${goal.timeHorizonYears} years
-- Investment Type: ${goal.investmentType}
-- User Risk Appetite: ${goal.riskAppetite}
-
+${goalContext}
 Output strictly valid JSON only:
 {
   "pros": ["pro 1", "pro 2"],
   "cons": ["con 1", "con 2"],
-  "suitabilityScore": 85,
-  "summary": "2-3 sentences max."
+  "suitabilityScore": ${goalContext ? 85 : "null"},
+  "analysis": "2-3 sentences max analyzing the fund."
 }
 `;
 
