@@ -7,7 +7,7 @@
     "dev": "NODE_OPTIONS=--dns-result-order=ipv4first next dev",
     "build": "prisma generate && NODE_OPTIONS=--dns-result-order=ipv4first next build",
     "start": "NODE_OPTIONS=--dns-result-order=ipv4first next start",
-    "lint": "next lint --dir src",
+    "lint": "eslint src",
     "prisma:generate": "prisma generate",
     "prisma:push": "prisma db push",
     "prisma:migrate": "prisma migrate dev"
