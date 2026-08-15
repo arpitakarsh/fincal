@@ -60,6 +60,11 @@ const getGoalIcon = (type: string | undefined) => {
   }
 };
 
+const GoalIcon = ({ type, className }: { type: string | undefined; className?: string }) => {
+  const IconComponent = getGoalIcon(type);
+  return React.createElement(IconComponent, { className });
+};
+
 export default function GoalDetailPage() {
   const { id } = useParams() as { id: string };
   const router = useRouter();
@@ -79,38 +84,38 @@ export default function GoalDetailPage() {
   const [prefilledFund, setPrefilledFund] = useState<{ id: string; name: string; category?: string } | undefined>(undefined);
 
   useEffect(() => {
+    const fetchGoalData = async () => {
+      try {
+        setLoading(true);
+        const res = await fetch(`/api/goals/${id}`);
+        if (!res.ok) {
+          if (res.status === 404) {
+            router.push('/goals');
+            return;
+          }
+          throw new Error('Failed to fetch goal');
+        }
+        const data = await res.json();
+        setGoal(data.data || data.goal || data);
+
+        // Fetch existing recommendations
+        const recsRes = await fetch(`/api/goals/${id}/recommend`);
+        if (recsRes.ok) {
+          const recsJson = await recsRes.json();
+          if (recsJson.data) {
+            const recs = Array.isArray(recsJson.data) ? recsJson.data : (recsJson.data.recommendations || []);
+            setRecommendations(recs.length > 0 ? recs : null);
+          }
+        }
+      } catch (err: any) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
     fetchGoalData();
-  }, [id]);
-
-  const fetchGoalData = async () => {
-    try {
-      setLoading(true);
-      const res = await fetch(`/api/goals/${id}`);
-      if (!res.ok) {
-        if (res.status === 404) {
-          router.push('/goals');
-          return;
-        }
-        throw new Error('Failed to fetch goal');
-      }
-      const data = await res.json();
-      setGoal(data.data || data.goal || data);
-
-      // Fetch existing recommendations
-      const recsRes = await fetch(`/api/goals/${id}/recommend`);
-      if (recsRes.ok) {
-        const recsJson = await recsRes.json();
-        if (recsJson.data) {
-          const recs = Array.isArray(recsJson.data) ? recsJson.data : (recsJson.data.recommendations || []);
-          setRecommendations(recs.length > 0 ? recs : null);
-        }
-      }
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [id, router]);
 
   const showToast = (message: string, type: 'success' | 'error') => {
     setToast({ message, type });
@@ -157,7 +162,6 @@ export default function GoalDetailPage() {
     );
   }
 
-  const Icon = getGoalIcon(goal.goalType);
   const amount = goal.investmentType === 'sip' ? goal.sipAmount : goal.lumpsumAmount;
 
   return (
@@ -179,7 +183,7 @@ export default function GoalDetailPage() {
           </Link>
           <div className="flex items-center">
             <div className="p-3 bg-blue-50 text-blue-600 rounded-xl mr-4 border border-blue-100 shadow-sm">
-              <Icon className="w-6 h-6" />
+              <GoalIcon type={goal.goalType} className="w-6 h-6" />
             </div>
             <div>
               <h1 className="text-2xl font-bold text-gray-900 flex items-center">

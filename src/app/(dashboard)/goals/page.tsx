@@ -80,7 +80,21 @@ export default function GoalsListPage() {
   };
 
   useEffect(() => {
-    fetchGoals();
+    let mounted = true;
+    const load = async () => {
+      try {
+        const res = await fetch('/api/goals');
+        if (!res.ok) throw new Error('Failed to fetch goals');
+        const json = await res.json();
+        if (mounted) setGoals(Array.isArray(json.data) ? json.data : []);
+      } catch (err: any) {
+        if (mounted) setError(err.message);
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    };
+    load();
+    return () => { mounted = false; };
   }, []);
 
   const showToast = (message: string, type: 'success' | 'error') => {

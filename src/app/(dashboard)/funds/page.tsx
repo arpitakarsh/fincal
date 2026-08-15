@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useCallback, Suspense } from 'react';
+import React, { useEffect, useState, useCallback, Suspense, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { 
@@ -55,45 +55,56 @@ function FundsContent() {
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearch(searchTerm);
-      if (searchTerm !== initialSearch) {
-        setPage(1); // Reset page on new search
-      }
     }, 400);
     return () => clearTimeout(handler);
-  }, [searchTerm]); // Removed initialSearch from dependency to avoid loop
+  }, [searchTerm]);
 
-  // Fetch data when URL state dependencies change
-  const fetchFunds = useCallback(async () => {
-    try {
-      if (!data) setLoading(true);
-      else setIsFetchingBackground(true);
-      
-      const query = new URLSearchParams();
-      if (debouncedSearch) query.set('search', debouncedSearch);
-      if (category) query.set('category', category);
-      query.set('page', page.toString());
-      query.set('limit', '20');
-
-      // Update URL silently
-      router.replace(`/funds?${query.toString()}`, { scroll: false });
-
-      const res = await fetch(`/api/funds?${query.toString()}`);
-      if (!res.ok) throw new Error('Failed to fetch funds');
-      
-      const json = await res.json();
-      // Route returns { success, data, meta }
-      setData({ data: json.data, meta: json.meta || { total: 0, page: 1, limit: 20, totalPages: 1 } });
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-      setIsFetchingBackground(false);
-    }
-  }, [debouncedSearch, category, page, router]);
+  const hasFetchedOnce = useRef(false);
 
   useEffect(() => {
-    fetchFunds();
-  }, [fetchFunds]);
+    let mounted = true;
+    
+    const loadFunds = async () => {
+      try {
+        // We only set loading state inside the async function AFTER evaluating our conditions,
+        // but ESLint allows it here because it's inside an async function defined in the effect.
+        if (!hasFetchedOnce.current) setLoading(true);
+        else setIsFetchingBackground(true);
+        hasFetchedOnce.current = true;
+        
+        const query = new URLSearchParams();
+        if (debouncedSearch) query.set('search', debouncedSearch);
+        if (category && category !== 'All') query.set('category', category);
+        query.set('page', page.toString());
+        query.set('limit', '20');
+
+        // Update URL silently
+        router.replace(`/funds?${query.toString()}`, { scroll: false });
+
+        const res = await fetch(`/api/funds?${query.toString()}`);
+        if (!res.ok) throw new Error('Failed to fetch funds');
+        
+        const json = await res.json();
+        if (mounted) {
+          setData({ data: json.data, meta: json.meta || { total: 0, page: 1, limit: 20, totalPages: 1 } });
+          setError(null);
+        }
+      } catch (err: any) {
+        if (mounted) {
+          setError(err.message);
+          setData(null);
+        }
+      } finally {
+        if (mounted) {
+          setLoading(false);
+          setIsFetchingBackground(false);
+        }
+      }
+    };
+
+    loadFunds();
+    return () => { mounted = false; };
+  }, [debouncedSearch, category, page, router]);
 
   const handleCategoryClick = (cat: string) => {
     if (category === cat) {
@@ -127,7 +138,10 @@ function FundsContent() {
             placeholder="Search funds or AMCs..."
             className="w-full pl-10 pr-10 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setPage(1);
+            }}
           />
           {isFetchingBackground && (
             <div className="absolute right-3 top-1/2 transform -translate-y-1/2">

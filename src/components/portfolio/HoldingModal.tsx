@@ -58,16 +58,18 @@ export function HoldingModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // When prefilledFund changes (e.g. opened from Funds Explorer)
-  useEffect(() => {
+  const [prevPrefilledFund, setPrevPrefilledFund] = useState(prefilledFund);
+
+  // Derived state from props without effects
+  if (prefilledFund !== prevPrefilledFund) {
+    setPrevPrefilledFund(prefilledFund);
     if (!holding && prefilledFund) {
       setSelectedFund(prefilledFund);
     }
-  }, [prefilledFund, holding]);
+  }
 
   useEffect(() => {
     if (!searchQuery || selectedFund) {
-      setSearchResults([]);
       return;
     }
 
@@ -167,7 +169,11 @@ export function HoldingModal({
                       placeholder="Type to search funds..."
                       className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                       value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setSearchQuery(val);
+                        if (!val) setSearchResults([]);
+                      }}
                     />
                     {isSearching && (
                       <div className="absolute right-3 top-1/2 transform -translate-y-1/2">

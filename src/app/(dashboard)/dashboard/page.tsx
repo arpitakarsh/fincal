@@ -62,7 +62,6 @@ export default function DashboardPage() {
       const res = await fetch('/api/dashboard');
       if (!res.ok) throw new Error('Failed to fetch dashboard data');
       const json = await res.json();
-      // API now returns { success, data: { user, profileCompleted, goals, portfolio } }
       setData(json.data || json);
     } catch (err: any) {
       setError(err.message);
@@ -72,9 +71,22 @@ export default function DashboardPage() {
   };
 
   useEffect(() => {
-    fetchDashboard();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); 
+    let mounted = true;
+    const load = async () => {
+      try {
+        const res = await fetch('/api/dashboard');
+        if (!res.ok) throw new Error('Failed to fetch dashboard data');
+        const json = await res.json();
+        if (mounted) setData(json.data || json);
+      } catch (err: any) {
+        if (mounted) setError(err.message);
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    };
+    load();
+    return () => { mounted = false; };
+  }, []);
 
 
   if (loading) {

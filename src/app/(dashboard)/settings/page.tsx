@@ -291,10 +291,6 @@ function ProfileSection({
   const [name, setName] = useState(user?.name || '');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  useEffect(() => {
-    setName(user?.name || '');
-  }, [user]);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -430,33 +426,15 @@ function InvestorProfileSection({
   showToast: any;
   updateData: any;
 }) {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState(() => ({
     age: profile?.age || 30,
     currentCapital: profile?.currentCapital || 0,
-    monthlyInvestmentCap:
-      profile?.monthlyInvestmentCap || 0,
+    monthlyInvestmentCap: profile?.monthlyInvestmentCap || 0,
     annualIncome: profile?.annualIncome || 0,
-    riskAppetite:
-      profile?.riskAppetite || 'Moderate',
-  });
+    riskAppetite: profile?.riskAppetite || 'Moderate',
+  }));
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  useEffect(() => {
-    if (profile) {
-      setFormData({
-        age: profile.age || 30,
-        currentCapital:
-          profile.currentCapital || 0,
-        monthlyInvestmentCap:
-          profile.monthlyInvestmentCap || 0,
-        annualIncome:
-          profile.annualIncome || 0,
-        riskAppetite:
-          profile.riskAppetite || 'Moderate',
-      });
-    }
-  }, [profile]);
 
   const handleSubmit = async (
     e: React.FormEvent
@@ -690,27 +668,13 @@ function PreferencesSection({
   showToast: any;
   updateData: any;
 }) {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState(() => ({
     theme: preferences?.theme || 'system',
     currency: preferences?.currency || 'INR',
-    emailAlerts:
-      preferences?.emailAlerts ?? true,
-  });
+    emailAlerts: preferences?.emailAlerts ?? true,
+  }));
 
-  const [isSubmitting, setIsSubmitting] =
-    useState(false);
-
-  useEffect(() => {
-    if (preferences) {
-      setFormData({
-        theme: preferences.theme || 'system',
-        currency:
-          preferences.currency || 'INR',
-        emailAlerts:
-          preferences.emailAlerts ?? true,
-      });
-    }
-  }, [preferences]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (
     e: React.FormEvent

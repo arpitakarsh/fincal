@@ -76,14 +76,15 @@ export default function FundDetailPage() {
     setTimeout(() => setToast(null), 3000);
   };
 
+  const history = fund?.history;
   const chartData = useMemo(() => {
-    if (!fund?.history) return [];
+    if (!history) return [];
     // MFAPI returns history in descending order (latest first), so reverse for chart
-    return [...fund.history].reverse().map(h => ({
+    return [...history].reverse().map((h: any) => ({
       date: h.date, // "DD-MM-YYYY"
       nav: h.nav
     }));
-  }, [fund?.history]);
+  }, [history]);
 
   if (loading) {
     return (

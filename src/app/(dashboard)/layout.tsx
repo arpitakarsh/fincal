@@ -27,6 +27,72 @@ const navItems = [
   { name: 'Settings', href: '/settings', icon: Settings },
 ];
 
+const NavContent = ({ pathname, session, handleLogout, setSidebarOpen }: any) => (
+  <div className="flex flex-col h-full bg-white border-r border-gray-200">
+    <div className="p-6">
+      <Link href="/dashboard" className="flex items-center space-x-2">
+        <div className="w-8 h-8 rounded bg-blue-600 flex items-center justify-center text-white font-bold text-xl">
+          F
+        </div>
+        <span className="text-xl font-bold text-gray-900 tracking-tight">FinCal</span>
+      </Link>
+    </div>
+
+    {session?.user && (
+      <div className="px-6 pb-6">
+        <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
+          {session.user.image ? (
+            /* eslint-disable-next-line @next/next/no-img-element */
+            <img src={session.user.image} alt={session.user.name} className="w-10 h-10 rounded-full object-cover" />
+          ) : (
+            <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold">
+              {session.user.name?.charAt(0) || 'U'}
+            </div>
+          )}
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-gray-900 truncate">
+              {session.user.name}
+            </p>
+            <button 
+              onClick={handleLogout}
+              className="text-xs text-gray-500 hover:text-red-600 flex items-center mt-0.5 transition-colors"
+            >
+              <LogOut className="w-3 h-3 mr-1" />
+              Logout
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+
+    <nav className="flex-1 px-4 space-y-1 overflow-y-auto">
+      {navItems.map((item) => {
+        const isActive = pathname?.startsWith(item.href) ?? false;
+        return (
+          <Link
+            key={item.name}
+            href={item.href}
+            onClick={() => setSidebarOpen(false)}
+            className={`flex items-center px-3 py-2.5 rounded-md text-sm font-medium transition-colors ${
+              isActive
+                ? 'bg-blue-50 text-blue-700'
+                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+            }`}
+          >
+            <item.icon
+              className={`flex-shrink-0 w-5 h-5 mr-3 ${
+                isActive ? 'text-blue-700' : 'text-gray-400'
+              }`}
+              aria-hidden="true"
+            />
+            {item.name}
+          </Link>
+        );
+      })}
+    </nav>
+  </div>
+);
+
 export default function DashboardLayout({
   children,
 }: {
@@ -55,71 +121,6 @@ export default function DashboardLayout({
     });
   };
 
-  const NavContent = () => (
-    <div className="flex flex-col h-full bg-white border-r border-gray-200">
-      <div className="p-6">
-        <Link href="/dashboard" className="flex items-center space-x-2">
-          <div className="w-8 h-8 rounded bg-blue-600 flex items-center justify-center text-white font-bold text-xl">
-            F
-          </div>
-          <span className="text-xl font-bold text-gray-900 tracking-tight">FinCal</span>
-        </Link>
-      </div>
-
-      {session?.user && (
-        <div className="px-6 pb-6">
-          <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
-            {session.user.image ? (
-              <img src={session.user.image} alt={session.user.name} className="w-10 h-10 rounded-full object-cover" />
-            ) : (
-              <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold">
-                {session.user.name?.charAt(0) || 'U'}
-              </div>
-            )}
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-gray-900 truncate">
-                {session.user.name}
-              </p>
-              <button 
-                onClick={handleLogout}
-                className="text-xs text-gray-500 hover:text-red-600 flex items-center mt-0.5 transition-colors"
-              >
-                <LogOut className="w-3 h-3 mr-1" />
-                Logout
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <nav className="flex-1 px-4 space-y-1 overflow-y-auto">
-        {navItems.map((item) => {
-          const isActive = pathname?.startsWith(item.href) ?? false;
-          return (
-            <Link
-              key={item.name}
-              href={item.href}
-              onClick={() => setSidebarOpen(false)}
-              className={`flex items-center px-3 py-2.5 rounded-md text-sm font-medium transition-colors ${
-                isActive
-                  ? 'bg-blue-50 text-blue-700'
-                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-              }`}
-            >
-              <item.icon
-                className={`flex-shrink-0 w-5 h-5 mr-3 ${
-                  isActive ? 'text-blue-700' : 'text-gray-400'
-                }`}
-                aria-hidden="true"
-              />
-              {item.name}
-            </Link>
-          );
-        })}
-      </nav>
-    </div>
-  );
-
   return (
     <div className="flex h-screen overflow-hidden bg-gray-50 text-gray-900">
       {/* Mobile sidebar overlay */}
@@ -144,13 +145,13 @@ export default function DashboardLayout({
             <X className="h-6 w-6 text-white" aria-hidden="true" />
           </button>
         </div>
-        <NavContent />
+        <NavContent pathname={pathname} session={session} handleLogout={handleLogout} setSidebarOpen={setSidebarOpen} />
       </div>
 
       {/* Desktop sidebar */}
       <div className="hidden lg:flex lg:flex-shrink-0">
         <div className="flex w-64 flex-col">
-          <NavContent />
+          <NavContent pathname={pathname} session={session} handleLogout={handleLogout} setSidebarOpen={setSidebarOpen} />
         </div>
       </div>
 

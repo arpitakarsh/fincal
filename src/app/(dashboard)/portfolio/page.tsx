@@ -90,7 +90,36 @@ export default function PortfolioPage() {
   };
 
   useEffect(() => {
-    fetchPortfolioData();
+    let mounted = true;
+    const load = async () => {
+      try {
+        const [portRes, analyticsRes] = await Promise.all([
+          fetch('/api/portfolio'),
+          fetch('/api/portfolio/analytics')
+        ]);
+        if (!portRes.ok && portRes.status !== 404) throw new Error('Failed to fetch portfolio');
+        
+        if (mounted && portRes.ok) {
+          const portData = await portRes.json();
+          setPortfolio(portData.data || null);
+        } else if (mounted) {
+          setPortfolio(null);
+        }
+
+        if (mounted && analyticsRes.ok) {
+          const analyticsData = await analyticsRes.json();
+          setAnalytics(analyticsData.data || null);
+        } else if (mounted) {
+          setAnalytics(null);
+        }
+      } catch (err: any) {
+        if (mounted) setError(err.message);
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    };
+    load();
+    return () => { mounted = false; };
   }, []);
 
   const showToast = (message: string, type: 'success' | 'error') => {

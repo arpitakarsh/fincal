@@ -11,7 +11,6 @@ export function useApi<T>(url: string | null, options: UseApiOptions = { immedia
   const [data, setData] = useState<T | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(Boolean(url && options.immediate !== false));
-
   const execute = useCallback(async (overrideUrl?: string) => {
     const target = overrideUrl ?? url;
     if (!target) return null;
@@ -43,11 +42,49 @@ export function useApi<T>(url: string | null, options: UseApiOptions = { immedia
     }
   }, [url]);
 
-  useEffect(() => {
+  // Derived state to track URL changes for automatic loading state
+  const [prevUrl, setPrevUrl] = useState(url);
+  if (url !== prevUrl) {
+    setPrevUrl(url);
     if (url && options.immediate !== false) {
-      void execute();
+      setLoading(true);
+      setError(null);
     }
-  }, [url, options.immediate, execute]);
+  }
+
+  useEffect(() => {
+    let mounted = true;
+    
+    if (url && options.immediate !== false) {
+      const fetchInitial = async () => {
+        try {
+          const res = await fetch(url, { credentials: 'include' });
+          const json = (await res.json()) as ApiResult<T> & { message?: string };
+
+          if (mounted) {
+            if (!res.ok || !json.success) {
+              const message = (!json.success && (json.message || json.error)) || `Request failed (${res.status})`;
+              setError(message);
+              setData(null);
+            } else {
+              setData(json.data);
+            }
+          }
+        } catch (err) {
+          if (mounted) {
+            setError(err instanceof Error ? err.message : 'Network error');
+            setData(null);
+          }
+        } finally {
+          if (mounted) setLoading(false);
+        }
+      };
+      
+      fetchInitial();
+    }
+    
+    return () => { mounted = false; };
+  }, [url, options.immediate]);
 
   return { data, error, loading, refetch: execute, setData };
 }
