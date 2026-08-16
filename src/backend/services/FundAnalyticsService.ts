@@ -5,6 +5,22 @@ import { callAI } from './ai.service';
 import { logger } from '@/lib/logger';
 import { CalculatorInput } from '@/shared/dtos/calculator.dto';
 
+export interface FundReturns {
+  '1M': number | null;
+  '3M': number | null;
+  '6M': number | null;
+  '1Y': number | null;
+  '3Y': number | null;
+  '5Y': number | null;
+  'inception': number | null;
+}
+
+export interface FundRisk {
+  volatility: number | null;      // Annualized standard deviation (ratio, e.g. 0.18 = 18%)
+  sharpeRatio: number | null;
+  maxDrawdown: number | null;     // As percentage (e.g. 15.3 = 15.3%)
+}
+
 export interface FundDetails {
   schemeCode: string;
   fundName: string;
@@ -13,20 +29,18 @@ export interface FundDetails {
   currentNav: number;
   navDate: string;
   returnsUnavailable?: boolean;
-  returns: {
-    '1M': number | null;
-    '3M': number | null;
-    '6M': number | null;
-    '1Y': number | null;
-    '3Y': number | null;
-    '5Y': number | null;
-    'inception': number | null;
-  };
-  risk: {
-    volatility: number | null;
-    sharpeRatio: number | null;
-    maxDrawdown: number | null;
-  };
+  returns: FundReturns;
+  risk: FundRisk;
+  /** Last 100 days of NAV history, newest first */
+  history: { date: string; nav: number }[];
+}
+
+export interface FundInsights {
+  pros: string[];
+  cons: string[];
+  /** 0–10 suitability score, only present when goalId context was provided */
+  suitabilityScore: number | null;
+  analysis: string;
 }
 
 export class FundAnalyticsService {
@@ -62,6 +76,9 @@ export class FundAnalyticsService {
       }
     }
 
+    // Include last 100 data points for the chart (history is newest-first)
+    const recentHistory = history.slice(0, 100);
+
     const details: FundDetails = {
       schemeCode,
       fundName: liveNav.schemeName || `Fund ${schemeCode}`,
@@ -72,6 +89,7 @@ export class FundAnalyticsService {
       returnsUnavailable,
       returns,
       risk,
+      history: recentHistory,
     };
 
     await CacheManager.set(cacheKey, details, 3600); // 60 mins
@@ -81,12 +99,12 @@ export class FundAnalyticsService {
   /**
    * Goal-aware AI insights. Cached 24h per scheme+goal combo (or general if no goal).
    */
-  async getFundInsights(schemeCode: string, goalId: string | null, userId: string) {
+  async getFundInsights(schemeCode: string, goalId: string | null, userId: string): Promise<FundInsights> {
     const cacheKey = goalId 
       ? `fund:insights:${schemeCode}:${goalId}`
       : `fund:insights:${schemeCode}:general`;
       
-    const cached = await CacheManager.get(cacheKey);
+    const cached = await CacheManager.get<FundInsights>(cacheKey);
     if (cached) return cached;
 
     // Rate Limiting (10 req / hour)
@@ -113,30 +131,55 @@ GOAL DETAILS:
 
     const fundDetails = await this.getFundDetails(schemeCode);
 
+    const volatilityDisplay = fundDetails.risk.volatility !== null
+      ? (fundDetails.risk.volatility * 100).toFixed(2) + '%'
+      : 'N/A';
+
     const prompt = `
 You are an expert financial analyst. Analyze the mutual fund '${fundDetails.fundName}'.
 ${goalContext ? "Analyze if this fund is suitable for the user's specific financial goal below." : "Provide a general analysis of this fund's performance and risk profile."}
 
 FUND DETAILS:
 - Category: ${fundDetails.category}
+- 1M Return: ${fundDetails.returns['1M'] !== null ? fundDetails.returns['1M']?.toFixed(2) + '%' : 'N/A'}
+- 3M Return: ${fundDetails.returns['3M'] !== null ? fundDetails.returns['3M']?.toFixed(2) + '%' : 'N/A'}
+- 6M Return: ${fundDetails.returns['6M'] !== null ? fundDetails.returns['6M']?.toFixed(2) + '%' : 'N/A'}
 - 1Y Return: ${fundDetails.returns['1Y'] !== null ? fundDetails.returns['1Y']?.toFixed(2) + '%' : 'N/A'}
-- 3Y Return: ${fundDetails.returns['3Y'] !== null ? fundDetails.returns['3Y']?.toFixed(2) + '%' : 'N/A'}
-- Annualized Volatility: ${fundDetails.risk.volatility !== null ? (fundDetails.risk.volatility * 100).toFixed(2) + '%' : 'N/A'}
+- 3Y Return (CAGR): ${fundDetails.returns['3Y'] !== null ? fundDetails.returns['3Y']?.toFixed(2) + '%' : 'N/A'}
+- 5Y Return (CAGR): ${fundDetails.returns['5Y'] !== null ? fundDetails.returns['5Y']?.toFixed(2) + '%' : 'N/A'}
+- Since Inception CAGR: ${fundDetails.returns['inception'] !== null ? fundDetails.returns['inception']?.toFixed(2) + '%' : 'N/A'}
+- Annualized Volatility: ${volatilityDisplay}
 - Sharpe Ratio: ${fundDetails.risk.sharpeRatio !== null ? fundDetails.risk.sharpeRatio.toFixed(2) : 'N/A'}
+- Max Drawdown: ${fundDetails.risk.maxDrawdown !== null ? fundDetails.risk.maxDrawdown.toFixed(2) + '%' : 'N/A'}
 ${goalContext}
-Output strictly valid JSON only:
+Output strictly valid JSON only (no markdown, no code blocks):
 {
-  "pros": ["pro 1", "pro 2"],
-  "cons": ["con 1", "con 2"],
-  "suitabilityScore": ${goalContext ? 85 : "null"},
-  "analysis": "2-3 sentences max analyzing the fund."
+  "pros": ["specific pro 1 based on data", "specific pro 2 based on data"],
+  "cons": ["specific con 1 based on data", "specific con 2 based on data"],
+  "suitabilityScore": ${goalContext ? 'a number between 0 and 10 (decimal allowed e.g. 7.5)' : 'null'},
+  "analysis": "2-3 sentences max analyzing the fund based on the actual data provided."
 }
 `;
 
     const responseText = await callAI(prompt, 'json');
-    let insights: any;
+    let insights: FundInsights;
     try {
-      insights = JSON.parse(responseText);
+      const cleanText = responseText.replace(/```(?:json)?\n?/g, '').replace(/```/g, '').trim();
+      const parsed = JSON.parse(cleanText);
+      // Validate and normalize suitabilityScore
+      let suitabilityScore: number | null = null;
+      if (parsed.suitabilityScore !== null && parsed.suitabilityScore !== undefined) {
+        const score = Number(parsed.suitabilityScore);
+        if (!isNaN(score) && score >= 0 && score <= 10) {
+          suitabilityScore = Math.round(score * 10) / 10; // round to 1 decimal
+        }
+      }
+      insights = {
+        pros: Array.isArray(parsed.pros) ? parsed.pros.filter((s: unknown) => typeof s === 'string') : [],
+        cons: Array.isArray(parsed.cons) ? parsed.cons.filter((s: unknown) => typeof s === 'string') : [],
+        suitabilityScore,
+        analysis: typeof parsed.analysis === 'string' ? parsed.analysis : '',
+      };
     } catch (e) {
       throw new Error('AI returned an invalid format for insights.');
     }
