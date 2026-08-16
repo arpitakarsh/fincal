@@ -15,13 +15,22 @@ const portfolioService = new PortfolioService();
 export const GET = withApiAuthAndError(async (req: NextRequest, { session }) => {
   const userId = session.user.id;
 
-  const [user, profile, goals, recommendations, portfolio] = await Promise.all([
+  const [user, profile, goals, insights, recommendations, portfolio] = await Promise.all([
     prisma.user.findUnique({
       where: { id: userId },
       select: { name: true, email: true }
     }),
     prisma.investorProfile.findUnique({ where: { userId } }),
-    prisma.goal.findMany({ where: { userId }, orderBy: { createdAt: 'desc' } }),
+    prisma.goal.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+      include: { progressSnapshots: { orderBy: { date: 'desc' }, take: 1 } },
+    }),
+    prisma.aIInsightHistory.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+      take: 3,
+    }),
     prisma.aIRecommendation.findMany({
       where: { goal: { userId } },
       orderBy: { createdAt: 'desc' }
@@ -58,9 +67,16 @@ export const GET = withApiAuthAndError(async (req: NextRequest, { session }) => 
             totalGainLoss: portfolio.totalPnl,
             totalGainLossPercentage: portfolio.totalPnlPercentage,
             holdingsCount: portfolio.holdingsCount,
-            assetAllocation: Object.fromEntries(
-              portfolio.assetAllocation.map(a => [a.name, a.percentage])
-            ),
+            assetAllocation: portfolio.assetAllocation,
+            categoryAllocation: portfolio.categoryAllocation,
+            amcAllocation: portfolio.amcAllocation,
+            lastUpdated: portfolio.lastUpdated,
+            snapshots: (await prisma.portfolioSnapshot.findMany({
+              where: { portfolioId: portfolio.id },
+              orderBy: { date: 'asc' },
+              take: 120,
+              select: { date: true, totalValue: true, netInvested: true },
+            })),
           }
         : {
             totalValue: 0,
@@ -68,8 +84,18 @@ export const GET = withApiAuthAndError(async (req: NextRequest, { session }) => 
             totalGainLoss: 0,
             totalGainLossPercentage: 0,
             holdingsCount: 0,
-            assetAllocation: {}
+            assetAllocation: [],
+            categoryAllocation: [],
+            amcAllocation: [],
+            lastUpdated: null,
+            snapshots: [],
           }
-    }
+      },
+      profile: profile ? {
+        riskAppetite: profile.riskAppetite,
+        investmentStyle: profile.investmentStyle,
+        investmentKnowledge: profile.investmentKnowledge,
+      } : null,
+      insights,
   });
 });

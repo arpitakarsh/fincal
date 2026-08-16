@@ -1,374 +1,53 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { 
-  TrendingUp, 
-  TrendingDown, 
-  Wallet, 
-  Target, 
-  Activity, 
-  Sparkles,
-  ChevronRight,
-  PlusCircle,
-  AlertCircle,
-  CheckCircle2
-} from 'lucide-react';
-import { 
-  PieChart, 
-  Pie, 
-  Cell, 
-  ResponsiveContainer, 
-  Tooltip as RechartsTooltip 
-} from 'recharts';
+import { useMemo, useState } from 'react';
+import { Activity, ArrowDownRight, ArrowUpRight, BarChart3, Bot, CheckCircle2, ChevronRight, CircleDollarSign, Compass, Landmark, Plus, ShieldCheck, Sparkles, Target, UserRound, Wallet, XCircle } from 'lucide-react';
+import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { useDashboard, type DashboardData } from '@/hooks/useDashboard';
 
-interface DashboardData {
-  user: { name: string; email: string };
-  profileCompleted: boolean;
-  goals: {
-    total: number;
-    upcoming: any;
-    list: any[];
-  };
-  portfolio: {
-    totalValue: number;
-    totalInvested: number;
-    totalGainLoss: number;
-    totalGainLossPercentage: number;
-    holdingsCount: number;
-    assetAllocation: Record<string, number>;
-  };
-}
+type Allocation = { name: string; value: number; percentage: number };
+type Snapshot = { date: string; totalValue: number; netInvested: number };
+type ExtendedDashboard = DashboardData & { portfolio: DashboardData['portfolio'] & { assetAllocation: Allocation[]; categoryAllocation?: Allocation[]; amcAllocation?: Allocation[]; snapshots?: Snapshot[]; lastUpdated?: string | null }; profile: { riskAppetite: string; investmentStyle: string; investmentKnowledge: string } | null; insights: { id: string; topic: string; insight: unknown; createdAt: string }[] };
 
-const formatCurrency = (value: number) => {
-  return new Intl.NumberFormat('en-IN', {
-    style: 'currency',
-    currency: 'INR',
-    maximumFractionDigits: 0
-  }).format(value);
-};
+const money = (value: number, decimals = 0) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: decimals }).format(value || 0);
+const number = (value: number) => new Intl.NumberFormat('en-IN').format(value || 0);
+const pct = (value: number) => `${value > 0 ? '+' : ''}${value.toFixed(2)}%`;
+const colors = ['#2563eb', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4'];
 
-const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'];
+function Card({ children, className = '' }: { children: React.ReactNode; className?: string }) { return <section className={`rounded-2xl border border-slate-200/80 bg-white shadow-[0_10px_30px_-24px_rgba(15,23,42,.5)] ${className}`}>{children}</section>; }
+function SectionTitle({ title, eyebrow, href }: { title: string; eyebrow?: string; href?: string }) { return <div className="flex items-end justify-between gap-4 border-b border-slate-100 px-6 py-5"><div><p className="text-[10px] font-bold uppercase tracking-[.18em] text-blue-600">{eyebrow || 'Overview'}</p><h2 className="mt-1 text-lg font-bold tracking-tight text-slate-950">{title}</h2></div>{href && <Link href={href} className="flex items-center gap-1 text-sm font-semibold text-blue-600 hover:text-blue-700">View all <ChevronRight className="h-4 w-4" /></Link>}</div>; }
+function Metric({ label, value, detail, icon: Icon, tone = 'blue' }: { label: string; value: string; detail?: string; icon: React.ElementType; tone?: 'blue' | 'green' | 'amber' | 'violet' }) { const tones = { blue: 'bg-blue-50 text-blue-600', green: 'bg-emerald-50 text-emerald-600', amber: 'bg-amber-50 text-amber-600', violet: 'bg-violet-50 text-violet-600' }; return <Card className="p-5"><div className="flex items-start justify-between"><div><p className="text-xs font-semibold text-slate-500">{label}</p><p className="mt-2 text-2xl font-bold tracking-tight text-slate-950">{value}</p>{detail && <p className="mt-1 text-xs text-slate-500">{detail}</p>}</div><div className={`rounded-xl p-2.5 ${tones[tone]}`}><Icon className="h-5 w-5" /></div></div></Card>; }
+function formatDate(value: string) { return new Intl.DateTimeFormat('en-IN', { day: '2-digit', month: 'short' }).format(new Date(value)); }
 
 export default function DashboardPage() {
-  const [data, setData] = useState<DashboardData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data: rawData, loading: isLoading, error, refetch } = useDashboard();
+  const [range, setRange] = useState('All');
+  const [now] = useState(() => Date.now());
+  const data = rawData as ExtendedDashboard | null;
+  const snapshots = useMemo(() => {
+    const all = data?.portfolio?.snapshots || [];
+    if (range === 'All' || all.length < 2) return all;
+    const days = range === '1M' ? 31 : range === '6M' ? 183 : range === '1Y' ? 365 : range === '3Y' ? 1095 : 1825;
+    return all.filter(item => new Date(item.date).getTime() >= now - days * 86400000);
+  }, [data?.portfolio?.snapshots, now, range]);
+  if (isLoading) return <div className="space-y-5 animate-pulse"><div className="h-24 rounded-2xl bg-slate-200" /><div className="grid grid-cols-2 gap-4 lg:grid-cols-4">{[1, 2, 3, 4].map(i => <div key={i} className="h-32 rounded-2xl bg-slate-200" />)}</div><div className="h-96 rounded-2xl bg-slate-200" /></div>;
+  if (error || !data) return <Card className="flex flex-col items-center p-12 text-center"><XCircle className="h-10 w-10 text-rose-500" /><h2 className="mt-4 text-lg font-bold text-slate-900">Unable to load your dashboard</h2><p className="mt-1 text-sm text-slate-500">{error || 'Please try again in a moment.'}</p><button onClick={() => refetch()} className="mt-5 rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white">Try again</button></Card>;
+  const { portfolio, goals, user, profile } = data;
+  const gain = portfolio.totalGainLoss;
+  const isPositive = gain > 0;
+  const hasSnapshots = (portfolio.snapshots?.length || 0) > 1;
+  const chartData = snapshots.map(item => ({ ...item, label: formatDate(item.date) }));
+  const allocations = portfolio.assetAllocation || [];
+  const quickActions: [React.ElementType, string, string][] = [[Plus, 'Add holding', '/portfolio/holdings/create'], [Compass, 'Explore funds', '/funds'], [Target, 'Create goal', '/goals'], [CircleDollarSign, 'SIP calculator', '/calculator'], [Bot, 'AI assistant', '/assistant']];
 
-  const fetchDashboard = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await fetch('/api/dashboard');
-      if (!res.ok) throw new Error('Failed to fetch dashboard data');
-      const json = await res.json();
-      setData(json.data || json);
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    let mounted = true;
-    const load = async () => {
-      try {
-        const res = await fetch('/api/dashboard');
-        if (!res.ok) throw new Error('Failed to fetch dashboard data');
-        const json = await res.json();
-        if (mounted) setData(json.data || json);
-      } catch (err: any) {
-        if (mounted) setError(err.message);
-      } finally {
-        if (mounted) setLoading(false);
-      }
-    };
-    load();
-    return () => { mounted = false; };
-  }, []);
-
-
-  if (loading) {
-    return (
-      <div className="space-y-6 animate-pulse">
-        <div className="h-8 w-64 bg-gray-200 rounded"></div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {[...Array(4)].map((_, i) => (
-            <div key={i} className="h-24 bg-gray-200 rounded-xl"></div>
-          ))}
-        </div>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 h-96 bg-gray-200 rounded-xl"></div>
-          <div className="h-96 bg-gray-200 rounded-xl"></div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error || !data) {
-    return (
-      <div className="bg-red-50 text-red-700 p-6 rounded-xl border border-red-100 flex flex-col items-center text-center">
-        <AlertCircle className="w-8 h-8 mb-3 text-red-500" />
-        <p className="font-semibold text-red-800 mb-1">Unable to load dashboard</p>
-        <p className="text-sm text-red-600 mb-4">{error || 'An unexpected error occurred.'}</p>
-        <button
-          onClick={fetchDashboard}
-          className="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors"
-        >
-          Try Again
-        </button>
-      </div>
-    );
-  }
-
-  const { user, profileCompleted, goals, portfolio } = data;
-  const isGain = portfolio.totalGainLoss >= 0;
-
-  const pieData = Object.entries(portfolio.assetAllocation || {}).map(([name, value]) => ({
-    name,
-    value
-  }));
-
-  const hasNoData = portfolio.holdingsCount === 0 && goals.total === 0;
-
-  return (
-    <div className="space-y-6">
-      {/* Header Row */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">
-            Welcome back, {user?.name?.split(' ')[0] || 'Investor'}
-          </h1>
-          <p className="text-gray-500 mt-1">Here's your financial overview for today.</p>
-        </div>
-        
-        {!profileCompleted && (
-          <Link 
-            href="/onboarding"
-            className="flex items-center space-x-2 bg-amber-50 text-amber-700 px-4 py-2 rounded-lg border border-amber-200 hover:bg-amber-100 transition-colors"
-          >
-            <AlertCircle className="w-4 h-4" />
-            <span className="text-sm font-medium">Complete your investor profile</span>
-            <ChevronRight className="w-4 h-4" />
-          </Link>
-        )}
-      </div>
-
-      {hasNoData ? (
-        <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center shadow-sm">
-          <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Wallet className="w-8 h-8" />
-          </div>
-          <h2 className="text-xl font-bold text-gray-900 mb-2">Welcome to FinCal</h2>
-          <p className="text-gray-500 max-w-md mx-auto mb-8">
-            You don't have any portfolio holdings or active goals yet. Let's get started on your financial journey.
-          </p>
-          <div className="flex justify-center gap-4">
-            <Link 
-              href="/goals"
-              className="flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
-            >
-              <PlusCircle className="w-5 h-5 mr-2" />
-              Create a Goal
-            </Link>
-            <Link 
-              href="/portfolio/holdings/create"
-              className="flex items-center px-6 py-3 bg-white text-gray-700 border border-gray-200 rounded-lg font-medium hover:bg-gray-50 transition-colors"
-            >
-              <PlusCircle className="w-5 h-5 mr-2" />
-              Add Holding
-            </Link>
-          </div>
-        </div>
-      ) : (
-        <>
-          {/* Portfolio Summary Strip */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm">
-              <div className="flex justify-between items-start">
-                <p className="text-sm font-medium text-gray-500">Total Portfolio</p>
-                <div className="p-2 bg-blue-50 rounded-lg text-blue-600">
-                  <Wallet className="w-4 h-4" />
-                </div>
-              </div>
-              <h3 className="text-2xl font-bold text-gray-900 mt-2">
-                {formatCurrency(portfolio.totalValue)}
-              </h3>
-            </div>
-            
-            <div className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm">
-              <div className="flex justify-between items-start">
-                <p className="text-sm font-medium text-gray-500">Overall Gain/Loss</p>
-                <div className={`p-2 rounded-lg ${isGain ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}`}>
-                  {isGain ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
-                </div>
-              </div>
-              <div className="mt-2 flex items-baseline space-x-2">
-                <h3 className={`text-2xl font-bold ${isGain ? 'text-emerald-600' : 'text-rose-600'}`}>
-                  {isGain ? '+' : ''}{formatCurrency(portfolio.totalGainLoss)}
-                </h3>
-                <span className={`text-sm font-medium ${isGain ? 'text-emerald-600' : 'text-rose-600'}`}>
-                  ({isGain ? '+' : ''}{portfolio.totalGainLossPercentage.toFixed(2)}%)
-                </span>
-              </div>
-            </div>
-
-            <div className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm">
-              <div className="flex justify-between items-start">
-                <p className="text-sm font-medium text-gray-500">Active Holdings</p>
-                <div className="p-2 bg-purple-50 rounded-lg text-purple-600">
-                  <Activity className="w-4 h-4" />
-                </div>
-              </div>
-              <h3 className="text-2xl font-bold text-gray-900 mt-2">
-                {portfolio.holdingsCount}
-              </h3>
-            </div>
-
-            <div className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm">
-              <div className="flex justify-between items-start">
-                <p className="text-sm font-medium text-gray-500">Active Goals</p>
-                <div className="p-2 bg-amber-50 rounded-lg text-amber-600">
-                  <Target className="w-4 h-4" />
-                </div>
-              </div>
-              <h3 className="text-2xl font-bold text-gray-900 mt-2">
-                {goals.total}
-              </h3>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Goals Preview (Left Column) */}
-            <div className="lg:col-span-2 space-y-6">
-              {/* Goals Preview */}
-              <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-                <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
-                  <h2 className="text-lg font-bold text-gray-900">Your Goals</h2>
-                  <Link href="/goals" className="text-sm font-medium text-blue-600 hover:text-blue-700">
-                    View All
-                  </Link>
-                </div>
-                <div className="divide-y divide-gray-100">
-                  {goals.list.length === 0 ? (
-                    <div className="p-6 text-center text-gray-500 text-sm">
-                      No active goals. <Link href="/goals" className="text-blue-600 hover:underline">Create one</Link>
-                    </div>
-                  ) : (
-                    goals.list.slice(0, 3).map((goal) => (
-                      <div key={goal.id} className="p-6 hover:bg-gray-50 transition-colors">
-                        <div className="flex justify-between items-start mb-2">
-                          <div>
-                            <h3 className="font-semibold text-gray-900">{goal.name}</h3>
-                            <p className="text-xs text-gray-500">
-                              Target: {goal.targetAmount ? formatCurrency(goal.targetAmount) : 'Not set'} • {goal.timeHorizonYears} Years
-                            </p>
-                          </div>
-                          <div className="text-right">
-                            <span className="text-sm font-bold text-gray-900">
-                              {goal.investmentType === 'sip' ? `SIP: ${formatCurrency(goal.sipAmount || 0)}` : `Lumpsum: ${formatCurrency(goal.lumpsumAmount || 0)}`}
-                            </span>
-                          </div>
-                        </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2 mb-4 overflow-hidden">
-                          <div 
-                            className="bg-blue-600 h-2 rounded-full transition-all duration-500" 
-                            style={{ width: `${goal.targetAmount ? Math.min(100, (((goal.investmentType === 'sip' ? goal.sipAmount : goal.lumpsumAmount) || 0) / goal.targetAmount) * 100) : 0}%` }}
-                          />
-                        </div>
-                        
-                        {/* Top AI Rec */}
-                        {goal.recommendations && goal.recommendations.length > 0 && (
-                          <div className="bg-indigo-50 rounded-lg p-3 border border-indigo-100 flex items-start">
-                            <Sparkles className="w-4 h-4 text-indigo-600 mr-2 flex-shrink-0 mt-0.5" />
-                            <div>
-                              <p className="text-sm font-medium text-gray-900 flex items-center">
-                                {goal.recommendations[0].fundName}
-                                <span className="ml-2 px-1.5 py-0.5 rounded text-[9px] font-bold bg-indigo-100 text-indigo-700 uppercase tracking-wider">
-                                  AI Pick
-                                </span>
-                              </p>
-                              <p className="text-xs text-gray-600 mt-1 line-clamp-1">
-                                {goal.recommendations[0].reason || 'Recommended to match your risk profile and goal.'}
-                              </p>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    ))
-                  )}
-                </div>
-              </div>
-
-            </div>
-
-            {/* Portfolio Analytics (Right Column) */}
-            <div className="bg-white rounded-xl border border-gray-100 shadow-sm flex flex-col h-full">
-              <div className="px-6 py-4 border-b border-gray-100">
-                <h2 className="text-lg font-bold text-gray-900">Asset Allocation</h2>
-              </div>
-              <div className="p-6 flex-1 flex flex-col">
-                {pieData.length === 0 ? (
-                  <div className="flex-1 flex items-center justify-center text-sm text-gray-500 text-center">
-                    Add holdings to see your portfolio allocation.
-                  </div>
-                ) : (
-                  <>
-                    <div className="h-64 w-full">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <PieChart>
-                          <Pie
-                            data={pieData}
-                            cx="50%"
-                            cy="50%"
-                            innerRadius={60}
-                            outerRadius={80}
-                            paddingAngle={5}
-                            dataKey="value"
-                          >
-                            {pieData.map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length] ?? '#3b82f6'} />
-                            ))}
-                          </Pie>
-                          <RechartsTooltip 
-                            formatter={(value) => [`${Number(value || 0).toFixed(2)}%`, 'Allocation']}
-                            contentStyle={{ borderRadius: '8px', border: '1px solid #f3f4f6', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                          />
-                        </PieChart>
-                      </ResponsiveContainer>
-                    </div>
-                    
-                    <div className="mt-6 space-y-3">
-                      {pieData.map((entry, index) => (
-                        <div key={entry.name} className="flex items-center justify-between">
-                          <div className="flex items-center">
-                            <span 
-                              className="w-3 h-3 rounded-full mr-2" 
-                              style={{ backgroundColor: COLORS[index % COLORS.length] }} 
-                            />
-                            <span className="text-sm font-medium text-gray-700">{entry.name}</span>
-                          </div>
-                          <span className="text-sm font-semibold text-gray-900">{entry.value.toFixed(2)}%</span>
-                        </div>
-                      ))}
-                    </div>
-                  </>
-                )}
-                
-                <div className="mt-auto pt-6">
-                  <Link 
-                    href="/portfolio"
-                    className="flex items-center justify-center w-full py-2.5 px-4 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-                  >
-                    View full portfolio
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </div>
-        </>
-      )}
-    </div>
-  );
+  return <div className="space-y-6 pb-8">
+    <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end"><div><p className="text-sm font-semibold text-blue-600">Sunday, {new Intl.DateTimeFormat('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date())}</p><h1 className="mt-1 text-3xl font-bold tracking-tight text-slate-950">Good to see you, {user?.name?.split(' ')[0] || 'Investor'}.</h1><p className="mt-1 text-sm text-slate-500">A clear view of your investing progress.</p></div>{!data.profileCompleted && <Link href="/onboarding" className="flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800"><UserRound className="h-4 w-4" /> Complete your profile <ChevronRight className="h-4 w-4" /></Link>}</div>
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4"><Metric label="Total portfolio value" value={money(portfolio.totalValue)} detail={`Invested ${money(portfolio.totalInvested)}`} icon={Wallet} /><Metric label="Overall gain / loss" value={`${gain < 0 ? '-' : ''}${money(Math.abs(gain))}`} detail={gain === 0 ? '0.00%' : pct(portfolio.totalGainLossPercentage)} icon={isPositive ? ArrowUpRight : gain < 0 ? ArrowDownRight : Activity} tone={gain < 0 ? 'amber' : 'green'} /><Metric label="Active holdings" value={number(portfolio.holdingsCount)} detail="Across your portfolio" icon={Landmark} tone="violet" /><Metric label="Active goals" value={number(goals.total)} detail="Being tracked" icon={Target} tone="amber" /></div>
+    <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1.6fr_1fr]"><Card><SectionTitle title="Portfolio performance" eyebrow="Your trajectory" /><div className="p-6">{hasSnapshots ? <><div className="mb-5 flex flex-wrap items-center justify-between gap-3"><div><p className="text-2xl font-bold text-slate-950">{money(portfolio.totalValue)}</p><p className="mt-1 text-xs text-slate-500">Current value · {isPositive ? 'up' : 'down'} {pct(Math.abs(portfolio.totalGainLossPercentage))} overall</p></div><div className="flex rounded-lg bg-slate-100 p-1">{['1M', '6M', '1Y', '3Y', '5Y', 'All'].map(item => <button key={item} onClick={() => setRange(item)} className={`rounded-md px-2.5 py-1.5 text-xs font-semibold ${range === item ? 'bg-white text-blue-700 shadow-sm' : 'text-slate-500'}`}>{item}</button>)}</div></div><div className="h-64"><ResponsiveContainer width="100%" height="100%"><AreaChart data={chartData}><defs><linearGradient id="valueFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stopColor="#2563eb" stopOpacity={.22} /><stop offset="100%" stopColor="#2563eb" stopOpacity={0} /></linearGradient></defs><CartesianGrid stroke="#eef2f7" vertical={false} /><XAxis dataKey="label" tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: '#94a3b8' }} /><YAxis hide domain={['auto', 'auto']} /><Tooltip formatter={(value) => money(Number(value))} labelStyle={{ color: '#475569' }} contentStyle={{ borderRadius: 12, border: '1px solid #e2e8f0' }} /><Area type="monotone" dataKey="totalValue" stroke="#2563eb" strokeWidth={2.5} fill="url(#valueFill)" name="Portfolio value" /></AreaChart></ResponsiveContainer></div><div className="mt-4 flex gap-5 text-xs text-slate-500"><span className="flex items-center gap-2"><i className="h-2 w-2 rounded-full bg-blue-600" /> Portfolio value</span><span>Based on stored portfolio snapshots</span></div></> : <div className="flex min-h-64 flex-col items-center justify-center rounded-xl bg-slate-50 px-6 text-center"><BarChart3 className="h-9 w-9 text-slate-300" /><p className="mt-3 font-semibold text-slate-700">Performance history will appear here</p><p className="mt-1 max-w-sm text-sm text-slate-500">FinCal needs more than one stored portfolio snapshot to draw this chart.</p></div>}</div></Card>
+      <Card><SectionTitle title="Asset allocation" eyebrow="Portfolio mix" href="/portfolio" /><div className="p-6">{allocations.length ? <div className="space-y-5">{allocations.map((item, index) => <div key={item.name}><div className="mb-2 flex justify-between gap-3 text-sm"><span className="flex min-w-0 items-center gap-2 font-semibold text-slate-700"><i className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: colors[index % colors.length] }} /> <span className="truncate">{item.name}</span></span><span className="shrink-0 font-bold text-slate-900">{item.percentage.toFixed(1)}%</span></div><div className="h-2 rounded-full bg-slate-100"><div className="h-2 rounded-full" style={{ width: `${Math.min(100, item.percentage)}%`, backgroundColor: colors[index % colors.length] }} /></div><p className="mt-1 text-right text-xs text-slate-500">{money(item.value)}</p></div>)}</div> : <div className="py-16 text-center text-sm text-slate-500">Add a holding to see your portfolio mix.</div>}<Link href="/portfolio" className="mt-6 flex items-center justify-center gap-2 rounded-xl border border-slate-200 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">Open portfolio <ChevronRight className="h-4 w-4" /></Link></div></Card></div>
+    <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1.45fr_1fr]"><Card><SectionTitle title="Your goals" eyebrow="Plan forward" href="/goals" /><div className="divide-y divide-slate-100">{goals.list.length ? goals.list.slice(0, 3).map(goal => { const latest = (goal as any).progressSnapshots?.[0]; const progress = latest?.percentage ?? (latest?.amount && goal.targetAmount ? latest.amount / goal.targetAmount * 100 : null); return <div key={goal.id} className="p-6"><div className="flex items-start justify-between gap-4"><div><h3 className="font-bold text-slate-900">{goal.name || 'Unnamed goal'}</h3><p className="mt-1 text-xs text-slate-500">Target {money(goal.targetAmount || 0)} · {goal.timeHorizonYears || 0} years</p></div><span className="rounded-full bg-blue-50 px-2.5 py-1 text-xs font-bold text-blue-700">{goal.investmentType === 'sip' ? `SIP ${money(goal.sipAmount || 0)}` : `Lumpsum ${money(goal.lumpsumAmount || 0)}`}</span></div>{progress !== null ? <><div className="mt-5 flex justify-between text-xs font-semibold text-slate-500"><span>Progress</span><span>{Math.min(100, progress).toFixed(0)}%</span></div><div className="mt-2 h-2 rounded-full bg-slate-100"><div className="h-2 rounded-full bg-blue-600" style={{ width: `${Math.min(100, Math.max(0, progress))}%` }} /></div></> : <p className="mt-4 rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-500">Progress will appear after the first goal snapshot is recorded.</p>}{goal.recommendations?.[0] && <div className="mt-4 flex gap-2 rounded-xl border border-violet-100 bg-violet-50/60 p-3"><Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-violet-600" /><p className="text-xs leading-5 text-slate-600"><span className="font-bold text-slate-800">AI pick: {goal.recommendations[0].fundName}</span>{goal.recommendations[0].reason ? ` · ${goal.recommendations[0].reason}` : ''}</p></div>}</div>; }) : <div className="p-10 text-center"><Target className="mx-auto h-8 w-8 text-slate-300" /><p className="mt-3 text-sm text-slate-500">No goals yet.</p><Link href="/goals" className="mt-3 inline-flex text-sm font-semibold text-blue-600">Create your first goal <ChevronRight className="h-4 w-4" /></Link></div>}</div></Card>
+      <Card><SectionTitle title="Portfolio insights" eyebrow="Based on your data" /><div className="space-y-3 p-6">{data.insights?.length ? data.insights.map(insight => <div key={insight.id} className="flex gap-3 rounded-xl border border-slate-100 bg-slate-50 p-4"><Bot className="mt-0.5 h-5 w-5 shrink-0 text-blue-600" /><div><p className="text-sm font-bold text-slate-800">{insight.topic}</p><p className="mt-1 text-xs leading-5 text-slate-500">{typeof insight.insight === 'string' ? insight.insight : 'Saved AI insight available in your profile history.'}</p></div></div>) : allocations.length ? <><div className="flex gap-3 rounded-xl border border-blue-100 bg-blue-50/60 p-4"><ShieldCheck className="h-5 w-5 shrink-0 text-blue-600" /><p className="text-sm leading-5 text-slate-600">Your largest allocation is <strong>{allocations[0]?.name}</strong> at {allocations[0]?.percentage.toFixed(1)}% of current portfolio value.</p></div>{profile && <div className="flex gap-3 rounded-xl border border-emerald-100 bg-emerald-50/60 p-4"><CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-600" /><p className="text-sm leading-5 text-slate-600">Investor profile: <strong>{profile.riskAppetite}</strong> risk appetite · <strong>{profile.investmentStyle}</strong> style.</p></div>}</> : <div className="py-10 text-center text-sm text-slate-500">Insights will appear once FinCal has portfolio or profile data to analyse.</div>}</div></Card></div>
+    <div><div className="mb-3 flex items-center justify-between"><h2 className="text-lg font-bold text-slate-950">Quick actions</h2><span className="text-xs font-medium text-slate-400">Continue building your plan</span></div><div className="grid grid-cols-2 gap-3 md:grid-cols-5">{quickActions.map(([Icon, label, href]) => <Link key={label} href={href} className="group flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4 text-sm font-semibold text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:border-blue-200 hover:text-blue-700"><span className="rounded-xl bg-slate-50 p-2 group-hover:bg-blue-50"><Icon className="h-5 w-5" /></span><span>{label}</span></Link>)}</div></div>
+  </div>;
 }
